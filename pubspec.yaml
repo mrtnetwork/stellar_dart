@@ -1,7 +1,14 @@
 name: stellar_dart
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: A comprehensive library for interacting with the Stellar network, including support for operations, smart contracts, and wallet management.
+version: 0.1.0
+homepage: "https://github.com/mrtnetwork/stellar_dart"
+repository: "https://github.com/mrtnetwork/stellar_dart"
+Author: mrhaydari.t@gmail.com
+topics:
+  - stellar
+  - soroban
+  - wallet
+  - xlm
 
 environment:
   sdk: '>=2.15.0 <4.0.0'
