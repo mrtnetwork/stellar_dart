@@ -24,13 +24,13 @@ To maximize the benefits of Stellar Dart, a solid understanding of Stellar's net
 
 ### Examples
 
-  - [Payment](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/send_assets)
-  - [DeployContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/deploy_contract)
-  - [CallContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/transfer)
-  - [CreateSellOffer](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/create_sell_offer)
-  - [EnableMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/enable_multisig_account)
-  - [PaymentUsingMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/payment_using_multisig)
-  - [PathPaymentStrict](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/path_payment_strict)
+  - [Payment](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/send_assets.dart)
+  - [DeployContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/deploy_contract.dart)
+  - [CallContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/transfer.dart)
+  - [CreateSellOffer](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/create_sell_offer.dart)
+  - [EnableMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/enable_multisig_account.dart)
+  - [PaymentUsingMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/payment_using_multisig.dart)
+  - [PathPaymentStrict](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/path_payment_strict.dart)
 
 - transfer
 
