@@ -102,11 +102,15 @@ transfer
 class StellarHTTPProvider implements StellarServiceProvider {
   @override
   Future<HorizonServiceResponse> get(HorizonRequestDetails params,
-      [Duration? timeout]) async {}
+      [Duration? timeout]) async {
+        /// see example file
+      }
 
   @override
   Future<HorizonServiceResponse> post(HorizonRequestDetails params,
-      [Duration? timeout]) async {}
+      [Duration? timeout]) async {
+        /// see example file
+      }
 }
 
   final providr = HorizonProvider(StellarHTTPProvider(
