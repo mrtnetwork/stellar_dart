@@ -32,7 +32,8 @@ To maximize the benefits of Stellar Dart, a solid understanding of Stellar's net
   - [PaymentUsingMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/payment_using_multisig.dart)
   - [PathPaymentStrict](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/path_payment_strict.dart)
 
-- transfer
+
+transfer
 
 ```dart
   /// Initialize the HorizonProvider with the specified URLs for the testnet.
