@@ -1,6 +1,6 @@
 name: stellar_dart
 description: A comprehensive library for interacting with the Stellar network, including support for operations, smart contracts, and wallet management.
-version: 2.0.0
+version: 2.1.0
 homepage: "https://github.com/mrtnetwork/stellar_dart"
 repository: "https://github.com/mrtnetwork/stellar_dart"
 Author: mrhaydari.t@gmail.com
@@ -16,7 +16,7 @@ environment:
 
 
 dependencies:
-  blockchain_utils: ^5.2.0
+  blockchain_utils: ^5.4.0
   # blockchain_utils:
   #   path: ../blockchain_utils
 

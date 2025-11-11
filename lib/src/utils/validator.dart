@@ -16,40 +16,11 @@ class StellarValidator {
   }
 }
 
-extension ListValidator<T> on List<T> {
-  List<T> max(int length, {required String? name}) {
-    if (this.length > length) {
-      throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
-          details: {'maximum': length, 'length': this.length});
-    }
-    return this;
-  }
-
-  List<T> min(int length, {required String? name}) {
-    if (this.length < length) {
-      throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
-          details: {'minimum': length, 'length': this.length});
-    }
-    return this;
-  }
-
-  List<T> exc(int length, {required String? name}) {
-    if (this.length != length) {
-      throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
-          details: {'expected': length, 'length': this.length});
-    }
-    return this;
-  }
-}
-
 extension StringValidator on String {
   String max(int length, {String? name}) {
     if (this.length > length) {
       throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
+          "Incorrect ${name == null ? '' : '$name '}String length.",
           details: {'maximum': length, 'length': this.length});
     }
     return this;
@@ -58,7 +29,7 @@ extension StringValidator on String {
   String min(int length, {String? name}) {
     if (this.length < length) {
       throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
+          "Incorrect ${name == null ? '' : '$name '}String length.",
           details: {'minimum': length, 'length': this.length});
     }
     return this;
@@ -67,7 +38,7 @@ extension StringValidator on String {
   String exc(int length, {String? name}) {
     if (this.length != length) {
       throw DartStellarPlugingException(
-          "Incorrect ${name == null ? '' : '$name '}array length.",
+          "Incorrect ${name == null ? '' : '$name '}String length.",
           details: {'expected': length, 'length': this.length});
     }
     return this;
