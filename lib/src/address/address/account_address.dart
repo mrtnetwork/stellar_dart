@@ -11,7 +11,7 @@ import 'muxed_address.dart';
 class StellarAccountAddress extends StellarAddress {
   /// Private constructor that initializes the address and type.
   StellarAccountAddress._({required String address, required super.type})
-      : super(baseAddress: address);
+    : super(baseAddress: address);
 
   /// Creates a `StellarAccountAddress` from a raw ED25519 public key byte array.
   ///
@@ -21,13 +21,19 @@ class StellarAccountAddress extends StellarAddress {
   /// Throws a `StellarAddressException` if the public key bytes are invalid.
   factory StellarAccountAddress.fromPublicKey(List<int> publicKey) {
     try {
-      final encode = XlmAddrEncoder()
-          .encodeKey(publicKey, {'addr_type': XlmAddrTypes.pubKey});
+      final encode = XlmAddrEncoder().encodeKey(
+        publicKey,
+        addrType: XlmAddrTypes.pubKey,
+      );
       return StellarAccountAddress._(
-          address: encode, type: XlmAddrTypes.pubKey);
+        address: encode,
+        type: XlmAddrTypes.pubKey,
+      );
     } catch (e, s) {
-      throw StellarAddressException('Invalid ED25519 public key bytes.',
-          details: {'error': e.toString(), 'stack': s.toString()});
+      throw StellarAddressException(
+        'Invalid ED25519 public key bytes.',
+        details: {'error': e.toString(), 'stack': s.toString()},
+      );
     }
   }
 
@@ -41,18 +47,22 @@ class StellarAccountAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.pubKey) {
-        throw StellarAddressException('Incorrect address type.', details: {
-          'expected': XlmAddrTypes.pubKey.name,
-          'type': decode.type.toString()
-        });
+        throw StellarAddressException(
+          'Incorrect address type.',
+          details: {
+            'expected': XlmAddrTypes.pubKey.name,
+            'type': decode.type.toString(),
+          },
+        );
       }
       return StellarAccountAddress._(address: address, type: decode.type);
     } on StellarAddressException {
       rethrow;
     } catch (e, s) {
       throw StellarAddressException(
-          'Invalid Stellar ED25519 public key address.',
-          details: {'error': e.toString(), 'stack': s.toString()});
+        'Invalid Stellar ED25519 public key address.',
+        details: {'error': e.toString(), 'stack': s.toString()},
+      );
     }
   }
 
@@ -61,7 +71,9 @@ class StellarAccountAddress extends StellarAddress {
   /// This allows for the creation of muxed addresses which can hold additional account IDs.
   StellarMuxedAddress toMuxedAddress(BigInt accountId) {
     return StellarMuxedAddress.fromAccountAddress(
-        address: this, accountId: accountId);
+      address: this,
+      accountId: accountId,
+    );
   }
 
   /// Converts this Stellar account address into an `ScAddress` for use in Soroban smart contracts.

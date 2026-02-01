@@ -6,8 +6,10 @@ class StellarTxStatus {
   static const StellarTxStatus error = StellarTxStatus._('ERROR', 0);
   static const StellarTxStatus pending = StellarTxStatus._('PENDING', 1);
   static const StellarTxStatus duplicate = StellarTxStatus._('DUPLICATE', 2);
-  static const StellarTxStatus tryAgainLater =
-      StellarTxStatus._('TRY_AGAIN_LATER', 3);
+  static const StellarTxStatus tryAgainLater = StellarTxStatus._(
+    'TRY_AGAIN_LATER',
+    3,
+  );
 
   final String name;
   final int value;
@@ -15,21 +17,24 @@ class StellarTxStatus {
   const StellarTxStatus._(this.name, this.value);
 
   static List<StellarTxStatus> get values => [
-        error,
-        pending,
-        duplicate,
-        tryAgainLater,
-      ];
+    error,
+    pending,
+    duplicate,
+    tryAgainLater,
+  ];
 
   static StellarTxStatus fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ScAddress type not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ScAddress type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 
@@ -43,21 +48,25 @@ class AsyncTransactionSubmissionResponse {
   final String? errorResultXdr;
   final StellarTxStatus txStatus;
   final String hash;
-  const AsyncTransactionSubmissionResponse(
-      {required this.errorResultXdr,
-      required this.txStatus,
-      required this.hash});
+  const AsyncTransactionSubmissionResponse({
+    required this.errorResultXdr,
+    required this.txStatus,
+    required this.hash,
+  });
   factory AsyncTransactionSubmissionResponse.fromJson(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return AsyncTransactionSubmissionResponse(
-        errorResultXdr: json['errorResultXdr'],
-        txStatus: StellarTxStatus.fromName(json['tx_status']),
-        hash: json['hash']);
+      errorResultXdr: json['errorResultXdr'],
+      txStatus: StellarTxStatus.fromName(json['tx_status']),
+      hash: json['hash'],
+    );
   }
 
   TransactionResult? get errorResult {
     if (errorResultXdr == null) return null;
     return TransactionResult.fromXdr(
-        StringUtils.encode(errorResultXdr!, type: StringEncoding.base64));
+      StringUtils.encode(errorResultXdr!, type: StringEncoding.base64),
+    );
   }
 }

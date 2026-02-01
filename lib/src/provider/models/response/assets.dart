@@ -13,8 +13,10 @@ abstract class StellarAssetResponse {
       case RequestAssetType.creditAlphanum4:
         return StellarAssetBalanceResponse.fromJson(json);
       default:
-        throw DartStellarPlugingException('Invalid asset type.',
-            details: {'type': type.name});
+        throw DartStellarPlugingException(
+          'Invalid asset type.',
+          details: {'type': type.name},
+        );
     }
   }
   Map<String, dynamic> toJson();
@@ -82,7 +84,8 @@ class StellarAssetBalanceResponse implements StellarAssetResponse {
     };
   }
 
-  late final BigInt unlockedBalance = StellarHelper.toStroop(balance) -
+  late final BigInt unlockedBalance =
+      StellarHelper.toStroop(balance) -
       StellarHelper.toStroop(sellingLiabilities);
 }
 
@@ -93,11 +96,12 @@ class StellarNativeBalanceResponse implements StellarAssetResponse {
   @override
   final RequestAssetType assetType;
 
-  StellarNativeBalanceResponse(
-      {required this.balance,
-      required this.buyingLiabilities,
-      required this.sellingLiabilities,
-      required this.assetType});
+  StellarNativeBalanceResponse({
+    required this.balance,
+    required this.buyingLiabilities,
+    required this.sellingLiabilities,
+    required this.assetType,
+  });
 
   factory StellarNativeBalanceResponse.fromJson(Map<String, dynamic> json) {
     return StellarNativeBalanceResponse(
@@ -108,7 +112,8 @@ class StellarNativeBalanceResponse implements StellarAssetResponse {
     );
   }
 
-  late final BigInt unlockedBalance = StellarHelper.toStroop(balance) -
+  late final BigInt unlockedBalance =
+      StellarHelper.toStroop(balance) -
       StellarHelper.toStroop(sellingLiabilities);
 
   @override

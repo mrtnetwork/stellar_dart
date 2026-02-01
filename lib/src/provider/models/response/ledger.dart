@@ -102,11 +102,7 @@ class SorobanLastLedgerResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'protocolVersion': protocolVersion,
-      'sequence': sequence,
-    };
+    return {'id': id, 'protocolVersion': protocolVersion, 'sequence': sequence};
   }
 }
 
@@ -114,13 +110,16 @@ class SorobanLedgerEntriesResponse {
   final List<SorobanLedgerEntry> entries;
   final int latestLedger;
 
-  const SorobanLedgerEntriesResponse(
-      {required this.entries, required this.latestLedger});
+  const SorobanLedgerEntriesResponse({
+    required this.entries,
+    required this.latestLedger,
+  });
 
   factory SorobanLedgerEntriesResponse.fromJson(Map<String, dynamic> json) {
-    final entriesList = (json['entries'] as List)
-        .map((entry) => SorobanLedgerEntry.fromJson(entry))
-        .toList();
+    final entriesList =
+        (json['entries'] as List)
+            .map((entry) => SorobanLedgerEntry.fromJson(entry))
+            .toList();
 
     return SorobanLedgerEntriesResponse(
       entries: entriesList,

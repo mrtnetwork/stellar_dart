@@ -1,6 +1,5 @@
 import 'package:blockchain_utils/helper/helper.dart';
 import 'package:stellar_dart/src/provider/models/models.dart';
-import 'package:stellar_dart/src/utils/validator.dart';
 import 'package:stellar_dart/src/provider/core/core.dart';
 
 /// Clients can request a filtered list of events emitted by a given ledger range.
@@ -26,14 +25,19 @@ class SorobanRequestGetEvents
     required this.startLedger,
     required List<SorobanEventFilter> filters,
     super.pagination,
-  }) : filters = filters.immutable.max(5, name: 'filters');
+  }) : filters = filters.immutable.max(
+         length: 5,
+         name: 'filters',
+         operation: "SorobanRequestGetEvents",
+         reason: "Invalid filters length.",
+       );
 
   @override
   Map<String, dynamic> get params => {
-        'startLedger': startLedger,
-        'filters': filters.map((e) => e.toJson()).toList(),
-        'pagination': pagination?.toJson()
-      };
+    'startLedger': startLedger,
+    'filters': filters.map((e) => e.toJson()).toList(),
+    'pagination': pagination?.toJson(),
+  };
 
   @override
   String get method => SorobanAPIMethods.getEvents.name;

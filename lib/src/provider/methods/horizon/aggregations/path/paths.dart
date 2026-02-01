@@ -48,11 +48,11 @@ class HorizonRequestPaymentPaths
 
   @override
   Map<String, dynamic> get queryParameters => {
-        'source_account': sourceAccount,
-        'source_assets': sourceAssets,
-        'destination_asset_type': destinationAssetType.name,
-        'destination_asset_issuer': destinationAssetIssuer,
-        'destination_asset_code': destinationAssetCode,
-        'destination_amount': destinationAmount
-      };
+    'source_account': sourceAccount,
+    'source_assets': sourceAssets,
+    'destination_asset_type': destinationAssetType.name,
+    'destination_asset_issuer': destinationAssetIssuer,
+    'destination_asset_code': destinationAssetCode,
+    'destination_amount': destinationAmount,
+  };
 }

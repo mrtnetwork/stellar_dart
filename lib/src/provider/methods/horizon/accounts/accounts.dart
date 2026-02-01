@@ -35,11 +35,11 @@ class HorizonRequestAccounts
 
   @override
   Map<String, dynamic> get queryParameters => {
-        'sponser': sponser,
-        'asset': asset,
-        'signer': signer,
-        'liqudity_pool': liqudityPool
-      };
+    'sponser': sponser,
+    'asset': asset,
+    'signer': signer,
+    'liqudity_pool': liqudityPool,
+  };
 
   @override
   List<StellarAccountResponse> onResonse(Map<String, dynamic> result) {
@@ -47,4 +47,5 @@ class HorizonRequestAccounts
     return records.map((e) => StellarAccountResponse.fromJson(e)).toList();
   }
 }
+
 // StellarAccountResponse

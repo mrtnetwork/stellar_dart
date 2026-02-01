@@ -4,8 +4,12 @@ import 'package:stellar_dart/src/provider/models/response/transaction_operation.
 
 /// The single operation endpoint provides information about a specific operation.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/retrieve-an-operation
-class HorizonRequestOperation extends HorizonRequest<
-    StellarTransactionOperationResponse, Map<String, dynamic>> {
+class HorizonRequestOperation
+    extends
+        HorizonRequest<
+          StellarTransactionOperationResponse,
+          Map<String, dynamic>
+        > {
   /// The ID number for this operation.
   final String id;
 

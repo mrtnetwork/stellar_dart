@@ -37,7 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   stellar_dart:
     path: ../
-  blockchain_utils: ^5.4.0
+  blockchain_utils: ^6.0.0
   # blockchain_utils:
   #   path: ../../blockchain_utils
   http: ^1.2.2

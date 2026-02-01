@@ -42,16 +42,17 @@ class HorizonRequestOffers
   ///  Required if the [buyingAssetType] is not native.
   final String? buyingAssetCode;
 
-  const HorizonRequestOffers(
-      {this.sponser,
-      this.seller,
-      this.sellingAssetType,
-      this.sellingAssetIssuer,
-      this.sellingAssetCode,
-      this.buyingAssetType,
-      this.buyingAssetIssuer,
-      this.buyingAssetCode,
-      super.paginationParams});
+  const HorizonRequestOffers({
+    this.sponser,
+    this.seller,
+    this.sellingAssetType,
+    this.sellingAssetIssuer,
+    this.sellingAssetCode,
+    this.buyingAssetType,
+    this.buyingAssetIssuer,
+    this.buyingAssetCode,
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.offers.url;
@@ -61,15 +62,15 @@ class HorizonRequestOffers
 
   @override
   Map<String, dynamic> get queryParameters => {
-        'sponser': sponser,
-        'seller': seller,
-        'selling_asset_type': sellingAssetType?.name,
-        'selling_asset_issuer': sellingAssetIssuer,
-        'selling_asset_code': sellingAssetCode,
-        'buying_asset_type': buyingAssetType?.name,
-        'buying_asset_issuer': buyingAssetIssuer,
-        'buying_asset_code': buyingAssetCode
-      };
+    'sponser': sponser,
+    'seller': seller,
+    'selling_asset_type': sellingAssetType?.name,
+    'selling_asset_issuer': sellingAssetIssuer,
+    'selling_asset_code': sellingAssetCode,
+    'buying_asset_type': buyingAssetType?.name,
+    'buying_asset_issuer': buyingAssetIssuer,
+    'buying_asset_code': buyingAssetCode,
+  };
 
   @override
   List<StellarOfferResponse> onResonse(Map<String, dynamic> result) {

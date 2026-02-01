@@ -67,11 +67,7 @@ class SignerResponse {
   final String key;
   final String type;
 
-  SignerResponse({
-    required this.weight,
-    required this.key,
-    required this.type,
-  });
+  SignerResponse({required this.weight, required this.key, required this.type});
 
   factory SignerResponse.fromJson(Map<String, dynamic> json) {
     return SignerResponse(
@@ -82,11 +78,7 @@ class SignerResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'weight': weight,
-      'key': key,
-      'type': type,
-    };
+    return {'weight': weight, 'key': key, 'type': type};
   }
 }
 
@@ -134,12 +126,14 @@ class StellarAccountResponse {
       numSponsored: json['num_sponsored'] as int,
       thresholds: ThresholdsReponse.fromJson(json['thresholds']),
       flags: FlagsResponse.fromJson(json['flags']),
-      balances: (json['balances'] as List<dynamic>)
-          .map((balance) => StellarAssetResponse.fromJson(balance))
-          .toList(),
-      signers: (json['signers'] as List<dynamic>)
-          .map((signer) => SignerResponse.fromJson(signer))
-          .toList(),
+      balances:
+          (json['balances'] as List<dynamic>)
+              .map((balance) => StellarAssetResponse.fromJson(balance))
+              .toList(),
+      signers:
+          (json['signers'] as List<dynamic>)
+              .map((signer) => SignerResponse.fromJson(signer))
+              .toList(),
     );
   }
   Map<String, dynamic> toJson() {

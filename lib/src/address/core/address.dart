@@ -17,7 +17,8 @@ abstract class StellarAddress {
         return StellarContractAddress(address);
       case XlmAddrTypes.privKey:
         throw const DartStellarPlugingException(
-            'Invalid address type. for secret key please use `StellarPrivateKey.fromBase32`');
+          'Invalid address type. for secret key please use `StellarPrivateKey.fromBase32`',
+        );
       default:
         throw const DartStellarPlugingException('Unknown address type.');
     }
@@ -44,8 +45,10 @@ abstract class StellarAddress {
 
   T cast<T extends StellarAddress>() {
     if (this is! T) {
-      throw DartStellarPlugingException('Address casting failed.',
-          details: {'expected': '$T', 'address': runtimeType.toString()});
+      throw DartStellarPlugingException(
+        'Address casting failed.',
+        details: {'expected': '$T', 'address': runtimeType.toString()},
+      );
     }
     return this as T;
   }

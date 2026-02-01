@@ -8,14 +8,20 @@ import 'package:stellar_dart/src/serialization/serialization.dart';
 import 'package:stellar_dart/src/utils/validator.dart';
 
 class ClaimAtomType {
-  static const ClaimAtomType claimAtomTypeV0 =
-      ClaimAtomType._('CLAIM_ATOM_TYPE_V0', 0);
+  static const ClaimAtomType claimAtomTypeV0 = ClaimAtomType._(
+    'CLAIM_ATOM_TYPE_V0',
+    0,
+  );
 
-  static const ClaimAtomType claimAtomTypeOrderBook =
-      ClaimAtomType._('CLAIM_ATOM_TYPE_ORDER_BOOK', 1);
+  static const ClaimAtomType claimAtomTypeOrderBook = ClaimAtomType._(
+    'CLAIM_ATOM_TYPE_ORDER_BOOK',
+    1,
+  );
 
-  static const ClaimAtomType claimAtomTypeLiquidityPool =
-      ClaimAtomType._('CLAIM_ATOM_TYPE_LIQUIDITY_POOL', 2);
+  static const ClaimAtomType claimAtomTypeLiquidityPool = ClaimAtomType._(
+    'CLAIM_ATOM_TYPE_LIQUIDITY_POOL',
+    2,
+  );
 
   final String name;
   final int value;
@@ -23,19 +29,22 @@ class ClaimAtomType {
   const ClaimAtomType._(this.name, this.value);
 
   static List<ClaimAtomType> get values => [
-        claimAtomTypeV0,
-        claimAtomTypeOrderBook,
-        claimAtomTypeLiquidityPool,
-      ];
+    claimAtomTypeV0,
+    claimAtomTypeOrderBook,
+    claimAtomTypeLiquidityPool,
+  ];
   static ClaimAtomType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ClaimAtom type not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ClaimAtom type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -54,24 +63,29 @@ abstract class ClaimAtom extends XDRVariantSerialization {
       case ClaimAtomType.claimAtomTypeLiquidityPool:
         return ClaimLiquidityAtom.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException('Invalid ClaimAtom type.',
-            details: {'type': type.name});
+        throw DartStellarPlugingException(
+          'Invalid ClaimAtom type.',
+          details: {'type': type.name},
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be([
       LazyVariantModel(
-          index: ClaimAtomType.claimAtomTypeV0.value,
-          layout: ClaimOfferAtomV0.layout,
-          property: ClaimAtomType.claimAtomTypeV0.name),
+        index: ClaimAtomType.claimAtomTypeV0.value,
+        layout: ClaimOfferAtomV0.layout,
+        property: ClaimAtomType.claimAtomTypeV0.name,
+      ),
       LazyVariantModel(
-          index: ClaimAtomType.claimAtomTypeOrderBook.value,
-          layout: ClaimOfferAtom.layout,
-          property: ClaimAtomType.claimAtomTypeOrderBook.name),
+        index: ClaimAtomType.claimAtomTypeOrderBook.value,
+        layout: ClaimOfferAtom.layout,
+        property: ClaimAtomType.claimAtomTypeOrderBook.name,
+      ),
       LazyVariantModel(
-          index: ClaimAtomType.claimAtomTypeLiquidityPool.value,
-          layout: ClaimLiquidityAtom.layout,
-          property: ClaimAtomType.claimAtomTypeLiquidityPool.name)
+        index: ClaimAtomType.claimAtomTypeLiquidityPool.value,
+        layout: ClaimLiquidityAtom.layout,
+        property: ClaimAtomType.claimAtomTypeLiquidityPool.name,
+      ),
     ], property: property);
   }
 
@@ -91,33 +105,40 @@ class ClaimOfferAtomV0 extends ClaimAtom {
   final BigInt amountSold;
   final StellarAsset assetBought;
   final BigInt amountBought;
-  ClaimOfferAtomV0(
-      {required List<int> sellerEd25519,
-      required BigInt offerID,
-      required this.assetSold,
-      required BigInt amountSold,
-      required this.assetBought,
-      required BigInt amountBought})
-      : sellerEd25519 = sellerEd25519.asImmutableBytes
-            .exc(StellarConst.ed25519PubKeyLength, name: 'sellerEd25519'),
-        offerID = offerID.asInt64,
-        amountSold = amountSold.asInt64,
-        amountBought = amountBought.asInt64,
-        super(ClaimAtomType.claimAtomTypeV0);
+  ClaimOfferAtomV0({
+    required List<int> sellerEd25519,
+    required BigInt offerID,
+    required this.assetSold,
+    required BigInt amountSold,
+    required this.assetBought,
+    required BigInt amountBought,
+  }) : sellerEd25519 = sellerEd25519.asImmutableBytes.exc(
+         length: StellarConst.ed25519PubKeyLength,
+         name: 'sellerEd25519',
+         operation: "ClaimOfferAtomV0",
+         reason: "Invalid sellerEd25519 bytes length.",
+       ),
+       offerID = offerID.asI64,
+       amountSold = amountSold.asI64,
+       amountBought = amountBought.asI64,
+       super(ClaimAtomType.claimAtomTypeV0);
 
   factory ClaimOfferAtomV0.fromStruct(Map<String, dynamic> json) {
     return ClaimOfferAtomV0(
-        sellerEd25519: json.asBytes('sellerEd25519'),
-        offerID: json.as('offerID'),
-        assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-        amountSold: json.as('amountSold'),
-        assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-        amountBought: json.as('amountBought'));
+      sellerEd25519: json.asBytes('sellerEd25519'),
+      offerID: json.as('offerID'),
+      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
+      amountSold: json.as('amountSold'),
+      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
+      amountBought: json.as('amountBought'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.ed25519PubKeyLength,
-          property: 'sellerEd25519'),
+      LayoutConst.fixedBlobN(
+        StellarConst.ed25519PubKeyLength,
+        property: 'sellerEd25519',
+      ),
       LayoutConst.s64be(property: 'offerID'),
       StellarAsset.layout(property: 'assetSold'),
       LayoutConst.s64be(property: 'amountSold'),
@@ -139,7 +160,7 @@ class ClaimOfferAtomV0 extends ClaimAtom {
       'assetSold': assetSold.toVariantLayoutStruct(),
       'amountSold': amountSold,
       'assetBought': assetBought.toVariantLayoutStruct(),
-      'amountBought': amountBought
+      'amountBought': amountBought,
     };
   }
 }
@@ -151,26 +172,27 @@ class ClaimOfferAtom extends ClaimAtom {
   final BigInt amountSold;
   final StellarAsset assetBought;
   final BigInt amountBought;
-  ClaimOfferAtom(
-      {required this.accountId,
-      required BigInt offerID,
-      required this.assetSold,
-      required BigInt amountSold,
-      required this.assetBought,
-      required BigInt amountBought})
-      : offerID = offerID.asInt64,
-        amountSold = amountSold.asInt64,
-        amountBought = amountBought.asInt64,
-        super(ClaimAtomType.claimAtomTypeOrderBook);
+  ClaimOfferAtom({
+    required this.accountId,
+    required BigInt offerID,
+    required this.assetSold,
+    required BigInt amountSold,
+    required this.assetBought,
+    required BigInt amountBought,
+  }) : offerID = offerID.asI64,
+       amountSold = amountSold.asI64,
+       amountBought = amountBought.asI64,
+       super(ClaimAtomType.claimAtomTypeOrderBook);
 
   factory ClaimOfferAtom.fromStruct(Map<String, dynamic> json) {
     return ClaimOfferAtom(
-        accountId: StellarPublicKey.fromStruct(json.asMap('accountId')),
-        offerID: json.as('offerID'),
-        assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-        amountSold: json.as('amountSold'),
-        assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-        amountBought: json.as('amountBought'));
+      accountId: StellarPublicKey.fromStruct(json.asMap('accountId')),
+      offerID: json.as('offerID'),
+      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
+      amountSold: json.as('amountSold'),
+      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
+      amountBought: json.as('amountBought'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -196,7 +218,7 @@ class ClaimOfferAtom extends ClaimAtom {
       'assetSold': assetSold.toVariantLayoutStruct(),
       'amountSold': amountSold,
       'assetBought': assetBought.toVariantLayoutStruct(),
-      'amountBought': amountBought
+      'amountBought': amountBought,
     };
   }
 }
@@ -207,30 +229,37 @@ class ClaimLiquidityAtom extends ClaimAtom {
   final BigInt amountSold;
   final StellarAsset assetBought;
   final BigInt amountBought;
-  ClaimLiquidityAtom(
-      {required List<int> liquidityPoolID,
-      required this.assetSold,
-      required BigInt amountSold,
-      required this.assetBought,
-      required BigInt amountBought})
-      : liquidityPoolID = liquidityPoolID.asImmutableBytes
-            .exc(StellarConst.ed25519PubKeyLength, name: 'liquidityPoolID'),
-        amountSold = amountSold.asInt64,
-        amountBought = amountBought.asInt64,
-        super(ClaimAtomType.claimAtomTypeLiquidityPool);
+  ClaimLiquidityAtom({
+    required List<int> liquidityPoolID,
+    required this.assetSold,
+    required BigInt amountSold,
+    required this.assetBought,
+    required BigInt amountBought,
+  }) : liquidityPoolID = liquidityPoolID.asImmutableBytes.exc(
+         length: StellarConst.ed25519PubKeyLength,
+         name: 'liquidityPoolID',
+         operation: "ClaimLiquidityAtom",
+         reason: "Invalid liquidityPoolID bytes length.",
+       ),
+       amountSold = amountSold.asI64,
+       amountBought = amountBought.asI64,
+       super(ClaimAtomType.claimAtomTypeLiquidityPool);
 
   factory ClaimLiquidityAtom.fromStruct(Map<String, dynamic> json) {
     return ClaimLiquidityAtom(
-        liquidityPoolID: json.asBytes('liquidityPoolID'),
-        assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-        amountSold: json.as('amountSold'),
-        assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-        amountBought: json.as('amountBought'));
+      liquidityPoolID: json.asBytes('liquidityPoolID'),
+      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
+      amountSold: json.as('amountSold'),
+      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
+      amountBought: json.as('amountBought'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.ed25519PubKeyLength,
-          property: 'liquidityPoolID'),
+      LayoutConst.fixedBlobN(
+        StellarConst.ed25519PubKeyLength,
+        property: 'liquidityPoolID',
+      ),
       StellarAsset.layout(property: 'assetSold'),
       LayoutConst.s64be(property: 'amountSold'),
       StellarAsset.layout(property: 'assetBought'),
@@ -250,7 +279,7 @@ class ClaimLiquidityAtom extends ClaimAtom {
       'assetSold': assetSold.toVariantLayoutStruct(),
       'amountSold': amountSold,
       'assetBought': assetBought.toVariantLayoutStruct(),
-      'amountBought': amountBought
+      'amountBought': amountBought,
     };
   }
 }
@@ -282,21 +311,24 @@ class CreateAccountResultCode {
   const CreateAccountResultCode._(this.name, this.value);
 
   static List<CreateAccountResultCode> get values => [
-        createAccountSuccess,
-        createAccountMalformed,
-        createAccountUnderfunded,
-        createAccountLowReserve,
-        createAccountAlreadyExist,
-      ];
+    createAccountSuccess,
+    createAccountMalformed,
+    createAccountUnderfunded,
+    createAccountLowReserve,
+    createAccountAlreadyExist,
+  ];
   static CreateAccountResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'CreateAccountResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'CreateAccountResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -314,17 +346,19 @@ abstract class CreateAccountResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(CreateAccountResultCode.values.length, (index) {
-          final type = CreateAccountResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreateAccountResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(CreateAccountResultCode.values.length, (index) {
+        final type = CreateAccountResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreateAccountResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -354,35 +388,55 @@ class CreateAccountResultVoid extends CreateAccountResult {
 }
 
 class PaymentResultCode {
-  static const PaymentResultCode paymentSuccess =
-      PaymentResultCode._('PAYMENT_SUCCESS', 0);
+  static const PaymentResultCode paymentSuccess = PaymentResultCode._(
+    'PAYMENT_SUCCESS',
+    0,
+  );
 
-  static const PaymentResultCode paymentMalformed =
-      PaymentResultCode._('PAYMENT_MALFORMED', -1);
+  static const PaymentResultCode paymentMalformed = PaymentResultCode._(
+    'PAYMENT_MALFORMED',
+    -1,
+  );
 
-  static const PaymentResultCode paymentUnderfunded =
-      PaymentResultCode._('PAYMENT_UNDERFUNDED', -2);
+  static const PaymentResultCode paymentUnderfunded = PaymentResultCode._(
+    'PAYMENT_UNDERFUNDED',
+    -2,
+  );
 
-  static const PaymentResultCode paymentSrcNoTrust =
-      PaymentResultCode._('PAYMENT_SRC_NO_TRUST', -3);
+  static const PaymentResultCode paymentSrcNoTrust = PaymentResultCode._(
+    'PAYMENT_SRC_NO_TRUST',
+    -3,
+  );
 
-  static const PaymentResultCode paymentSrcNotAuthorized =
-      PaymentResultCode._('PAYMENT_SRC_NOT_AUTHORIZED', -4);
+  static const PaymentResultCode paymentSrcNotAuthorized = PaymentResultCode._(
+    'PAYMENT_SRC_NOT_AUTHORIZED',
+    -4,
+  );
 
-  static const PaymentResultCode paymentNoDestination =
-      PaymentResultCode._('PAYMENT_NO_DESTINATION', -5);
+  static const PaymentResultCode paymentNoDestination = PaymentResultCode._(
+    'PAYMENT_NO_DESTINATION',
+    -5,
+  );
 
-  static const PaymentResultCode paymentNoTrust =
-      PaymentResultCode._('PAYMENT_NO_TRUST', -6);
+  static const PaymentResultCode paymentNoTrust = PaymentResultCode._(
+    'PAYMENT_NO_TRUST',
+    -6,
+  );
 
-  static const PaymentResultCode paymentNotAuthorized =
-      PaymentResultCode._('PAYMENT_NOT_AUTHORIZED', -7);
+  static const PaymentResultCode paymentNotAuthorized = PaymentResultCode._(
+    'PAYMENT_NOT_AUTHORIZED',
+    -7,
+  );
 
-  static const PaymentResultCode paymentLineFull =
-      PaymentResultCode._('PAYMENT_LINE_FULL', -8);
+  static const PaymentResultCode paymentLineFull = PaymentResultCode._(
+    'PAYMENT_LINE_FULL',
+    -8,
+  );
 
-  static const PaymentResultCode paymentNoIssuer =
-      PaymentResultCode._('PAYMENT_NO_ISSUER', -9);
+  static const PaymentResultCode paymentNoIssuer = PaymentResultCode._(
+    'PAYMENT_NO_ISSUER',
+    -9,
+  );
 
   final String name;
   final int value;
@@ -390,26 +444,29 @@ class PaymentResultCode {
   const PaymentResultCode._(this.name, this.value);
 
   static List<PaymentResultCode> get values => [
-        paymentSuccess,
-        paymentMalformed,
-        paymentUnderfunded,
-        paymentSrcNoTrust,
-        paymentSrcNotAuthorized,
-        paymentNoDestination,
-        paymentNoTrust,
-        paymentNotAuthorized,
-        paymentLineFull,
-        paymentNoIssuer,
-      ];
+    paymentSuccess,
+    paymentMalformed,
+    paymentUnderfunded,
+    paymentSrcNoTrust,
+    paymentSrcNotAuthorized,
+    paymentNoDestination,
+    paymentNoTrust,
+    paymentNotAuthorized,
+    paymentLineFull,
+    paymentNoIssuer,
+  ];
   static PaymentResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'PaymentResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'PaymentResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -427,17 +484,19 @@ abstract class PaymentResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(PaymentResultCode.values.length, (index) {
-          final type = PaymentResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PaymentResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(PaymentResultCode.values.length, (index) {
+        final type = PaymentResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PaymentResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -468,63 +527,83 @@ class PaymentResultVoid extends PaymentResult {
 
 class PathPaymentStrictReceiveResultCode {
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveSuccess = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_SUCCESS', 0);
+  pathPaymentStrictReceiveSuccess = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_SUCCESS',
+    0,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveMalformed = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_MALFORMED', -1);
+  pathPaymentStrictReceiveMalformed = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_MALFORMED',
+    -1,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveUnderfunded =
+  pathPaymentStrictReceiveUnderfunded = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_UNDERFUNDED',
+    -2,
+  );
+
+  static const PathPaymentStrictReceiveResultCode
+  pathPaymentStrictReceiveSrcNoTrust = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_SRC_NO_TRUST',
+    -3,
+  );
+
+  static const PathPaymentStrictReceiveResultCode
+  pathPaymentStrictReceiveSrcNotAuthorized =
       PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_UNDERFUNDED', -2);
+        'PATH_PAYMENT_STRICT_RECEIVE_SRC_NOT_AUTHORIZED',
+        -4,
+      );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveSrcNoTrust = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_SRC_NO_TRUST', -3);
+  pathPaymentStrictReceiveNoDestination = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_NO_DESTINATION',
+    -5,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveSrcNotAuthorized =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_SRC_NOT_AUTHORIZED', -4);
+  pathPaymentStrictReceiveNoTrust = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_NO_TRUST',
+    -6,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveNoDestination =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_NO_DESTINATION', -5);
+  pathPaymentStrictReceiveNotAuthorized = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_NOT_AUTHORIZED',
+    -7,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveNoTrust = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_NO_TRUST', -6);
+  pathPaymentStrictReceiveLineFull = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_LINE_FULL',
+    -8,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveNotAuthorized =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_NOT_AUTHORIZED', -7);
+  pathPaymentStrictReceiveNoIssuer = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_NO_ISSUER',
+    -9,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveLineFull = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_LINE_FULL', -8);
+  pathPaymentStrictReceiveTooFewOffers = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_TOO_FEW_OFFERS',
+    -10,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveNoIssuer = PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_NO_ISSUER', -9);
+  pathPaymentStrictReceiveOfferCrossSelf = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_OFFER_CROSS_SELF',
+    -11,
+  );
 
   static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveTooFewOffers =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_TOO_FEW_OFFERS', -10);
-
-  static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveOfferCrossSelf =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_OFFER_CROSS_SELF', -11);
-
-  static const PathPaymentStrictReceiveResultCode
-      pathPaymentStrictReceiveOverSendMax =
-      PathPaymentStrictReceiveResultCode._(
-          'PATH_PAYMENT_STRICT_RECEIVE_OVER_SENDMAX', -12);
+  pathPaymentStrictReceiveOverSendMax = PathPaymentStrictReceiveResultCode._(
+    'PATH_PAYMENT_STRICT_RECEIVE_OVER_SENDMAX',
+    -12,
+  );
 
   final String name;
   final int value;
@@ -532,29 +611,32 @@ class PathPaymentStrictReceiveResultCode {
   const PathPaymentStrictReceiveResultCode._(this.name, this.value);
 
   static List<PathPaymentStrictReceiveResultCode> get values => [
-        pathPaymentStrictReceiveSuccess,
-        pathPaymentStrictReceiveMalformed,
-        pathPaymentStrictReceiveUnderfunded,
-        pathPaymentStrictReceiveSrcNoTrust,
-        pathPaymentStrictReceiveSrcNotAuthorized,
-        pathPaymentStrictReceiveNoDestination,
-        pathPaymentStrictReceiveNoTrust,
-        pathPaymentStrictReceiveNotAuthorized,
-        pathPaymentStrictReceiveLineFull,
-        pathPaymentStrictReceiveNoIssuer,
-        pathPaymentStrictReceiveTooFewOffers,
-        pathPaymentStrictReceiveOfferCrossSelf,
-        pathPaymentStrictReceiveOverSendMax,
-      ];
+    pathPaymentStrictReceiveSuccess,
+    pathPaymentStrictReceiveMalformed,
+    pathPaymentStrictReceiveUnderfunded,
+    pathPaymentStrictReceiveSrcNoTrust,
+    pathPaymentStrictReceiveSrcNotAuthorized,
+    pathPaymentStrictReceiveNoDestination,
+    pathPaymentStrictReceiveNoTrust,
+    pathPaymentStrictReceiveNotAuthorized,
+    pathPaymentStrictReceiveLineFull,
+    pathPaymentStrictReceiveNoIssuer,
+    pathPaymentStrictReceiveTooFewOffers,
+    pathPaymentStrictReceiveOfferCrossSelf,
+    pathPaymentStrictReceiveOverSendMax,
+  ];
   static PathPaymentStrictReceiveResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AllowTrustResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AllowTrustResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -562,11 +644,12 @@ class PathPaymentStrictReceiveResultCode {
 abstract class PathPaymentStrictReceiveResult extends OperationInner {
   final PathPaymentStrictReceiveResultCode code;
   const PathPaymentStrictReceiveResult(this.code)
-      : super(OperationType.pathPaymentStrictReceive);
+    : super(OperationType.pathPaymentStrictReceive);
   factory PathPaymentStrictReceiveResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
-    final code =
-        PathPaymentStrictReceiveResultCode.fromName(decode.variantName);
+    final code = PathPaymentStrictReceiveResultCode.fromName(
+      decode.variantName,
+    );
     switch (code) {
       case PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveSuccess:
         return PathPaymentStrictReceiveResultSuccesss.fromStruct(decode.value);
@@ -578,31 +661,33 @@ abstract class PathPaymentStrictReceiveResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(PathPaymentStrictReceiveResultCode.values.length,
-            (index) {
-          final type =
-              PathPaymentStrictReceiveResultCode.values.elementAt(index);
-          switch (type) {
-            case PathPaymentStrictReceiveResultCode
-                  .pathPaymentStrictReceiveSuccess:
-              return LazyVariantModel(
-                  layout: PathPaymentStrictReceiveResultSuccesss.layout,
-                  property: type.name,
-                  index: type.value);
-            case PathPaymentStrictReceiveResultCode
-                  .pathPaymentStrictReceiveNoIssuer:
-              return LazyVariantModel(
-                  layout: PathPaymentStrictReceiveResultNoIssuer.layout,
-                  property: type.name,
-                  index: type.value);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PathPaymentStrictReceiveResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(PathPaymentStrictReceiveResultCode.values.length, (index) {
+        final type = PathPaymentStrictReceiveResultCode.values.elementAt(index);
+        switch (type) {
+          case PathPaymentStrictReceiveResultCode
+              .pathPaymentStrictReceiveSuccess:
+            return LazyVariantModel(
+              layout: PathPaymentStrictReceiveResultSuccesss.layout,
+              property: type.name,
+              index: type.value,
+            );
+          case PathPaymentStrictReceiveResultCode
+              .pathPaymentStrictReceiveNoIssuer:
+            return LazyVariantModel(
+              layout: PathPaymentStrictReceiveResultNoIssuer.layout,
+              property: type.name,
+              index: type.value,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PathPaymentStrictReceiveResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -618,9 +703,11 @@ class SimplePaymentResult extends XDRSerialization {
   final StellarPublicKey destination;
   final StellarAsset asset;
   final BigInt amount;
-  SimplePaymentResult(
-      {required this.destination, required this.asset, required BigInt amount})
-      : amount = amount.asInt64;
+  SimplePaymentResult({
+    required this.destination,
+    required this.asset,
+    required BigInt amount,
+  }) : amount = amount.asI64;
 
   factory SimplePaymentResult.fromStruct(Map<String, dynamic> json) {
     return SimplePaymentResult(
@@ -647,7 +734,7 @@ class SimplePaymentResult extends XDRSerialization {
     return {
       'destination': destination.toLayoutStruct(),
       'asset': asset.toVariantLayoutStruct(),
-      'amount': amount
+      'amount': amount,
     };
   }
 }
@@ -656,24 +743,29 @@ class PathPaymentStrictReceiveResultSuccesss
     extends PathPaymentStrictReceiveResult {
   final List<ClaimAtom> offers;
   final SimplePaymentResult last;
-  PathPaymentStrictReceiveResultSuccesss(
-      {required List<ClaimAtom> offers, required this.last})
-      : offers = offers.immutable,
-        super(
-            PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveSuccess);
+  PathPaymentStrictReceiveResultSuccesss({
+    required List<ClaimAtom> offers,
+    required this.last,
+  }) : offers = offers.immutable,
+       super(
+         PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveSuccess,
+       );
   factory PathPaymentStrictReceiveResultSuccesss.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return PathPaymentStrictReceiveResultSuccesss(
-        offers: json
-            .asListOfMap('offers')!
-            .map((e) => ClaimAtom.fromStruct(e))
-            .toList(),
-        last: SimplePaymentResult.fromStruct(json.asMap('last')));
+      offers:
+          json
+              .asListOfMap('offers')!
+              .map((e) => ClaimAtom.fromStruct(e))
+              .toList(),
+      last: SimplePaymentResult.fromStruct(json.asMap('last')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       LayoutConst.xdrVec(ClaimAtom.layout(), property: 'offers'),
-      SimplePaymentResult.layout(property: 'last')
+      SimplePaymentResult.layout(property: 'last'),
     ], property: property);
   }
 
@@ -686,7 +778,7 @@ class PathPaymentStrictReceiveResultSuccesss
   Map<String, dynamic> toLayoutStruct() {
     return {
       'offers': offers.map((e) => e.toVariantLayoutStruct()).toList(),
-      'last': last.toLayoutStruct()
+      'last': last.toLayoutStruct(),
     };
   }
 }
@@ -696,16 +788,20 @@ class PathPaymentStrictReceiveResultNoIssuer
   final StellarAsset noIssuer;
 
   PathPaymentStrictReceiveResultNoIssuer(this.noIssuer)
-      : super(PathPaymentStrictReceiveResultCode
-            .pathPaymentStrictReceiveNoIssuer);
+    : super(
+        PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveNoIssuer,
+      );
   factory PathPaymentStrictReceiveResultNoIssuer.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return PathPaymentStrictReceiveResultNoIssuer(
-        StellarAsset.fromStruct(json.asMap('noIssuer')));
+      StellarAsset.fromStruct(json.asMap('noIssuer')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct([StellarAsset.layout(property: 'noIssuer')],
-        property: property);
+    return LayoutConst.struct([
+      StellarAsset.layout(property: 'noIssuer'),
+    ], property: property);
   }
 
   @override
@@ -746,26 +842,27 @@ class OfferEntryResult extends XDRSerialization {
   final int flags;
   final ExtentionPointVoid ext;
 
-  OfferEntryResult(
-      {required this.sellerID,
-      required BigInt offerID,
-      required this.selling,
-      required this.buying,
-      required BigInt amount,
-      required int flags,
-      this.ext = const ExtentionPointVoid()})
-      : offerID = offerID.asInt64,
-        amount = amount.asInt64,
-        flags = flags.asUint32;
+  OfferEntryResult({
+    required this.sellerID,
+    required BigInt offerID,
+    required this.selling,
+    required this.buying,
+    required BigInt amount,
+    required int flags,
+    this.ext = const ExtentionPointVoid(),
+  }) : offerID = offerID.asI64,
+       amount = amount.asI64,
+       flags = flags.asU32;
   factory OfferEntryResult.fromStruct(Map<String, dynamic> json) {
     return OfferEntryResult(
-        sellerID: StellarPublicKey.fromStruct(json.asMap('sellerID')),
-        amount: json.as('amount'),
-        buying: StellarAsset.fromStruct(json.asMap('buying')),
-        selling: StellarAsset.fromStruct(json.asMap('selling')),
-        flags: json.as('flags'),
-        offerID: json.as('offerID'),
-        ext: ExtentionPointVoid.fromStruct(json.asMap('ext')));
+      sellerID: StellarPublicKey.fromStruct(json.asMap('sellerID')),
+      amount: json.as('amount'),
+      buying: StellarAsset.fromStruct(json.asMap('buying')),
+      selling: StellarAsset.fromStruct(json.asMap('selling')),
+      flags: json.as('flags'),
+      offerID: json.as('offerID'),
+      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -775,7 +872,7 @@ class OfferEntryResult extends XDRSerialization {
       StellarAsset.layout(property: 'buying'),
       LayoutConst.s64be(property: 'amount'),
       LayoutConst.u32be(property: 'flags'),
-      ExtentionPointVoid.layout(property: 'ext')
+      ExtentionPointVoid.layout(property: 'ext'),
     ], property: property);
   }
 
@@ -814,19 +911,22 @@ class ManageOfferEffectType {
   const ManageOfferEffectType._(this.name, this.value);
 
   static List<ManageOfferEffectType> get values => [
-        manageOfferCreated,
-        manageOfferUpdated,
-        manageOfferDeleted,
-      ];
+    manageOfferCreated,
+    manageOfferUpdated,
+    manageOfferDeleted,
+  ];
   static ManageOfferEffectType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ManageOfferEffect type not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ManageOfferEffect type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -845,16 +945,19 @@ abstract class ManageOfferEffect extends XDRVariantSerialization {
       case ManageOfferEffectType.manageOfferUpdated:
         return ManageOfferEffectUpdated.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException('Invalid ManageOfferEffect type.',
-            details: {'type': type.name});
+        throw DartStellarPlugingException(
+          'Invalid ManageOfferEffect type.',
+          details: {'type': type.name},
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumU32Be([
       LazyVariantModel(
-          index: ManageOfferEffectType.manageOfferCreated.value,
-          layout: ManageOfferEffectCreated.layout,
-          property: ManageOfferEffectType.manageOfferCreated.name),
+        index: ManageOfferEffectType.manageOfferCreated.value,
+        layout: ManageOfferEffectCreated.layout,
+        property: ManageOfferEffectType.manageOfferCreated.name,
+      ),
       LazyVariantModel(
         index: ManageOfferEffectType.manageOfferDeleted.value,
         layout: ManageOfferEffectDeleted.layout,
@@ -864,7 +967,7 @@ abstract class ManageOfferEffect extends XDRVariantSerialization {
         index: ManageOfferEffectType.manageOfferUpdated.value,
         layout: ManageOfferEffectUpdated.layout,
         property: ManageOfferEffectType.manageOfferUpdated.name,
-      )
+      ),
     ], property: property);
   }
 
@@ -900,14 +1003,16 @@ class ManageOfferEffectCreated extends ManageOfferEffect {
 class ManageOfferEffectUpdated extends ManageOfferEffect {
   final OfferEntryResult offerEntry;
   ManageOfferEffectUpdated(this.offerEntry)
-      : super(ManageOfferEffectType.manageOfferUpdated);
+    : super(ManageOfferEffectType.manageOfferUpdated);
   factory ManageOfferEffectUpdated.fromStruct(Map<String, dynamic> json) {
     return ManageOfferEffectUpdated(
-        OfferEntryResult.fromStruct(json.asMap('offerEntry')));
+      OfferEntryResult.fromStruct(json.asMap('offerEntry')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct([OfferEntryResult.layout(property: 'offerEntry')],
-        property: property);
+    return LayoutConst.struct([
+      OfferEntryResult.layout(property: 'offerEntry'),
+    ], property: property);
   }
 
   @override
@@ -987,29 +1092,32 @@ class ManageSellOfferResultCode {
   const ManageSellOfferResultCode._(this.name, this.value);
 
   static List<ManageSellOfferResultCode> get values => [
-        manageSellOfferSuccess,
-        manageSellOfferMalformed,
-        manageSellOfferSellNoTrust,
-        manageSellOfferBuyNoTrust,
-        manageSellOfferSellNotAuthorized,
-        manageSellOfferBuyNotAuthorized,
-        manageSellOfferLineFull,
-        manageSellOfferUnderfunded,
-        manageSellOfferCrossSelf,
-        manageSellOfferSellNoIssuer,
-        manageSellOfferBuyNoIssuer,
-        manageSellOfferNotFound,
-        manageSellOfferLowReserve,
-      ];
+    manageSellOfferSuccess,
+    manageSellOfferMalformed,
+    manageSellOfferSellNoTrust,
+    manageSellOfferBuyNoTrust,
+    manageSellOfferSellNotAuthorized,
+    manageSellOfferBuyNotAuthorized,
+    manageSellOfferLineFull,
+    manageSellOfferUnderfunded,
+    manageSellOfferCrossSelf,
+    manageSellOfferSellNoIssuer,
+    manageSellOfferBuyNoIssuer,
+    manageSellOfferNotFound,
+    manageSellOfferLowReserve,
+  ];
   static ManageSellOfferResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AllowTrustResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AllowTrustResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1029,22 +1137,25 @@ abstract class ManageSellOfferResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ManageSellOfferResultCode.values.length, (index) {
-          final type = ManageSellOfferResultCode.values.elementAt(index);
-          switch (type) {
-            case ManageSellOfferResultCode.manageSellOfferSuccess:
-              return LazyVariantModel(
-                  layout: ManageSellOfferResultSuccess.layout,
-                  property: type.name,
-                  index: index);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ManageSellOfferResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ManageSellOfferResultCode.values.length, (index) {
+        final type = ManageSellOfferResultCode.values.elementAt(index);
+        switch (type) {
+          case ManageSellOfferResultCode.manageSellOfferSuccess:
+            return LazyVariantModel(
+              layout: ManageSellOfferResultSuccess.layout,
+              property: type.name,
+              index: index,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ManageSellOfferResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1059,22 +1170,24 @@ abstract class ManageSellOfferResult extends OperationInner {
 class ManageOfferSuccessResult extends XDRSerialization {
   final List<ClaimAtom> offersClaimed;
   final ManageOfferEffect offer;
-  ManageOfferSuccessResult(
-      {required List<ClaimAtom> offersClaimed, required this.offer})
-      : offersClaimed = offersClaimed.immutable;
+  ManageOfferSuccessResult({
+    required List<ClaimAtom> offersClaimed,
+    required this.offer,
+  }) : offersClaimed = offersClaimed.immutable;
   factory ManageOfferSuccessResult.fromStruct(Map<String, dynamic> json) {
     return ManageOfferSuccessResult(
-      offersClaimed: json
-          .asListOfMap('offersClaimed')!
-          .map((e) => ClaimAtom.fromStruct(e))
-          .toList(),
+      offersClaimed:
+          json
+              .asListOfMap('offersClaimed')!
+              .map((e) => ClaimAtom.fromStruct(e))
+              .toList(),
       offer: ManageOfferEffect.fromStruct(json.asMap('offer')),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       LayoutConst.xdrVec(ClaimAtom.layout(), property: 'offersClaimed'),
-      ManageOfferEffect.layout(property: 'offer')
+      ManageOfferEffect.layout(property: 'offer'),
     ], property: property);
   }
 
@@ -1088,7 +1201,7 @@ class ManageOfferSuccessResult extends XDRSerialization {
     return {
       'offersClaimed':
           offersClaimed.map((e) => e.toVariantLayoutStruct()).toList(),
-      'offer': offer.toVariantLayoutStruct()
+      'offer': offer.toVariantLayoutStruct(),
     };
   }
 }
@@ -1096,15 +1209,16 @@ class ManageOfferSuccessResult extends XDRSerialization {
 class ManageSellOfferResultSuccess extends ManageSellOfferResult {
   final ManageOfferSuccessResult success;
   ManageSellOfferResultSuccess(this.success)
-      : super(ManageSellOfferResultCode.manageSellOfferSuccess);
+    : super(ManageSellOfferResultCode.manageSellOfferSuccess);
   factory ManageSellOfferResultSuccess.fromStruct(Map<String, dynamic> json) {
     return ManageSellOfferResultSuccess(
-        ManageOfferSuccessResult.fromStruct(json.asMap('success')));
+      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [ManageOfferSuccessResult.layout(property: 'success')],
-        property: property);
+    return LayoutConst.struct([
+      ManageOfferSuccessResult.layout(property: 'success'),
+    ], property: property);
   }
 
   @override
@@ -1138,7 +1252,7 @@ class ManageSellOfferResultVoid extends ManageSellOfferResult {
 abstract class CreatePassiveSellOfferResult extends OperationInner {
   final ManageSellOfferResultCode code;
   const CreatePassiveSellOfferResult(this.code)
-      : super(OperationType.createPassiveSellOffer);
+    : super(OperationType.createPassiveSellOffer);
   factory CreatePassiveSellOfferResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = ManageSellOfferResultCode.fromName(decode.variantName);
@@ -1151,22 +1265,25 @@ abstract class CreatePassiveSellOfferResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ManageSellOfferResultCode.values.length, (index) {
-          final type = ManageSellOfferResultCode.values.elementAt(index);
-          switch (type) {
-            case ManageSellOfferResultCode.manageSellOfferSuccess:
-              return LazyVariantModel(
-                  layout: CreatePassiveSellOfferResultSuccess.layout,
-                  property: type.name,
-                  index: index);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreatePassiveSellOfferResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ManageSellOfferResultCode.values.length, (index) {
+        final type = ManageSellOfferResultCode.values.elementAt(index);
+        switch (type) {
+          case ManageSellOfferResultCode.manageSellOfferSuccess:
+            return LazyVariantModel(
+              layout: CreatePassiveSellOfferResultSuccess.layout,
+              property: type.name,
+              index: index,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreatePassiveSellOfferResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1181,16 +1298,18 @@ abstract class CreatePassiveSellOfferResult extends OperationInner {
 class CreatePassiveSellOfferResultSuccess extends CreatePassiveSellOfferResult {
   final ManageOfferSuccessResult success;
   CreatePassiveSellOfferResultSuccess(this.success)
-      : super(ManageSellOfferResultCode.manageSellOfferSuccess);
+    : super(ManageSellOfferResultCode.manageSellOfferSuccess);
   factory CreatePassiveSellOfferResultSuccess.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return CreatePassiveSellOfferResultSuccess(
-        ManageOfferSuccessResult.fromStruct(json.asMap('success')));
+      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [ManageOfferSuccessResult.layout(property: 'success')],
-        property: property);
+    return LayoutConst.struct([
+      ManageOfferSuccessResult.layout(property: 'success'),
+    ], property: property);
   }
 
   @override
@@ -1222,8 +1341,10 @@ class CreatePassiveSellOfferResultVoid extends CreatePassiveSellOfferResult {
 }
 
 class SetOptionsResultCode {
-  static const SetOptionsResultCode setOptionsSuccess =
-      SetOptionsResultCode._('SET_OPTIONS_SUCCESS', 0);
+  static const SetOptionsResultCode setOptionsSuccess = SetOptionsResultCode._(
+    'SET_OPTIONS_SUCCESS',
+    0,
+  );
 
   static const SetOptionsResultCode setOptionsLowReserve =
       SetOptionsResultCode._('SET_OPTIONS_LOW_RESERVE', -1);
@@ -1231,8 +1352,10 @@ class SetOptionsResultCode {
   static const SetOptionsResultCode setOptionsTooManySigners =
       SetOptionsResultCode._('SET_OPTIONS_TOO_MANY_SIGNERS', -2);
 
-  static const SetOptionsResultCode setOptionsBadFlags =
-      SetOptionsResultCode._('SET_OPTIONS_BAD_FLAGS', -3);
+  static const SetOptionsResultCode setOptionsBadFlags = SetOptionsResultCode._(
+    'SET_OPTIONS_BAD_FLAGS',
+    -3,
+  );
 
   static const SetOptionsResultCode setOptionsInvalidInflation =
       SetOptionsResultCode._('SET_OPTIONS_INVALID_INFLATION', -4);
@@ -1261,28 +1384,31 @@ class SetOptionsResultCode {
   const SetOptionsResultCode._(this.name, this.value);
 
   static List<SetOptionsResultCode> get values => [
-        setOptionsSuccess,
-        setOptionsLowReserve,
-        setOptionsTooManySigners,
-        setOptionsBadFlags,
-        setOptionsInvalidInflation,
-        setOptionsCantChange,
-        setOptionsUnknownFlag,
-        setOptionsThresholdOutOfRange,
-        setOptionsBadSigner,
-        setOptionsInvalidHomeDomain,
-        setOptionsAuthRevocableRequired,
-      ];
+    setOptionsSuccess,
+    setOptionsLowReserve,
+    setOptionsTooManySigners,
+    setOptionsBadFlags,
+    setOptionsInvalidInflation,
+    setOptionsCantChange,
+    setOptionsUnknownFlag,
+    setOptionsThresholdOutOfRange,
+    setOptionsBadSigner,
+    setOptionsInvalidHomeDomain,
+    setOptionsAuthRevocableRequired,
+  ];
 
   static SetOptionsResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AllowTrustResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AllowTrustResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1300,17 +1426,19 @@ abstract class SetOptionsResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(SetOptionsResultCode.values.length, (index) {
-          final type = SetOptionsResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: SetOptionsResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(SetOptionsResultCode.values.length, (index) {
+        final type = SetOptionsResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: SetOptionsResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1373,25 +1501,28 @@ class ChangeTrustResultCode {
   const ChangeTrustResultCode._(this.name, this.value);
 
   static List<ChangeTrustResultCode> get values => [
-        changeTrustSuccess,
-        changeTrustMalformed,
-        changeTrustNoIssuer,
-        changeTrustInvalidLimit,
-        changeTrustLowReserve,
-        changeTrustSelfNotAllowed,
-        changeTrustTrustLineMissing,
-        changeTrustCannotDelete,
-        changeTrustNotAuthMaintainLiabilities,
-      ];
+    changeTrustSuccess,
+    changeTrustMalformed,
+    changeTrustNoIssuer,
+    changeTrustInvalidLimit,
+    changeTrustLowReserve,
+    changeTrustSelfNotAllowed,
+    changeTrustTrustLineMissing,
+    changeTrustCannotDelete,
+    changeTrustNotAuthMaintainLiabilities,
+  ];
   static ChangeTrustResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AllowTrustResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AllowTrustResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1409,17 +1540,19 @@ abstract class ChangeTrustResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ChangeTrustResultCode.values.length, (index) {
-          final type = ChangeTrustResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ChangeTrustResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ChangeTrustResultCode.values.length, (index) {
+        final type = ChangeTrustResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ChangeTrustResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1449,8 +1582,10 @@ class ChangeTrustResultVoid extends ChangeTrustResult {
 }
 
 class AllowTrustResultCode {
-  static const AllowTrustResultCode allowTrustSuccess =
-      AllowTrustResultCode._('ALLOW_TRUST_SUCCESS', 0);
+  static const AllowTrustResultCode allowTrustSuccess = AllowTrustResultCode._(
+    'ALLOW_TRUST_SUCCESS',
+    0,
+  );
 
   static const AllowTrustResultCode allowTrustMalformed =
       AllowTrustResultCode._('ALLOW_TRUST_MALFORMED', -1);
@@ -1476,23 +1611,26 @@ class AllowTrustResultCode {
   const AllowTrustResultCode._(this.name, this.value);
 
   static List<AllowTrustResultCode> get values => [
-        allowTrustSuccess,
-        allowTrustMalformed,
-        allowTrustNoTrustLine,
-        allowTrustTrustNotRequired,
-        allowTrustCantRevoke,
-        allowTrustSelfNotAllowed,
-        allowTrustLowReserve,
-      ];
+    allowTrustSuccess,
+    allowTrustMalformed,
+    allowTrustNoTrustLine,
+    allowTrustTrustNotRequired,
+    allowTrustCantRevoke,
+    allowTrustSelfNotAllowed,
+    allowTrustLowReserve,
+  ];
   static AllowTrustResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AllowTrustResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AllowTrustResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1510,17 +1648,19 @@ abstract class AllowTrustResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(AllowTrustResultCode.values.length, (index) {
-          final type = AllowTrustResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: AllowTrustResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(AllowTrustResultCode.values.length, (index) {
+        final type = AllowTrustResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: AllowTrustResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1580,24 +1720,27 @@ class AccountMergeResultCode {
   const AccountMergeResultCode._(this.name, this.value);
 
   static List<AccountMergeResultCode> get values => [
-        accountMergeSuccess,
-        accountMergeMalformed,
-        accountMergeNoAccount,
-        accountMergeImmutableSet,
-        accountMergeHasSubEntries,
-        accountMergeSeqnumTooFar,
-        accountMergeDestFull,
-        accountMergeIsSponsor,
-      ];
+    accountMergeSuccess,
+    accountMergeMalformed,
+    accountMergeNoAccount,
+    accountMergeImmutableSet,
+    accountMergeHasSubEntries,
+    accountMergeSeqnumTooFar,
+    accountMergeDestFull,
+    accountMergeIsSponsor,
+  ];
   static AccountMergeResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'AccountMergeResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'AccountMergeResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1617,23 +1760,25 @@ abstract class AccountMergeResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(AccountMergeResultCode.values.length, (index) {
-          final type = AccountMergeResultCode.values.elementAt(index);
-          switch (type) {
-            case AccountMergeResultCode.accountMergeSuccess:
-              return LazyVariantModel(
-                layout: AccountMergeResultSuccess.layout,
-                property: type.name,
-                index: type.value,
-              );
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: AccountMergeResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(AccountMergeResultCode.values.length, (index) {
+        final type = AccountMergeResultCode.values.elementAt(index);
+        switch (type) {
+          case AccountMergeResultCode.accountMergeSuccess:
+            return LazyVariantModel(
+              layout: AccountMergeResultSuccess.layout,
+              property: type.name,
+              index: type.value,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: AccountMergeResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1665,15 +1810,15 @@ class AccountMergeResultVoid extends AccountMergeResult {
 class AccountMergeResultSuccess extends AccountMergeResult {
   final BigInt sourceAccountBalance;
   AccountMergeResultSuccess(BigInt sourceAccountBalance)
-      : sourceAccountBalance = sourceAccountBalance.asInt64,
-        super(AccountMergeResultCode.accountMergeSuccess);
+    : sourceAccountBalance = sourceAccountBalance.asI64,
+      super(AccountMergeResultCode.accountMergeSuccess);
   factory AccountMergeResultSuccess.fromStruct(Map<String, dynamic> json) {
     return AccountMergeResultSuccess(json.as('sourceAccountBalance'));
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [LayoutConst.s64be(property: 'sourceAccountBalance')],
-        property: property);
+    return LayoutConst.struct([
+      LayoutConst.s64be(property: 'sourceAccountBalance'),
+    ], property: property);
   }
 
   @override
@@ -1688,11 +1833,15 @@ class AccountMergeResultSuccess extends AccountMergeResult {
 }
 
 class InflationResultCode {
-  static const InflationResultCode inflationSuccess =
-      InflationResultCode._('INFLATION_SUCCESS', 0);
+  static const InflationResultCode inflationSuccess = InflationResultCode._(
+    'INFLATION_SUCCESS',
+    0,
+  );
 
-  static const InflationResultCode inflationNotTime =
-      InflationResultCode._('INFLATION_NOT_TIME', -1);
+  static const InflationResultCode inflationNotTime = InflationResultCode._(
+    'INFLATION_NOT_TIME',
+    -1,
+  );
 
   final String name;
   final int value;
@@ -1700,18 +1849,21 @@ class InflationResultCode {
   const InflationResultCode._(this.name, this.value);
 
   static List<InflationResultCode> get values => [
-        inflationSuccess,
-        inflationNotTime,
-      ];
+    inflationSuccess,
+    inflationNotTime,
+  ];
   static InflationResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'InflationResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'InflationResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1731,22 +1883,25 @@ abstract class InflationResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(InflationResultCode.values.length, (index) {
-          final type = InflationResultCode.values.elementAt(index);
-          switch (type) {
-            case InflationResultCode.inflationSuccess:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InflationResultSuccess.layout,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InflationResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(InflationResultCode.values.length, (index) {
+        final type = InflationResultCode.values.elementAt(index);
+        switch (type) {
+          case InflationResultCode.inflationSuccess:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InflationResultSuccess.layout,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InflationResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1762,16 +1917,17 @@ class InflationPayout extends XDRSerialization {
   final StellarPublicKey destination;
   final BigInt amount;
   InflationPayout({required this.destination, required BigInt amount})
-      : amount = amount.asInt64;
+    : amount = amount.asI64;
   factory InflationPayout.fromStruct(Map<String, dynamic> json) {
     return InflationPayout(
-        destination: StellarPublicKey.fromStruct(json.asMap('destination')),
-        amount: json.as('amount'));
+      destination: StellarPublicKey.fromStruct(json.asMap('destination')),
+      amount: json.as('amount'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarPublicKey.layout(property: 'destination'),
-      LayoutConst.s64be(property: 'amount')
+      LayoutConst.s64be(property: 'amount'),
     ], property: property);
   }
 
@@ -1806,18 +1962,20 @@ class InflationResultVoid extends InflationResult {
 class InflationResultSuccess extends InflationResult {
   final List<InflationPayout> payouts;
   InflationResultSuccess(List<InflationPayout> payouts)
-      : payouts = payouts.immutable,
-        super(InflationResultCode.inflationSuccess);
+    : payouts = payouts.immutable,
+      super(InflationResultCode.inflationSuccess);
   factory InflationResultSuccess.fromStruct(Map<String, dynamic> json) {
-    return InflationResultSuccess(json
-        .asListOfMap('payouts')!
-        .map((e) => InflationPayout.fromStruct(e))
-        .toList());
+    return InflationResultSuccess(
+      json
+          .asListOfMap('payouts')!
+          .map((e) => InflationPayout.fromStruct(e))
+          .toList(),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [LayoutConst.xdrVec(InflationPayout.layout(), property: 'payouts')],
-        property: property);
+    return LayoutConst.struct([
+      LayoutConst.xdrVec(InflationPayout.layout(), property: 'payouts'),
+    ], property: property);
   }
 
   @override
@@ -1832,8 +1990,10 @@ class InflationResultSuccess extends InflationResult {
 }
 
 class ManageDataResultCode {
-  static const ManageDataResultCode manageDataSuccess =
-      ManageDataResultCode._('MANAGE_DATA_SUCCESS', 0);
+  static const ManageDataResultCode manageDataSuccess = ManageDataResultCode._(
+    'MANAGE_DATA_SUCCESS',
+    0,
+  );
 
   static const ManageDataResultCode manageDataNotSupportedYet =
       ManageDataResultCode._('MANAGE_DATA_NOT_SUPPORTED_YET', -1);
@@ -1853,21 +2013,24 @@ class ManageDataResultCode {
   const ManageDataResultCode._(this.name, this.value);
 
   static List<ManageDataResultCode> get values => [
-        manageDataSuccess,
-        manageDataNotSupportedYet,
-        manageDataNameNotFound,
-        manageDataLowReserve,
-        manageDataInvalidName,
-      ];
+    manageDataSuccess,
+    manageDataNotSupportedYet,
+    manageDataNameNotFound,
+    manageDataLowReserve,
+    manageDataInvalidName,
+  ];
   static ManageDataResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'BumpSequenceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'BumpSequenceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1885,17 +2048,19 @@ abstract class ManageDataResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ManageDataResultCode.values.length, (index) {
-          final type = ManageDataResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ManageDataResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ManageDataResultCode.values.length, (index) {
+        final type = ManageDataResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ManageDataResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -1937,18 +2102,21 @@ class BumpSequenceResultCode {
   const BumpSequenceResultCode._(this.name, this.value);
 
   static List<BumpSequenceResultCode> get values => [
-        bumpSequenceSuccess,
-        bumpSequenceBadSeq,
-      ];
+    bumpSequenceSuccess,
+    bumpSequenceBadSeq,
+  ];
   static BumpSequenceResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'BumpSequenceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'BumpSequenceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -1966,17 +2134,19 @@ abstract class BumpSequenceResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(BumpSequenceResultCode.values.length, (index) {
-          final type = BumpSequenceResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: BumpSequenceResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(BumpSequenceResultCode.values.length, (index) {
+        final type = BumpSequenceResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: BumpSequenceResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2051,29 +2221,32 @@ class ManageBuyOfferResultCode {
   const ManageBuyOfferResultCode._(this.name, this.value);
 
   static List<ManageBuyOfferResultCode> get values => [
-        manageBuyOfferSuccess,
-        manageBuyOfferMalformed,
-        manageBuyOfferSellNoTrust,
-        manageBuyOfferBuyNoTrust,
-        manageBuyOfferSellNotAuthorized,
-        manageBuyOfferBuyNotAuthorized,
-        manageBuyOfferLineFull,
-        manageBuyOfferUnderfunded,
-        manageBuyOfferCrossSelf,
-        manageBuyOfferSellNoIssuer,
-        manageBuyOfferBuyNoIssuer,
-        manageBuyOfferNotFound,
-        manageBuyOfferLowReserve,
-      ];
+    manageBuyOfferSuccess,
+    manageBuyOfferMalformed,
+    manageBuyOfferSellNoTrust,
+    manageBuyOfferBuyNoTrust,
+    manageBuyOfferSellNotAuthorized,
+    manageBuyOfferBuyNotAuthorized,
+    manageBuyOfferLineFull,
+    manageBuyOfferUnderfunded,
+    manageBuyOfferCrossSelf,
+    manageBuyOfferSellNoIssuer,
+    manageBuyOfferBuyNoIssuer,
+    manageBuyOfferNotFound,
+    manageBuyOfferLowReserve,
+  ];
   static ManageBuyOfferResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ManageBuyOfferResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ManageBuyOfferResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2093,23 +2266,25 @@ abstract class ManageBuyOfferResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ManageBuyOfferResultCode.values.length, (index) {
-          final type = ManageBuyOfferResultCode.values.elementAt(index);
-          switch (type) {
-            case ManageBuyOfferResultCode.manageBuyOfferSuccess:
-              return LazyVariantModel(
-                  layout: ManageBuyOfferResultSuccess.layout,
-                  index: type.value,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                index: type.value,
-                property: type.name,
-                layout: ManageBuyOfferResultVoid.layout,
-              );
-          }
-        }),
-        property: property);
+      List.generate(ManageBuyOfferResultCode.values.length, (index) {
+        final type = ManageBuyOfferResultCode.values.elementAt(index);
+        switch (type) {
+          case ManageBuyOfferResultCode.manageBuyOfferSuccess:
+            return LazyVariantModel(
+              layout: ManageBuyOfferResultSuccess.layout,
+              index: type.value,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              property: type.name,
+              layout: ManageBuyOfferResultVoid.layout,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2124,15 +2299,16 @@ abstract class ManageBuyOfferResult extends OperationInner {
 class ManageBuyOfferResultSuccess extends ManageBuyOfferResult {
   final ManageOfferSuccessResult success;
   ManageBuyOfferResultSuccess(this.success)
-      : super(ManageBuyOfferResultCode.manageBuyOfferSuccess);
+    : super(ManageBuyOfferResultCode.manageBuyOfferSuccess);
   factory ManageBuyOfferResultSuccess.fromStruct(Map<String, dynamic> json) {
     return ManageBuyOfferResultSuccess(
-        ManageOfferSuccessResult.fromStruct(json.asMap('success')));
+      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [ManageOfferSuccessResult.layout(property: 'success')],
-        property: property);
+    return LayoutConst.struct([
+      ManageOfferSuccessResult.layout(property: 'success'),
+    ], property: property);
   }
 
   @override
@@ -2169,51 +2345,75 @@ class PathPaymentStrictSendResultCode {
 
   static const PathPaymentStrictSendResultCode pathPaymentStrictSendMalformed =
       PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_MALFORMED', -1);
+        'PATH_PAYMENT_STRICT_SEND_MALFORMED',
+        -1,
+      );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendUnderfunded = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_UNDERFUNDED', -2);
+  pathPaymentStrictSendUnderfunded = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_UNDERFUNDED',
+    -2,
+  );
 
   static const PathPaymentStrictSendResultCode pathPaymentStrictSendSrcNoTrust =
       PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_SRC_NO_TRUST', -3);
+        'PATH_PAYMENT_STRICT_SEND_SRC_NO_TRUST',
+        -3,
+      );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendSrcNotAuthorized = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_SRC_NOT_AUTHORIZED', -4);
+  pathPaymentStrictSendSrcNotAuthorized = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_SRC_NOT_AUTHORIZED',
+    -4,
+  );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendNoDestination = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_NO_DESTINATION', -5);
+  pathPaymentStrictSendNoDestination = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_NO_DESTINATION',
+    -5,
+  );
 
   static const PathPaymentStrictSendResultCode pathPaymentStrictSendNoTrust =
       PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_NO_TRUST', -6);
+        'PATH_PAYMENT_STRICT_SEND_NO_TRUST',
+        -6,
+      );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendNotAuthorized = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_NOT_AUTHORIZED', -7);
+  pathPaymentStrictSendNotAuthorized = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_NOT_AUTHORIZED',
+    -7,
+  );
 
   static const PathPaymentStrictSendResultCode pathPaymentStrictSendLineFull =
       PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_LINE_FULL', -8);
+        'PATH_PAYMENT_STRICT_SEND_LINE_FULL',
+        -8,
+      );
 
   static const PathPaymentStrictSendResultCode pathPaymentStrictSendNoIssuer =
       PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_NO_ISSUER', -9);
+        'PATH_PAYMENT_STRICT_SEND_NO_ISSUER',
+        -9,
+      );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendTooFewOffers = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_TOO_FEW_OFFERS', -10);
+  pathPaymentStrictSendTooFewOffers = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_TOO_FEW_OFFERS',
+    -10,
+  );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendOfferCrossSelf = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_OFFER_CROSS_SELF', -11);
+  pathPaymentStrictSendOfferCrossSelf = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_OFFER_CROSS_SELF',
+    -11,
+  );
 
   static const PathPaymentStrictSendResultCode
-      pathPaymentStrictSendUnderDestMin = PathPaymentStrictSendResultCode._(
-          'PATH_PAYMENT_STRICT_SEND_UNDER_DESTMIN', -12);
+  pathPaymentStrictSendUnderDestMin = PathPaymentStrictSendResultCode._(
+    'PATH_PAYMENT_STRICT_SEND_UNDER_DESTMIN',
+    -12,
+  );
 
   final String name;
   final int value;
@@ -2221,29 +2421,32 @@ class PathPaymentStrictSendResultCode {
   const PathPaymentStrictSendResultCode._(this.name, this.value);
 
   static List<PathPaymentStrictSendResultCode> get values => [
-        pathPaymentStrictSendSuccess,
-        pathPaymentStrictSendMalformed,
-        pathPaymentStrictSendUnderfunded,
-        pathPaymentStrictSendSrcNoTrust,
-        pathPaymentStrictSendSrcNotAuthorized,
-        pathPaymentStrictSendNoDestination,
-        pathPaymentStrictSendNoTrust,
-        pathPaymentStrictSendNotAuthorized,
-        pathPaymentStrictSendLineFull,
-        pathPaymentStrictSendNoIssuer,
-        pathPaymentStrictSendTooFewOffers,
-        pathPaymentStrictSendOfferCrossSelf,
-        pathPaymentStrictSendUnderDestMin,
-      ];
+    pathPaymentStrictSendSuccess,
+    pathPaymentStrictSendMalformed,
+    pathPaymentStrictSendUnderfunded,
+    pathPaymentStrictSendSrcNoTrust,
+    pathPaymentStrictSendSrcNotAuthorized,
+    pathPaymentStrictSendNoDestination,
+    pathPaymentStrictSendNoTrust,
+    pathPaymentStrictSendNotAuthorized,
+    pathPaymentStrictSendLineFull,
+    pathPaymentStrictSendNoIssuer,
+    pathPaymentStrictSendTooFewOffers,
+    pathPaymentStrictSendOfferCrossSelf,
+    pathPaymentStrictSendUnderDestMin,
+  ];
   static PathPaymentStrictSendResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'CreateClaimableBalanceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'CreateClaimableBalanceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2251,7 +2454,7 @@ class PathPaymentStrictSendResultCode {
 abstract class PathPaymentStrictSendResult extends OperationInner {
   final PathPaymentStrictSendResultCode code;
   const PathPaymentStrictSendResult(this.code)
-      : super(OperationType.pathPaymentStrictSend);
+    : super(OperationType.pathPaymentStrictSend);
   factory PathPaymentStrictSendResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = PathPaymentStrictSendResultCode.fromName(decode.variantName);
@@ -2262,17 +2465,19 @@ abstract class PathPaymentStrictSendResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(PathPaymentStrictSendResultCode.values.length, (index) {
-          final type = PathPaymentStrictSendResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PathPaymentStrictSendResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(PathPaymentStrictSendResultCode.values.length, (index) {
+        final type = PathPaymentStrictSendResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PathPaymentStrictSendResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2305,20 +2510,30 @@ class CreateClaimableBalanceResultCode {
   static const CreateClaimableBalanceResultCode createClaimableBalanceSuccess =
       CreateClaimableBalanceResultCode._('CREATE_CLAIMABLE_BALANCE_SUCCESS', 0);
   static const CreateClaimableBalanceResultCode
-      createClaimableBalanceMalformed = CreateClaimableBalanceResultCode._(
-          'CREATE_CLAIMABLE_BALANCE_MALFORMED', -1);
+  createClaimableBalanceMalformed = CreateClaimableBalanceResultCode._(
+    'CREATE_CLAIMABLE_BALANCE_MALFORMED',
+    -1,
+  );
   static const CreateClaimableBalanceResultCode
-      createClaimableBalanceLowReserve = CreateClaimableBalanceResultCode._(
-          'CREATE_CLAIMABLE_BALANCE_LOW_RESERVE', -2);
+  createClaimableBalanceLowReserve = CreateClaimableBalanceResultCode._(
+    'CREATE_CLAIMABLE_BALANCE_LOW_RESERVE',
+    -2,
+  );
   static const CreateClaimableBalanceResultCode createClaimableBalanceNoTrust =
       CreateClaimableBalanceResultCode._(
-          'CREATE_CLAIMABLE_BALANCE_NO_TRUST', -3);
+        'CREATE_CLAIMABLE_BALANCE_NO_TRUST',
+        -3,
+      );
   static const CreateClaimableBalanceResultCode
-      createClaimableBalanceNotAuthorized = CreateClaimableBalanceResultCode._(
-          'CREATE_CLAIMABLE_BALANCE_NOT_AUTHORIZED', -4);
+  createClaimableBalanceNotAuthorized = CreateClaimableBalanceResultCode._(
+    'CREATE_CLAIMABLE_BALANCE_NOT_AUTHORIZED',
+    -4,
+  );
   static const CreateClaimableBalanceResultCode
-      createClaimableBalanceUnderfunded = CreateClaimableBalanceResultCode._(
-          'CREATE_CLAIMABLE_BALANCE_UNDERFUNDED', -5);
+  createClaimableBalanceUnderfunded = CreateClaimableBalanceResultCode._(
+    'CREATE_CLAIMABLE_BALANCE_UNDERFUNDED',
+    -5,
+  );
 
   final String name;
   final int value;
@@ -2326,22 +2541,25 @@ class CreateClaimableBalanceResultCode {
   const CreateClaimableBalanceResultCode._(this.name, this.value);
 
   static List<CreateClaimableBalanceResultCode> get values => [
-        createClaimableBalanceSuccess,
-        createClaimableBalanceMalformed,
-        createClaimableBalanceLowReserve,
-        createClaimableBalanceNoTrust,
-        createClaimableBalanceNotAuthorized,
-        createClaimableBalanceUnderfunded,
-      ];
+    createClaimableBalanceSuccess,
+    createClaimableBalanceMalformed,
+    createClaimableBalanceLowReserve,
+    createClaimableBalanceNoTrust,
+    createClaimableBalanceNotAuthorized,
+    createClaimableBalanceUnderfunded,
+  ];
   static CreateClaimableBalanceResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'CreateClaimableBalanceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'CreateClaimableBalanceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2349,7 +2567,7 @@ class CreateClaimableBalanceResultCode {
 abstract class CreateClaimableBalanceResult extends OperationInner {
   final CreateClaimableBalanceResultCode code;
   const CreateClaimableBalanceResult(this.code)
-      : super(OperationType.createClaimableBalance);
+    : super(OperationType.createClaimableBalance);
   factory CreateClaimableBalanceResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = CreateClaimableBalanceResultCode.fromName(decode.variantName);
@@ -2362,22 +2580,25 @@ abstract class CreateClaimableBalanceResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(CreateClaimableBalanceResultCode.values.length, (index) {
-          final type = CreateClaimableBalanceResultCode.values.elementAt(index);
-          switch (type) {
-            case CreateClaimableBalanceResultCode.createClaimableBalanceSuccess:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreateClaimableBalanceResultSuccess.layout,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreateClaimableBalanceResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(CreateClaimableBalanceResultCode.values.length, (index) {
+        final type = CreateClaimableBalanceResultCode.values.elementAt(index);
+        switch (type) {
+          case CreateClaimableBalanceResultCode.createClaimableBalanceSuccess:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreateClaimableBalanceResultSuccess.layout,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreateClaimableBalanceResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2409,16 +2630,18 @@ class CreateClaimableBalanceResultVoid extends CreateClaimableBalanceResult {
 class CreateClaimableBalanceResultSuccess extends CreateClaimableBalanceResult {
   final ClaimableBalanceId balanceId;
   CreateClaimableBalanceResultSuccess(this.balanceId)
-      : super(CreateClaimableBalanceResultCode.createClaimableBalanceSuccess);
+    : super(CreateClaimableBalanceResultCode.createClaimableBalanceSuccess);
   factory CreateClaimableBalanceResultSuccess.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return CreateClaimableBalanceResultSuccess(
-        ClaimableBalanceId.fromStruct(json.asMap('balanceId')));
+      ClaimableBalanceId.fromStruct(json.asMap('balanceId')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [ClaimableBalanceId.layout(property: 'balanceId')],
-        property: property);
+    return LayoutConst.struct([
+      ClaimableBalanceId.layout(property: 'balanceId'),
+    ], property: property);
   }
 
   @override
@@ -2436,19 +2659,27 @@ class ClaimClaimableBalanceResultCode {
   static const ClaimClaimableBalanceResultCode claimClaimableBalanceSuccess =
       ClaimClaimableBalanceResultCode._('CLAIM_CLAIMABLE_BALANCE_SUCCESS', 0);
   static const ClaimClaimableBalanceResultCode
-      claimClaimableBalanceDoesNotExist = ClaimClaimableBalanceResultCode._(
-          'CLAIM_CLAIMABLE_BALANCE_DOES_NOT_EXIST', -1);
+  claimClaimableBalanceDoesNotExist = ClaimClaimableBalanceResultCode._(
+    'CLAIM_CLAIMABLE_BALANCE_DOES_NOT_EXIST',
+    -1,
+  );
   static const ClaimClaimableBalanceResultCode
-      claimClaimableBalanceCannotClaim = ClaimClaimableBalanceResultCode._(
-          'CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM', -2);
+  claimClaimableBalanceCannotClaim = ClaimClaimableBalanceResultCode._(
+    'CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM',
+    -2,
+  );
   static const ClaimClaimableBalanceResultCode claimClaimableBalanceLineFull =
       ClaimClaimableBalanceResultCode._(
-          'CLAIM_CLAIMABLE_BALANCE_LINE_FULL', -3);
+        'CLAIM_CLAIMABLE_BALANCE_LINE_FULL',
+        -3,
+      );
   static const ClaimClaimableBalanceResultCode claimClaimableBalanceNoTrust =
       ClaimClaimableBalanceResultCode._('CLAIM_CLAIMABLE_BALANCE_NO_TRUST', -4);
   static const ClaimClaimableBalanceResultCode
-      claimClaimableBalanceNotAuthorized = ClaimClaimableBalanceResultCode._(
-          'CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED', -5);
+  claimClaimableBalanceNotAuthorized = ClaimClaimableBalanceResultCode._(
+    'CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED',
+    -5,
+  );
 
   final String name;
   final int value;
@@ -2456,22 +2687,25 @@ class ClaimClaimableBalanceResultCode {
   const ClaimClaimableBalanceResultCode._(this.name, this.value);
 
   static List<ClaimClaimableBalanceResultCode> get values => [
-        claimClaimableBalanceSuccess,
-        claimClaimableBalanceDoesNotExist,
-        claimClaimableBalanceCannotClaim,
-        claimClaimableBalanceLineFull,
-        claimClaimableBalanceNoTrust,
-        claimClaimableBalanceNotAuthorized,
-      ];
+    claimClaimableBalanceSuccess,
+    claimClaimableBalanceDoesNotExist,
+    claimClaimableBalanceCannotClaim,
+    claimClaimableBalanceLineFull,
+    claimClaimableBalanceNoTrust,
+    claimClaimableBalanceNotAuthorized,
+  ];
   static ClaimClaimableBalanceResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ClaimClaimableBalanceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ClaimClaimableBalanceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2479,7 +2713,7 @@ class ClaimClaimableBalanceResultCode {
 abstract class ClaimClaimableBalanceResult extends OperationInner {
   final ClaimClaimableBalanceResultCode code;
   const ClaimClaimableBalanceResult(this.code)
-      : super(OperationType.claimClaimableBalance);
+    : super(OperationType.claimClaimableBalance);
   factory ClaimClaimableBalanceResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = ClaimClaimableBalanceResultCode.fromName(decode.variantName);
@@ -2490,17 +2724,19 @@ abstract class ClaimClaimableBalanceResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ClaimClaimableBalanceResultCode.values.length, (index) {
-          final type = ClaimClaimableBalanceResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClaimClaimableBalanceResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ClaimClaimableBalanceResultCode.values.length, (index) {
+        final type = ClaimClaimableBalanceResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClaimClaimableBalanceResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2531,13 +2767,16 @@ class ClaimClaimableBalanceResultVoid extends ClaimClaimableBalanceResult {
 
 class EndSponsoringFutureReservesResultCode {
   static const EndSponsoringFutureReservesResultCode
-      endSponsoringFutureReservesSuccess =
-      EndSponsoringFutureReservesResultCode._(
-          'END_SPONSORING_FUTURE_RESERVES_SUCCESS', 0);
+  endSponsoringFutureReservesSuccess = EndSponsoringFutureReservesResultCode._(
+    'END_SPONSORING_FUTURE_RESERVES_SUCCESS',
+    0,
+  );
   static const EndSponsoringFutureReservesResultCode
-      endSponsoringFutureReservesNotSponsored =
+  endSponsoringFutureReservesNotSponsored =
       EndSponsoringFutureReservesResultCode._(
-          'END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED', -1);
+        'END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED',
+        -1,
+      );
 
   final String name;
   final int value;
@@ -2545,18 +2784,21 @@ class EndSponsoringFutureReservesResultCode {
   const EndSponsoringFutureReservesResultCode._(this.name, this.value);
 
   static List<EndSponsoringFutureReservesResultCode> get values => [
-        endSponsoringFutureReservesSuccess,
-        endSponsoringFutureReservesNotSponsored,
-      ];
+    endSponsoringFutureReservesSuccess,
+    endSponsoringFutureReservesNotSponsored,
+  ];
   static EndSponsoringFutureReservesResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'EndSponsoringFutureReservesResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'EndSponsoringFutureReservesResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2564,12 +2806,14 @@ class EndSponsoringFutureReservesResultCode {
 abstract class EndSponsoringFutureReservesResult extends OperationInner {
   final EndSponsoringFutureReservesResultCode code;
   const EndSponsoringFutureReservesResult(this.code)
-      : super(OperationType.endSponsoringFutureReserves);
+    : super(OperationType.endSponsoringFutureReserves);
   factory EndSponsoringFutureReservesResult.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
-    final code =
-        EndSponsoringFutureReservesResultCode.fromName(decode.variantName);
+    final code = EndSponsoringFutureReservesResultCode.fromName(
+      decode.variantName,
+    );
     switch (code) {
       default:
         return EndSponsoringFutureReservesResultVoid(code);
@@ -2577,19 +2821,23 @@ abstract class EndSponsoringFutureReservesResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(EndSponsoringFutureReservesResultCode.values.length,
-            (index) {
-          final type =
-              EndSponsoringFutureReservesResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: EndSponsoringFutureReservesResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(EndSponsoringFutureReservesResultCode.values.length, (
+        index,
+      ) {
+        final type = EndSponsoringFutureReservesResultCode.values.elementAt(
+          index,
+        );
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: EndSponsoringFutureReservesResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2639,22 +2887,25 @@ class RevokeSponsorshipResultCode {
   const RevokeSponsorshipResultCode._(this.name, this.value);
 
   static List<RevokeSponsorshipResultCode> get values => [
-        revokeSponsorshipSuccess,
-        revokeSponsorshipDoesNotExist,
-        revokeSponsorshipNotSponsor,
-        revokeSponsorshipLowReserve,
-        revokeSponsorshipOnlyTransferable,
-        revokeSponsorshipMalformed,
-      ];
+    revokeSponsorshipSuccess,
+    revokeSponsorshipDoesNotExist,
+    revokeSponsorshipNotSponsor,
+    revokeSponsorshipLowReserve,
+    revokeSponsorshipOnlyTransferable,
+    revokeSponsorshipMalformed,
+  ];
   static RevokeSponsorshipResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'RevokeSponsorshipResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'RevokeSponsorshipResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2662,7 +2913,7 @@ class RevokeSponsorshipResultCode {
 abstract class RevokeSponsorshipResult extends OperationInner {
   final RevokeSponsorshipResultCode code;
   const RevokeSponsorshipResult(this.code)
-      : super(OperationType.revokeSponsorship);
+    : super(OperationType.revokeSponsorship);
   factory RevokeSponsorshipResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = RevokeSponsorshipResultCode.fromName(decode.variantName);
@@ -2673,17 +2924,19 @@ abstract class RevokeSponsorshipResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(RevokeSponsorshipResultCode.values.length, (index) {
-          final type = RevokeSponsorshipResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: RevokeSponsorshipResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(RevokeSponsorshipResultCode.values.length, (index) {
+        final type = RevokeSponsorshipResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: RevokeSponsorshipResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2713,16 +2966,24 @@ class RevokeSponsorshipResultVoid extends RevokeSponsorshipResult {
 }
 
 class ClawbackResultCode {
-  static const ClawbackResultCode clawbackSuccess =
-      ClawbackResultCode._('CLAWBACK_SUCCESS', 0);
-  static const ClawbackResultCode clawbackMalformed =
-      ClawbackResultCode._('CLAWBACK_MALFORMED', -1);
+  static const ClawbackResultCode clawbackSuccess = ClawbackResultCode._(
+    'CLAWBACK_SUCCESS',
+    0,
+  );
+  static const ClawbackResultCode clawbackMalformed = ClawbackResultCode._(
+    'CLAWBACK_MALFORMED',
+    -1,
+  );
   static const ClawbackResultCode clawbackNotClawbackEnabled =
       ClawbackResultCode._('CLAWBACK_NOT_CLAWBACK_ENABLED', -2);
-  static const ClawbackResultCode clawbackNoTrust =
-      ClawbackResultCode._('CLAWBACK_NO_TRUST', -3);
-  static const ClawbackResultCode clawbackUnderfunded =
-      ClawbackResultCode._('CLAWBACK_UNDERFUNDED', -4);
+  static const ClawbackResultCode clawbackNoTrust = ClawbackResultCode._(
+    'CLAWBACK_NO_TRUST',
+    -3,
+  );
+  static const ClawbackResultCode clawbackUnderfunded = ClawbackResultCode._(
+    'CLAWBACK_UNDERFUNDED',
+    -4,
+  );
 
   final String name;
   final int value;
@@ -2730,21 +2991,24 @@ class ClawbackResultCode {
   const ClawbackResultCode._(this.name, this.value);
 
   static List<ClawbackResultCode> get values => [
-        clawbackSuccess,
-        clawbackMalformed,
-        clawbackNotClawbackEnabled,
-        clawbackNoTrust,
-        clawbackUnderfunded,
-      ];
+    clawbackSuccess,
+    clawbackMalformed,
+    clawbackNotClawbackEnabled,
+    clawbackNoTrust,
+    clawbackUnderfunded,
+  ];
   static ClawbackResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ClawbackResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ClawbackResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2762,17 +3026,19 @@ abstract class ClawbackResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ClawbackResultCode.values.length, (index) {
-          final type = ClawbackResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClawbackResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ClawbackResultCode.values.length, (index) {
+        final type = ClawbackResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClawbackResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2803,19 +3069,26 @@ class ClawbackResultVoid extends ClawbackResult {
 
 class ClawbackClaimableBalanceResultCode {
   static const ClawbackClaimableBalanceResultCode
-      clawbackClaimableBalanceSuccess = ClawbackClaimableBalanceResultCode._(
-          'CLAWBACK_CLAIMABLE_BALANCE_SUCCESS', 0);
+  clawbackClaimableBalanceSuccess = ClawbackClaimableBalanceResultCode._(
+    'CLAWBACK_CLAIMABLE_BALANCE_SUCCESS',
+    0,
+  );
   static const ClawbackClaimableBalanceResultCode
-      clawbackClaimableBalanceDoesNotExist =
+  clawbackClaimableBalanceDoesNotExist = ClawbackClaimableBalanceResultCode._(
+    'CLAWBACK_CLAIMABLE_BALANCE_DOES_NOT_EXIST',
+    -1,
+  );
+  static const ClawbackClaimableBalanceResultCode
+  clawbackClaimableBalanceNotIssuer = ClawbackClaimableBalanceResultCode._(
+    'CLAWBACK_CLAIMABLE_BALANCE_NOT_ISSUER',
+    -2,
+  );
+  static const ClawbackClaimableBalanceResultCode
+  clawbackClaimableBalanceNotClawbackEnabled =
       ClawbackClaimableBalanceResultCode._(
-          'CLAWBACK_CLAIMABLE_BALANCE_DOES_NOT_EXIST', -1);
-  static const ClawbackClaimableBalanceResultCode
-      clawbackClaimableBalanceNotIssuer = ClawbackClaimableBalanceResultCode._(
-          'CLAWBACK_CLAIMABLE_BALANCE_NOT_ISSUER', -2);
-  static const ClawbackClaimableBalanceResultCode
-      clawbackClaimableBalanceNotClawbackEnabled =
-      ClawbackClaimableBalanceResultCode._(
-          'CLAWBACK_CLAIMABLE_BALANCE_NOT_CLAWBACK_ENABLED', -3);
+        'CLAWBACK_CLAIMABLE_BALANCE_NOT_CLAWBACK_ENABLED',
+        -3,
+      );
 
   final String name;
   final int value;
@@ -2823,20 +3096,23 @@ class ClawbackClaimableBalanceResultCode {
   const ClawbackClaimableBalanceResultCode._(this.name, this.value);
 
   static List<ClawbackClaimableBalanceResultCode> get values => [
-        clawbackClaimableBalanceSuccess,
-        clawbackClaimableBalanceDoesNotExist,
-        clawbackClaimableBalanceNotIssuer,
-        clawbackClaimableBalanceNotClawbackEnabled,
-      ];
+    clawbackClaimableBalanceSuccess,
+    clawbackClaimableBalanceDoesNotExist,
+    clawbackClaimableBalanceNotIssuer,
+    clawbackClaimableBalanceNotClawbackEnabled,
+  ];
   static ClawbackClaimableBalanceResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'ClawbackClaimableBalanceResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'ClawbackClaimableBalanceResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2844,11 +3120,12 @@ class ClawbackClaimableBalanceResultCode {
 abstract class ClawbackClaimableBalanceResult extends OperationInner {
   final ClawbackClaimableBalanceResultCode code;
   const ClawbackClaimableBalanceResult(this.code)
-      : super(OperationType.clawbackClaimableBalance);
+    : super(OperationType.clawbackClaimableBalance);
   factory ClawbackClaimableBalanceResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
-    final code =
-        ClawbackClaimableBalanceResultCode.fromName(decode.variantName);
+    final code = ClawbackClaimableBalanceResultCode.fromName(
+      decode.variantName,
+    );
     switch (code) {
       default:
         return ClawbackClaimableBalanceResultVoid(code);
@@ -2856,19 +3133,19 @@ abstract class ClawbackClaimableBalanceResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ClawbackClaimableBalanceResultCode.values.length,
-            (index) {
-          final type =
-              ClawbackClaimableBalanceResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClawbackClaimableBalanceResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ClawbackClaimableBalanceResultCode.values.length, (index) {
+        final type = ClawbackClaimableBalanceResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClawbackClaimableBalanceResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2918,22 +3195,25 @@ class SetTrustLineFlagsResultCode {
   const SetTrustLineFlagsResultCode._(this.name, this.value);
 
   static List<SetTrustLineFlagsResultCode> get values => [
-        setTrustLineFlagsSuccess,
-        setTrustLineFlagsMalformed,
-        setTrustLineFlagsNoTrustLine,
-        setTrustLineFlagsCantRevoke,
-        setTrustLineFlagsInvalidState,
-        setTrustLineFlagsLowReserve,
-      ];
+    setTrustLineFlagsSuccess,
+    setTrustLineFlagsMalformed,
+    setTrustLineFlagsNoTrustLine,
+    setTrustLineFlagsCantRevoke,
+    setTrustLineFlagsInvalidState,
+    setTrustLineFlagsLowReserve,
+  ];
   static SetTrustLineFlagsResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'SetTrustLineFlagsResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'SetTrustLineFlagsResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -2941,7 +3221,7 @@ class SetTrustLineFlagsResultCode {
 abstract class SetTrustLineFlagsResult extends OperationInner {
   final SetTrustLineFlagsResultCode code;
   const SetTrustLineFlagsResult(this.code)
-      : super(OperationType.setTrustLineFlags);
+    : super(OperationType.setTrustLineFlags);
   factory SetTrustLineFlagsResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = SetTrustLineFlagsResultCode.fromName(decode.variantName);
@@ -2952,17 +3232,19 @@ abstract class SetTrustLineFlagsResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(SetTrustLineFlagsResultCode.values.length, (index) {
-          final type = SetTrustLineFlagsResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: SetTrustLineFlagsResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(SetTrustLineFlagsResultCode.values.length, (index) {
+        final type = SetTrustLineFlagsResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: SetTrustLineFlagsResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -2999,11 +3281,15 @@ class LiquidityPoolDepositResultCode {
   static const LiquidityPoolDepositResultCode liquidityPoolDepositNoTrust =
       LiquidityPoolDepositResultCode._('LIQUIDITY_POOL_DEPOSIT_NO_TRUST', -2);
   static const LiquidityPoolDepositResultCode
-      liquidityPoolDepositNotAuthorized = LiquidityPoolDepositResultCode._(
-          'LIQUIDITY_POOL_DEPOSIT_NOT_AUTHORIZED', -3);
+  liquidityPoolDepositNotAuthorized = LiquidityPoolDepositResultCode._(
+    'LIQUIDITY_POOL_DEPOSIT_NOT_AUTHORIZED',
+    -3,
+  );
   static const LiquidityPoolDepositResultCode liquidityPoolDepositUnderfunded =
       LiquidityPoolDepositResultCode._(
-          'LIQUIDITY_POOL_DEPOSIT_UNDERFUNDED', -4);
+        'LIQUIDITY_POOL_DEPOSIT_UNDERFUNDED',
+        -4,
+      );
   static const LiquidityPoolDepositResultCode liquidityPoolDepositLineFull =
       LiquidityPoolDepositResultCode._('LIQUIDITY_POOL_DEPOSIT_LINE_FULL', -5);
   static const LiquidityPoolDepositResultCode liquidityPoolDepositBadPrice =
@@ -3017,24 +3303,27 @@ class LiquidityPoolDepositResultCode {
   const LiquidityPoolDepositResultCode._(this.name, this.value);
 
   static List<LiquidityPoolDepositResultCode> get values => [
-        liquidityPoolDepositSuccess,
-        liquidityPoolDepositMalformed,
-        liquidityPoolDepositNoTrust,
-        liquidityPoolDepositNotAuthorized,
-        liquidityPoolDepositUnderfunded,
-        liquidityPoolDepositLineFull,
-        liquidityPoolDepositBadPrice,
-        liquidityPoolDepositPoolFull,
-      ];
+    liquidityPoolDepositSuccess,
+    liquidityPoolDepositMalformed,
+    liquidityPoolDepositNoTrust,
+    liquidityPoolDepositNotAuthorized,
+    liquidityPoolDepositUnderfunded,
+    liquidityPoolDepositLineFull,
+    liquidityPoolDepositBadPrice,
+    liquidityPoolDepositPoolFull,
+  ];
   static LiquidityPoolDepositResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'LiquidityPoolDepositResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'LiquidityPoolDepositResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3042,7 +3331,7 @@ class LiquidityPoolDepositResultCode {
 abstract class LiquidityPoolDepositResult extends OperationInner {
   final LiquidityPoolDepositResultCode code;
   const LiquidityPoolDepositResult(this.code)
-      : super(OperationType.liquidityPoolDeposit);
+    : super(OperationType.liquidityPoolDeposit);
   factory LiquidityPoolDepositResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = LiquidityPoolDepositResultCode.fromName(decode.variantName);
@@ -3053,17 +3342,19 @@ abstract class LiquidityPoolDepositResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(LiquidityPoolDepositResultCode.values.length, (index) {
-          final type = LiquidityPoolDepositResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: LiquidityPoolDepositResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(LiquidityPoolDepositResultCode.values.length, (index) {
+        final type = LiquidityPoolDepositResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: LiquidityPoolDepositResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3097,18 +3388,26 @@ class LiquidityPoolWithdrawResultCode {
       LiquidityPoolWithdrawResultCode._('LIQUIDITY_POOL_WITHDRAW_SUCCESS', 0);
   static const LiquidityPoolWithdrawResultCode liquidityPoolWithdrawMalformed =
       LiquidityPoolWithdrawResultCode._(
-          'LIQUIDITY_POOL_WITHDRAW_MALFORMED', -1);
+        'LIQUIDITY_POOL_WITHDRAW_MALFORMED',
+        -1,
+      );
   static const LiquidityPoolWithdrawResultCode liquidityPoolWithdrawNoTrust =
       LiquidityPoolWithdrawResultCode._('LIQUIDITY_POOL_WITHDRAW_NO_TRUST', -2);
   static const LiquidityPoolWithdrawResultCode
-      liquidityPoolWithdrawUnderfunded = LiquidityPoolWithdrawResultCode._(
-          'LIQUIDITY_POOL_WITHDRAW_UNDERFUNDED', -3);
+  liquidityPoolWithdrawUnderfunded = LiquidityPoolWithdrawResultCode._(
+    'LIQUIDITY_POOL_WITHDRAW_UNDERFUNDED',
+    -3,
+  );
   static const LiquidityPoolWithdrawResultCode liquidityPoolWithdrawLineFull =
       LiquidityPoolWithdrawResultCode._(
-          'LIQUIDITY_POOL_WITHDRAW_LINE_FULL', -4);
+        'LIQUIDITY_POOL_WITHDRAW_LINE_FULL',
+        -4,
+      );
   static const LiquidityPoolWithdrawResultCode
-      liquidityPoolWithdrawUnderMinimum = LiquidityPoolWithdrawResultCode._(
-          'LIQUIDITY_POOL_WITHDRAW_UNDER_MINIMUM', -5);
+  liquidityPoolWithdrawUnderMinimum = LiquidityPoolWithdrawResultCode._(
+    'LIQUIDITY_POOL_WITHDRAW_UNDER_MINIMUM',
+    -5,
+  );
 
   final String name;
   final int value;
@@ -3116,22 +3415,25 @@ class LiquidityPoolWithdrawResultCode {
   const LiquidityPoolWithdrawResultCode._(this.name, this.value);
 
   static List<LiquidityPoolWithdrawResultCode> get values => [
-        liquidityPoolWithdrawSuccess,
-        liquidityPoolWithdrawMalformed,
-        liquidityPoolWithdrawNoTrust,
-        liquidityPoolWithdrawUnderfunded,
-        liquidityPoolWithdrawLineFull,
-        liquidityPoolWithdrawUnderMinimum,
-      ];
+    liquidityPoolWithdrawSuccess,
+    liquidityPoolWithdrawMalformed,
+    liquidityPoolWithdrawNoTrust,
+    liquidityPoolWithdrawUnderfunded,
+    liquidityPoolWithdrawLineFull,
+    liquidityPoolWithdrawUnderMinimum,
+  ];
   static LiquidityPoolWithdrawResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'LiquidityPoolWithdrawResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'LiquidityPoolWithdrawResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3139,7 +3441,7 @@ class LiquidityPoolWithdrawResultCode {
 abstract class LiquidityPoolWithdrawResult extends OperationInner {
   final LiquidityPoolWithdrawResultCode code;
   const LiquidityPoolWithdrawResult(this.code)
-      : super(OperationType.liquidityPoolWithdraw);
+    : super(OperationType.liquidityPoolWithdraw);
   factory LiquidityPoolWithdrawResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = LiquidityPoolWithdrawResultCode.fromName(decode.variantName);
@@ -3150,17 +3452,19 @@ abstract class LiquidityPoolWithdrawResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(LiquidityPoolWithdrawResultCode.values.length, (index) {
-          final type = LiquidityPoolWithdrawResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: LiquidityPoolWithdrawResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(LiquidityPoolWithdrawResultCode.values.length, (index) {
+        final type = LiquidityPoolWithdrawResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: LiquidityPoolWithdrawResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3197,14 +3501,17 @@ class InvokeHostFunctionResultCode {
   static const InvokeHostFunctionResultCode invokeHostFunctionTrapped =
       InvokeHostFunctionResultCode._('INVOKE_HOST_FUNCTION_TRAPPED', -2);
   static const InvokeHostFunctionResultCode
-      invokeHostFunctionResourceLimitExceeded = InvokeHostFunctionResultCode._(
-          'INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED', -3);
+  invokeHostFunctionResourceLimitExceeded = InvokeHostFunctionResultCode._(
+    'INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED',
+    -3,
+  );
   static const InvokeHostFunctionResultCode invokeHostFunctionEntryArchived =
       InvokeHostFunctionResultCode._('INVOKE_HOST_FUNCTION_ENTRY_ARCHIVED', -4);
   static const InvokeHostFunctionResultCode
-      invokeHostFunctionInsufficientRefundableFee =
-      InvokeHostFunctionResultCode._(
-          'INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE', -5);
+  invokeHostFunctionInsufficientRefundableFee = InvokeHostFunctionResultCode._(
+    'INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE',
+    -5,
+  );
 
   final String name;
   final int value;
@@ -3212,22 +3519,25 @@ class InvokeHostFunctionResultCode {
   const InvokeHostFunctionResultCode._(this.name, this.value);
 
   static List<InvokeHostFunctionResultCode> get values => [
-        invokeHostFunctionSuccess,
-        invokeHostFunctionMalformed,
-        invokeHostFunctionTrapped,
-        invokeHostFunctionResourceLimitExceeded,
-        invokeHostFunctionEntryArchived,
-        invokeHostFunctionInsufficientRefundableFee,
-      ];
+    invokeHostFunctionSuccess,
+    invokeHostFunctionMalformed,
+    invokeHostFunctionTrapped,
+    invokeHostFunctionResourceLimitExceeded,
+    invokeHostFunctionEntryArchived,
+    invokeHostFunctionInsufficientRefundableFee,
+  ];
   static InvokeHostFunctionResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'InvokeHostFunctionResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'InvokeHostFunctionResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3235,7 +3545,7 @@ class InvokeHostFunctionResultCode {
 abstract class InvokeHostFunctionResult extends OperationInner {
   final InvokeHostFunctionResultCode code;
   const InvokeHostFunctionResult(this.code)
-      : super(OperationType.invokeHostFunction);
+    : super(OperationType.invokeHostFunction);
   factory InvokeHostFunctionResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = InvokeHostFunctionResultCode.fromName(decode.variantName);
@@ -3248,22 +3558,25 @@ abstract class InvokeHostFunctionResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(InvokeHostFunctionResultCode.values.length, (index) {
-          final type = InvokeHostFunctionResultCode.values.elementAt(index);
-          switch (type) {
-            case InvokeHostFunctionResultCode.invokeHostFunctionSuccess:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InvokeHostFunctionResultSuccess.layout,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InvokeHostFunctionResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(InvokeHostFunctionResultCode.values.length, (index) {
+        final type = InvokeHostFunctionResultCode.values.elementAt(index);
+        switch (type) {
+          case InvokeHostFunctionResultCode.invokeHostFunctionSuccess:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InvokeHostFunctionResultSuccess.layout,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InvokeHostFunctionResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3295,16 +3608,21 @@ class InvokeHostFunctionResultVoid extends InvokeHostFunctionResult {
 class InvokeHostFunctionResultSuccess extends InvokeHostFunctionResult {
   final List<int> success;
   InvokeHostFunctionResultSuccess(List<int> success)
-      : success = success.asImmutableBytes.exc(StellarConst.hash256Length,
-            name: 'InvokeHostFunctionResultSuccess'),
-        super(InvokeHostFunctionResultCode.invokeHostFunctionSuccess);
+    : success = success.asImmutableBytes.exc(
+        length: StellarConst.hash256Length,
+        name: 'success',
+        operation: "InvokeHostFunctionResultSuccess",
+        reason: "Invalid success bytes length.",
+      ),
+      super(InvokeHostFunctionResultCode.invokeHostFunctionSuccess);
   factory InvokeHostFunctionResultSuccess.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return InvokeHostFunctionResultSuccess(json.asBytes('success'));
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.hash256Length, property: 'success')
+      LayoutConst.fixedBlobN(StellarConst.hash256Length, property: 'success'),
     ], property: property);
   }
 
@@ -3325,12 +3643,15 @@ class ExtendFootprintTTLResultCode {
   static const ExtendFootprintTTLResultCode extendFootprintTtlMalformed =
       ExtendFootprintTTLResultCode._('EXTEND_FOOTPRINT_TTL_MALFORMED', -1);
   static const ExtendFootprintTTLResultCode
-      extendFootprintTtlResourceLimitExceeded = ExtendFootprintTTLResultCode._(
-          'EXTEND_FOOTPRINT_TTL_RESOURCE_LIMIT_EXCEEDED', -2);
+  extendFootprintTtlResourceLimitExceeded = ExtendFootprintTTLResultCode._(
+    'EXTEND_FOOTPRINT_TTL_RESOURCE_LIMIT_EXCEEDED',
+    -2,
+  );
   static const ExtendFootprintTTLResultCode
-      extendFootprintTtlInsufficientRefundableFee =
-      ExtendFootprintTTLResultCode._(
-          'EXTEND_FOOTPRINT_TTL_INSUFFICIENT_REFUNDABLE_FEE', -3);
+  extendFootprintTtlInsufficientRefundableFee = ExtendFootprintTTLResultCode._(
+    'EXTEND_FOOTPRINT_TTL_INSUFFICIENT_REFUNDABLE_FEE',
+    -3,
+  );
 
   final String name;
   final int value;
@@ -3338,20 +3659,23 @@ class ExtendFootprintTTLResultCode {
   const ExtendFootprintTTLResultCode._(this.name, this.value);
 
   static List<ExtendFootprintTTLResultCode> get values => [
-        extendFootprintTtlSuccess,
-        extendFootprintTtlMalformed,
-        extendFootprintTtlResourceLimitExceeded,
-        extendFootprintTtlInsufficientRefundableFee,
-      ];
+    extendFootprintTtlSuccess,
+    extendFootprintTtlMalformed,
+    extendFootprintTtlResourceLimitExceeded,
+    extendFootprintTtlInsufficientRefundableFee,
+  ];
   static ExtendFootprintTTLResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'OperationResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'OperationResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3359,7 +3683,7 @@ class ExtendFootprintTTLResultCode {
 abstract class ExtendFootprintTTLResult extends OperationInner {
   final ExtendFootprintTTLResultCode code;
   const ExtendFootprintTTLResult(this.code)
-      : super(OperationType.extendFootprintTtl);
+    : super(OperationType.extendFootprintTtl);
   factory ExtendFootprintTTLResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = ExtendFootprintTTLResultCode.fromName(decode.variantName);
@@ -3370,17 +3694,19 @@ abstract class ExtendFootprintTTLResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ExtendFootprintTTLResultCode.values.length, (index) {
-          final type = ExtendFootprintTTLResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ExtendFootprintTTLResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ExtendFootprintTTLResultCode.values.length, (index) {
+        final type = ExtendFootprintTTLResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ExtendFootprintTTLResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3415,11 +3741,15 @@ class RestoreFootprintResultCode {
   static const RestoreFootprintResultCode restoreFootprintMalformed =
       RestoreFootprintResultCode._('RESTORE_FOOTPRINT_MALFORMED', -1);
   static const RestoreFootprintResultCode
-      restoreFootprintResourceLimitExceeded = RestoreFootprintResultCode._(
-          'RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED', -2);
+  restoreFootprintResourceLimitExceeded = RestoreFootprintResultCode._(
+    'RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED',
+    -2,
+  );
   static const RestoreFootprintResultCode
-      restoreFootprintInsufficientRefundableFee = RestoreFootprintResultCode._(
-          'RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE', -3);
+  restoreFootprintInsufficientRefundableFee = RestoreFootprintResultCode._(
+    'RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE',
+    -3,
+  );
 
   final String name;
   final int value;
@@ -3427,20 +3757,23 @@ class RestoreFootprintResultCode {
   const RestoreFootprintResultCode._(this.name, this.value);
 
   static List<RestoreFootprintResultCode> get values => [
-        restoreFootprintSuccess,
-        restoreFootprintMalformed,
-        restoreFootprintResourceLimitExceeded,
-        restoreFootprintInsufficientRefundableFee,
-      ];
+    restoreFootprintSuccess,
+    restoreFootprintMalformed,
+    restoreFootprintResourceLimitExceeded,
+    restoreFootprintInsufficientRefundableFee,
+  ];
   static RestoreFootprintResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'OperationResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'OperationResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3448,7 +3781,7 @@ class RestoreFootprintResultCode {
 abstract class RestoreFootprintResult extends OperationInner {
   final RestoreFootprintResultCode code;
   const RestoreFootprintResult(this.code)
-      : super(OperationType.restoreFootprint);
+    : super(OperationType.restoreFootprint);
   factory RestoreFootprintResult.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
     final code = RestoreFootprintResultCode.fromName(decode.variantName);
@@ -3459,17 +3792,19 @@ abstract class RestoreFootprintResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(RestoreFootprintResultCode.values.length, (index) {
-          final type = RestoreFootprintResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: RestoreFootprintResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(RestoreFootprintResultCode.values.length, (index) {
+        final type = RestoreFootprintResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: RestoreFootprintResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3500,21 +3835,29 @@ class RestoreFootprintResultVoid extends RestoreFootprintResult {
 
 class BeginSponsoringFutureReservesResultCode {
   static const BeginSponsoringFutureReservesResultCode
-      beginSponsoringFutureReservesSuccess =
+  beginSponsoringFutureReservesSuccess =
       BeginSponsoringFutureReservesResultCode._(
-          'BEGIN_SPONSORING_FUTURE_RESERVES_SUCCESS', 0);
+        'BEGIN_SPONSORING_FUTURE_RESERVES_SUCCESS',
+        0,
+      );
   static const BeginSponsoringFutureReservesResultCode
-      beginSponsoringFutureReservesMalformed =
+  beginSponsoringFutureReservesMalformed =
       BeginSponsoringFutureReservesResultCode._(
-          'BEGIN_SPONSORING_FUTURE_RESERVES_MALFORMED', -1);
+        'BEGIN_SPONSORING_FUTURE_RESERVES_MALFORMED',
+        -1,
+      );
   static const BeginSponsoringFutureReservesResultCode
-      beginSponsoringFutureReservesSponsored =
+  beginSponsoringFutureReservesSponsored =
       BeginSponsoringFutureReservesResultCode._(
-          'BEGIN_SPONSORING_FUTURE_RESERVES_ALREADY_SPONSORED', -2);
+        'BEGIN_SPONSORING_FUTURE_RESERVES_ALREADY_SPONSORED',
+        -2,
+      );
   static const BeginSponsoringFutureReservesResultCode
-      beginSponsoringFutureReservesRecursive =
+  beginSponsoringFutureReservesRecursive =
       BeginSponsoringFutureReservesResultCode._(
-          'BEGIN_SPONSORING_FUTURE_RESERVES_RECURSIVE', -3);
+        'BEGIN_SPONSORING_FUTURE_RESERVES_RECURSIVE',
+        -3,
+      );
 
   final String name;
   final int value;
@@ -3522,20 +3865,23 @@ class BeginSponsoringFutureReservesResultCode {
   const BeginSponsoringFutureReservesResultCode._(this.name, this.value);
 
   static List<BeginSponsoringFutureReservesResultCode> get values => [
-        beginSponsoringFutureReservesSuccess,
-        beginSponsoringFutureReservesMalformed,
-        beginSponsoringFutureReservesSponsored,
-        beginSponsoringFutureReservesRecursive,
-      ];
+    beginSponsoringFutureReservesSuccess,
+    beginSponsoringFutureReservesMalformed,
+    beginSponsoringFutureReservesSponsored,
+    beginSponsoringFutureReservesRecursive,
+  ];
   static BeginSponsoringFutureReservesResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'BeginSponsoringFutureReservesResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'BeginSponsoringFutureReservesResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3543,12 +3889,14 @@ class BeginSponsoringFutureReservesResultCode {
 abstract class BeginSponsoringFutureReservesResult extends OperationInner {
   final BeginSponsoringFutureReservesResultCode code;
   const BeginSponsoringFutureReservesResult(this.code)
-      : super(OperationType.beginSponsoringFutureReserves);
+    : super(OperationType.beginSponsoringFutureReserves);
   factory BeginSponsoringFutureReservesResult.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
-    final code =
-        BeginSponsoringFutureReservesResultCode.fromName(decode.variantName);
+    final code = BeginSponsoringFutureReservesResultCode.fromName(
+      decode.variantName,
+    );
     switch (code) {
       default:
         return BeginSponsoringFutureReservesResultVoid(code);
@@ -3556,17 +3904,19 @@ abstract class BeginSponsoringFutureReservesResult extends OperationInner {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(ExtendFootprintTTLResultCode.values.length, (index) {
-          final type = ExtendFootprintTTLResultCode.values.elementAt(index);
-          switch (type) {
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: BeginSponsoringFutureReservesResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(ExtendFootprintTTLResultCode.values.length, (index) {
+        final type = ExtendFootprintTTLResultCode.values.elementAt(index);
+        switch (type) {
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: BeginSponsoringFutureReservesResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3599,42 +3949,68 @@ class BeginSponsoringFutureReservesResultVoid
 class TransactionResultType {
   static const TransactionResultType txFeeBumpInnerSuccess =
       TransactionResultType._('txFEE_BUMP_INNER_SUCCESS', 1);
-  static const TransactionResultType txSuccess =
-      TransactionResultType._('txSUCCESS', 0);
-  static const TransactionResultType txFailed =
-      TransactionResultType._('txFAILED', -1);
-  static const TransactionResultType txTooEarly =
-      TransactionResultType._('txTOO_EARLY', -2);
-  static const TransactionResultType txTooLate =
-      TransactionResultType._('txTOO_LATE', -3);
+  static const TransactionResultType txSuccess = TransactionResultType._(
+    'txSUCCESS',
+    0,
+  );
+  static const TransactionResultType txFailed = TransactionResultType._(
+    'txFAILED',
+    -1,
+  );
+  static const TransactionResultType txTooEarly = TransactionResultType._(
+    'txTOO_EARLY',
+    -2,
+  );
+  static const TransactionResultType txTooLate = TransactionResultType._(
+    'txTOO_LATE',
+    -3,
+  );
   static const TransactionResultType txMissingOperation =
       TransactionResultType._('txMISSING_OPERATION', -4);
-  static const TransactionResultType txBadSeq =
-      TransactionResultType._('txBAD_SEQ', -5);
-  static const TransactionResultType txBadAuth =
-      TransactionResultType._('txBAD_AUTH', -6);
+  static const TransactionResultType txBadSeq = TransactionResultType._(
+    'txBAD_SEQ',
+    -5,
+  );
+  static const TransactionResultType txBadAuth = TransactionResultType._(
+    'txBAD_AUTH',
+    -6,
+  );
   static const TransactionResultType txInsufficientBalance =
       TransactionResultType._('txINSUFFICIENT_BALANCE', -7);
-  static const TransactionResultType txNoAccount =
-      TransactionResultType._('txNO_ACCOUNT', -8);
+  static const TransactionResultType txNoAccount = TransactionResultType._(
+    'txNO_ACCOUNT',
+    -8,
+  );
   static const TransactionResultType txInsufficientFee =
       TransactionResultType._('txINSUFFICIENT_FEE', -9);
-  static const TransactionResultType txBadAuthExtra =
-      TransactionResultType._('txBAD_AUTH_EXTRA', -10);
-  static const TransactionResultType txInternalError =
-      TransactionResultType._('txINTERNAL_ERROR', -11);
-  static const TransactionResultType txNotSupported =
-      TransactionResultType._('txNOT_SUPPORTED', -12);
+  static const TransactionResultType txBadAuthExtra = TransactionResultType._(
+    'txBAD_AUTH_EXTRA',
+    -10,
+  );
+  static const TransactionResultType txInternalError = TransactionResultType._(
+    'txINTERNAL_ERROR',
+    -11,
+  );
+  static const TransactionResultType txNotSupported = TransactionResultType._(
+    'txNOT_SUPPORTED',
+    -12,
+  );
   static const TransactionResultType txFeeBumpInnerFailed =
       TransactionResultType._('txFEE_BUMP_INNER_FAILED', -13);
-  static const TransactionResultType txBadSponsorship =
-      TransactionResultType._('txBAD_SPONSORSHIP', -14);
+  static const TransactionResultType txBadSponsorship = TransactionResultType._(
+    'txBAD_SPONSORSHIP',
+    -14,
+  );
   static const TransactionResultType txBadMinSeqAgeOrGap =
       TransactionResultType._('txBAD_MIN_SEQ_AGE_OR_GAP', -15);
-  static const TransactionResultType txMalformed =
-      TransactionResultType._('txMALFORMED', -16);
-  static const TransactionResultType txSorobanInvalid =
-      TransactionResultType._('txSOROBAN_INVALID', -17);
+  static const TransactionResultType txMalformed = TransactionResultType._(
+    'txMALFORMED',
+    -16,
+  );
+  static const TransactionResultType txSorobanInvalid = TransactionResultType._(
+    'txSOROBAN_INVALID',
+    -17,
+  );
 
   final String name;
   final int value;
@@ -3642,35 +4018,38 @@ class TransactionResultType {
   const TransactionResultType._(this.name, this.value);
 
   static List<TransactionResultType> get values => [
-        txFeeBumpInnerSuccess,
-        txSuccess,
-        txFailed,
-        txTooEarly,
-        txTooLate,
-        txMissingOperation,
-        txBadSeq,
-        txBadAuth,
-        txInsufficientBalance,
-        txNoAccount,
-        txInsufficientFee,
-        txBadAuthExtra,
-        txInternalError,
-        txNotSupported,
-        txFeeBumpInnerFailed,
-        txBadSponsorship,
-        txBadMinSeqAgeOrGap,
-        txMalformed,
-        txSorobanInvalid,
-      ];
+    txFeeBumpInnerSuccess,
+    txSuccess,
+    txFailed,
+    txTooEarly,
+    txTooLate,
+    txMissingOperation,
+    txBadSeq,
+    txBadAuth,
+    txInsufficientBalance,
+    txNoAccount,
+    txInsufficientFee,
+    txBadAuthExtra,
+    txInternalError,
+    txNotSupported,
+    txFeeBumpInnerFailed,
+    txBadSponsorship,
+    txBadMinSeqAgeOrGap,
+    txMalformed,
+    txSorobanInvalid,
+  ];
   static TransactionResultType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'TransactionResultType not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'TransactionResultType not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 
@@ -3681,20 +4060,34 @@ class TransactionResultType {
 }
 
 class OperationResultCode {
-  static const OperationResultCode opInner =
-      OperationResultCode._('opINNER', 0);
-  static const OperationResultCode opBadAuth =
-      OperationResultCode._('opBAD_AUTH', -1);
-  static const OperationResultCode opNoAccount =
-      OperationResultCode._('opNO_ACCOUNT', -2);
-  static const OperationResultCode opNotSupported =
-      OperationResultCode._('opNOT_SUPPORTED', -3);
-  static const OperationResultCode opTooManySubentries =
-      OperationResultCode._('opTOO_MANY_SUBENTRIES', -4);
-  static const OperationResultCode opExceededWorkLimit =
-      OperationResultCode._('opEXCEEDED_WORK_LIMIT', -5);
-  static const OperationResultCode opTooManySponsoring =
-      OperationResultCode._('opTOO_MANY_SPONSORING', -6);
+  static const OperationResultCode opInner = OperationResultCode._(
+    'opINNER',
+    0,
+  );
+  static const OperationResultCode opBadAuth = OperationResultCode._(
+    'opBAD_AUTH',
+    -1,
+  );
+  static const OperationResultCode opNoAccount = OperationResultCode._(
+    'opNO_ACCOUNT',
+    -2,
+  );
+  static const OperationResultCode opNotSupported = OperationResultCode._(
+    'opNOT_SUPPORTED',
+    -3,
+  );
+  static const OperationResultCode opTooManySubentries = OperationResultCode._(
+    'opTOO_MANY_SUBENTRIES',
+    -4,
+  );
+  static const OperationResultCode opExceededWorkLimit = OperationResultCode._(
+    'opEXCEEDED_WORK_LIMIT',
+    -5,
+  );
+  static const OperationResultCode opTooManySponsoring = OperationResultCode._(
+    'opTOO_MANY_SPONSORING',
+    -6,
+  );
 
   final String name;
   final int value;
@@ -3702,23 +4095,26 @@ class OperationResultCode {
   const OperationResultCode._(this.name, this.value);
 
   static List<OperationResultCode> get values => [
-        opInner,
-        opBadAuth,
-        opNoAccount,
-        opNotSupported,
-        opTooManySubentries,
-        opExceededWorkLimit,
-        opTooManySponsoring,
-      ];
+    opInner,
+    opBadAuth,
+    opNoAccount,
+    opNotSupported,
+    opTooManySubentries,
+    opExceededWorkLimit,
+    opTooManySponsoring,
+  ];
   static OperationResultCode fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'OperationResultCode not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'OperationResultCode not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -3738,22 +4134,25 @@ abstract class OperationResult extends XDRVariantSerialization {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(RestoreFootprintResultCode.values.length, (index) {
-          final type = OperationResultCode.values.elementAt(index);
-          switch (type) {
-            case OperationResultCode.opInner:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: OperationResultOpInner.layout,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: OperationResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(RestoreFootprintResultCode.values.length, (index) {
+        final type = OperationResultCode.values.elementAt(index);
+        switch (type) {
+          case OperationResultCode.opInner:
+            return LazyVariantModel(
+              index: type.value,
+              layout: OperationResultOpInner.layout,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: OperationResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -3770,153 +4169,180 @@ class OperationResultOpInner extends OperationResult {
   OperationResultOpInner(this.opInner) : super(OperationResultCode.opInner);
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumU32Be(
-        List.generate(OperationType.values.length, (index) {
-          final type = OperationType.values.elementAt(index);
-          switch (type) {
-            case OperationType.payment:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PaymentResult.layout,
-                  property: type.name);
-            case OperationType.setOptions:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: SetOptionsResult.layout,
-                  property: type.name);
-            case OperationType.pathPaymentStrictReceive:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PathPaymentStrictReceiveResult.layout,
-                  property: type.name);
-            case OperationType.createAccount:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreateAccountResult.layout,
-                  property: type.name);
-            case OperationType.manageSellOffer:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ManageSellOfferResult.layout,
-                  property: type.name);
-            case OperationType.createPassiveSellOffer:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreatePassiveSellOfferResult.layout,
-                  property: type.name);
-            case OperationType.changeTrust:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ChangeTrustResult.layout,
-                  property: type.name);
-            case OperationType.allowTrust:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: AllowTrustResult.layout,
-                  property: type.name);
-            case OperationType.accountMerge:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: AccountMergeResult.layout,
-                  property: type.name);
-            case OperationType.inflation:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InflationResult.layout,
-                  property: type.name);
-            case OperationType.manageData:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ManageDataResult.layout,
-                  property: type.name);
-            case OperationType.bumpSequence:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: BumpSequenceResult.layout,
-                  property: type.name);
-            case OperationType.manageBuyOffer:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ManageBuyOfferResult.layout,
-                  property: type.name);
-            case OperationType.pathPaymentStrictSend:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: PathPaymentStrictSendResult.layout,
-                  property: type.name);
-            case OperationType.createClaimableBalance:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: CreateClaimableBalanceResult.layout,
-                  property: type.name);
+      List.generate(OperationType.values.length, (index) {
+        final type = OperationType.values.elementAt(index);
+        switch (type) {
+          case OperationType.payment:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PaymentResult.layout,
+              property: type.name,
+            );
+          case OperationType.setOptions:
+            return LazyVariantModel(
+              index: type.value,
+              layout: SetOptionsResult.layout,
+              property: type.name,
+            );
+          case OperationType.pathPaymentStrictReceive:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PathPaymentStrictReceiveResult.layout,
+              property: type.name,
+            );
+          case OperationType.createAccount:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreateAccountResult.layout,
+              property: type.name,
+            );
+          case OperationType.manageSellOffer:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ManageSellOfferResult.layout,
+              property: type.name,
+            );
+          case OperationType.createPassiveSellOffer:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreatePassiveSellOfferResult.layout,
+              property: type.name,
+            );
+          case OperationType.changeTrust:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ChangeTrustResult.layout,
+              property: type.name,
+            );
+          case OperationType.allowTrust:
+            return LazyVariantModel(
+              index: type.value,
+              layout: AllowTrustResult.layout,
+              property: type.name,
+            );
+          case OperationType.accountMerge:
+            return LazyVariantModel(
+              index: type.value,
+              layout: AccountMergeResult.layout,
+              property: type.name,
+            );
+          case OperationType.inflation:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InflationResult.layout,
+              property: type.name,
+            );
+          case OperationType.manageData:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ManageDataResult.layout,
+              property: type.name,
+            );
+          case OperationType.bumpSequence:
+            return LazyVariantModel(
+              index: type.value,
+              layout: BumpSequenceResult.layout,
+              property: type.name,
+            );
+          case OperationType.manageBuyOffer:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ManageBuyOfferResult.layout,
+              property: type.name,
+            );
+          case OperationType.pathPaymentStrictSend:
+            return LazyVariantModel(
+              index: type.value,
+              layout: PathPaymentStrictSendResult.layout,
+              property: type.name,
+            );
+          case OperationType.createClaimableBalance:
+            return LazyVariantModel(
+              index: type.value,
+              layout: CreateClaimableBalanceResult.layout,
+              property: type.name,
+            );
 
-            case OperationType.claimClaimableBalance:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClaimClaimableBalanceResult.layout,
-                  property: type.name);
-            case OperationType.beginSponsoringFutureReserves:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: BeginSponsoringFutureReservesResult.layout,
-                  property: type.name);
+          case OperationType.claimClaimableBalance:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClaimClaimableBalanceResult.layout,
+              property: type.name,
+            );
+          case OperationType.beginSponsoringFutureReserves:
+            return LazyVariantModel(
+              index: type.value,
+              layout: BeginSponsoringFutureReservesResult.layout,
+              property: type.name,
+            );
 
-            case OperationType.endSponsoringFutureReserves:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: EndSponsoringFutureReservesResult.layout,
-                  property: type.name);
+          case OperationType.endSponsoringFutureReserves:
+            return LazyVariantModel(
+              index: type.value,
+              layout: EndSponsoringFutureReservesResult.layout,
+              property: type.name,
+            );
 
-            case OperationType.revokeSponsorship:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: RevokeSponsorshipResult.layout,
-                  property: type.name);
-            case OperationType.clawback:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClawbackResult.layout,
-                  property: type.name);
-            case OperationType.clawbackClaimableBalance:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ClawbackClaimableBalanceResult.layout,
-                  property: type.name);
-            case OperationType.setTrustLineFlags:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: SetTrustLineFlagsResult.layout,
-                  property: type.name);
-            case OperationType.liquidityPoolDeposit:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: LiquidityPoolDepositResult.layout,
-                  property: type.name);
-            case OperationType.liquidityPoolWithdraw:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: LiquidityPoolWithdrawResult.layout,
-                  property: type.name);
-            case OperationType.invokeHostFunction:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InvokeHostFunctionResult.layout,
-                  property: type.name);
-            case OperationType.extendFootprintTtl:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: ExtendFootprintTTLResult.layout,
-                  property: type.name);
-            case OperationType.restoreFootprint:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: RestoreFootprintResult.layout,
-                  property: type.name);
-            default:
-              throw const DartStellarPlugingException(
-                  'Invalid Operation type.');
-          }
-        }),
-        property: property);
+          case OperationType.revokeSponsorship:
+            return LazyVariantModel(
+              index: type.value,
+              layout: RevokeSponsorshipResult.layout,
+              property: type.name,
+            );
+          case OperationType.clawback:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClawbackResult.layout,
+              property: type.name,
+            );
+          case OperationType.clawbackClaimableBalance:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ClawbackClaimableBalanceResult.layout,
+              property: type.name,
+            );
+          case OperationType.setTrustLineFlags:
+            return LazyVariantModel(
+              index: type.value,
+              layout: SetTrustLineFlagsResult.layout,
+              property: type.name,
+            );
+          case OperationType.liquidityPoolDeposit:
+            return LazyVariantModel(
+              index: type.value,
+              layout: LiquidityPoolDepositResult.layout,
+              property: type.name,
+            );
+          case OperationType.liquidityPoolWithdraw:
+            return LazyVariantModel(
+              index: type.value,
+              layout: LiquidityPoolWithdrawResult.layout,
+              property: type.name,
+            );
+          case OperationType.invokeHostFunction:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InvokeHostFunctionResult.layout,
+              property: type.name,
+            );
+          case OperationType.extendFootprintTtl:
+            return LazyVariantModel(
+              index: type.value,
+              layout: ExtendFootprintTTLResult.layout,
+              property: type.name,
+            );
+          case OperationType.restoreFootprint:
+            return LazyVariantModel(
+              index: type.value,
+              layout: RestoreFootprintResult.layout,
+              property: type.name,
+            );
+          default:
+            throw const DartStellarPlugingException('Invalid Operation type.');
+        }
+      }),
+      property: property,
+    );
   }
 
   factory OperationResultOpInner.fromStruct(Map<String, dynamic> json) {
@@ -4045,9 +4471,13 @@ class InnerTransactionResultPair extends TransactionResultCode {
   InnerTransactionResultPair({
     required this.result,
     required List<int> transactionHash,
-  })  : transactionHash = transactionHash.asImmutableBytes
-            .exc(StellarConst.hash256Length, name: 'transactionHash'),
-        super(code: TransactionResultType.txFeeBumpInnerFailed);
+  }) : transactionHash = transactionHash.asImmutableBytes.exc(
+         length: StellarConst.hash256Length,
+         name: 'transactionHash',
+         operation: "InnerTransactionResultPair",
+         reason: "Invalid transactionHash bytes length.",
+       ),
+       super(code: TransactionResultType.txFeeBumpInnerFailed);
   factory InnerTransactionResultPair.fromStruct(Map<String, dynamic> json) {
     return InnerTransactionResultPair(
       result: TransactionResult.fromStruct(json.asMap('result')),
@@ -4057,9 +4487,11 @@ class InnerTransactionResultPair extends TransactionResultCode {
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.hash256Length,
-          property: 'transactionHash'),
-      TransactionResult.layout(property: 'result')
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'transactionHash',
+      ),
+      TransactionResult.layout(property: 'result'),
     ], property: property);
   }
 
@@ -4082,7 +4514,9 @@ abstract class TransactionResultCode extends XDRVariantSerialization {
   const TransactionResultCode({required this.code});
   factory TransactionResultCode.fromXdr(List<int> bytes, {String? property}) {
     final decode = XDRVariantSerialization.deserialize(
-        bytes: bytes, layout: layout(property: property));
+      bytes: bytes,
+      layout: layout(property: property),
+    );
 
     return TransactionResultCode.fromStruct(decode);
   }
@@ -4102,32 +4536,37 @@ abstract class TransactionResultCode extends XDRVariantSerialization {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.lazyEnumS32Be(
-        List.generate(TransactionResultType.values.length, (index) {
-          final type = TransactionResultType.values.elementAt(index);
-          switch (type) {
-            case TransactionResultType.txFeeBumpInnerFailed:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: InnerTransactionResultPair.layout,
-                  property: type.name);
-            case TransactionResultType.txFailed:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: TransactionResultTxFailed.layout,
-                  property: type.name);
-            case TransactionResultType.txSuccess:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: TransactionResultTxSuccess.layout,
-                  property: type.name);
-            default:
-              return LazyVariantModel(
-                  index: type.value,
-                  layout: TransactionResultVoid.layout,
-                  property: type.name);
-          }
-        }),
-        property: property);
+      List.generate(TransactionResultType.values.length, (index) {
+        final type = TransactionResultType.values.elementAt(index);
+        switch (type) {
+          case TransactionResultType.txFeeBumpInnerFailed:
+            return LazyVariantModel(
+              index: type.value,
+              layout: InnerTransactionResultPair.layout,
+              property: type.name,
+            );
+          case TransactionResultType.txFailed:
+            return LazyVariantModel(
+              index: type.value,
+              layout: TransactionResultTxFailed.layout,
+              property: type.name,
+            );
+          case TransactionResultType.txSuccess:
+            return LazyVariantModel(
+              index: type.value,
+              layout: TransactionResultTxSuccess.layout,
+              property: type.name,
+            );
+          default:
+            return LazyVariantModel(
+              index: type.value,
+              layout: TransactionResultVoid.layout,
+              property: type.name,
+            );
+        }
+      }),
+      property: property,
+    );
   }
 
   @override
@@ -4159,20 +4598,21 @@ class TransactionResultVoid extends TransactionResultCode {
 
 class TransactionResultTxSuccess extends TransactionResultCode {
   final List<OperationResult> operationResult;
-  TransactionResultTxSuccess({
-    required List<OperationResult> operationResult,
-  })  : operationResult = operationResult.immutable,
-        super(code: TransactionResultType.txSuccess);
+  TransactionResultTxSuccess({required List<OperationResult> operationResult})
+    : operationResult = operationResult.immutable,
+      super(code: TransactionResultType.txSuccess);
   factory TransactionResultTxSuccess.fromStruct(Map<String, dynamic> json) {
     return TransactionResultTxSuccess(
-        operationResult: json
-            .asListOfMap('operationResult')!
-            .map((e) => OperationResult.fromStruct(e))
-            .toList());
+      operationResult:
+          json
+              .asListOfMap('operationResult')!
+              .map((e) => OperationResult.fromStruct(e))
+              .toList(),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.xdrVec(OperationResult.layout(), property: 'operationResult')
+      LayoutConst.xdrVec(OperationResult.layout(), property: 'operationResult'),
     ], property: property);
   }
 
@@ -4185,27 +4625,28 @@ class TransactionResultTxSuccess extends TransactionResultCode {
   Map<String, dynamic> toLayoutStruct() {
     return {
       'operationResult':
-          operationResult.map((e) => e.toVariantLayoutStruct()).toList()
+          operationResult.map((e) => e.toVariantLayoutStruct()).toList(),
     };
   }
 }
 
 class TransactionResultTxFailed extends TransactionResultCode {
   final List<OperationResult> operationResult;
-  TransactionResultTxFailed({
-    required List<OperationResult> operationResult,
-  })  : operationResult = operationResult.immutable,
-        super(code: TransactionResultType.txFailed);
+  TransactionResultTxFailed({required List<OperationResult> operationResult})
+    : operationResult = operationResult.immutable,
+      super(code: TransactionResultType.txFailed);
   factory TransactionResultTxFailed.fromStruct(Map<String, dynamic> json) {
     return TransactionResultTxFailed(
-        operationResult: json
-            .asListOfMap('operationResult')!
-            .map((e) => OperationResult.fromStruct(e))
-            .toList());
+      operationResult:
+          json
+              .asListOfMap('operationResult')!
+              .map((e) => OperationResult.fromStruct(e))
+              .toList(),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.xdrVec(OperationResult.layout(), property: 'operationResult')
+      LayoutConst.xdrVec(OperationResult.layout(), property: 'operationResult'),
     ], property: property);
   }
 
@@ -4218,7 +4659,7 @@ class TransactionResultTxFailed extends TransactionResultCode {
   Map<String, dynamic> toLayoutStruct() {
     return {
       'operationResult':
-          operationResult.map((e) => e.toVariantLayoutStruct()).toList()
+          operationResult.map((e) => e.toVariantLayoutStruct()).toList(),
     };
   }
 }
@@ -4227,23 +4668,26 @@ class TransactionResult extends XDRSerialization {
   final BigInt feeCharged;
   final TransactionResultCode code;
   TransactionResult({required this.code, required BigInt feeCharged})
-      : feeCharged = feeCharged.asInt64,
-        super();
+    : feeCharged = feeCharged.asI64,
+      super();
   factory TransactionResult.fromXdr(List<int> bytes, {String? property}) {
     final decode = XDRSerialization.deserialize(
-        bytes: bytes, layout: layout(property: property));
+      bytes: bytes,
+      layout: layout(property: property),
+    );
     return TransactionResult.fromStruct(decode);
   }
   factory TransactionResult.fromStruct(Map<String, dynamic> json) {
     return TransactionResult(
-        feeCharged: json.as('feeCharged'),
-        code: TransactionResultCode.fromStruct(json.asMap('code')));
+      feeCharged: json.as('feeCharged'),
+      code: TransactionResultCode.fromStruct(json.asMap('code')),
+    );
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       LayoutConst.s64be(property: 'feeCharged'),
-      TransactionResultCode.layout(property: 'code')
+      TransactionResultCode.layout(property: 'code'),
     ], property: property);
   }
 

@@ -10,14 +10,16 @@ class SorobanRequestSimulateTransaction
     extends SorobanRequest<SorobanSimulateResponse, Map<String, dynamic>> {
   final String tx;
   final int? instructionLeeway;
-  const SorobanRequestSimulateTransaction(
-      {required this.tx, this.instructionLeeway});
+  const SorobanRequestSimulateTransaction({
+    required this.tx,
+    this.instructionLeeway,
+  });
 
   @override
   Map<String, dynamic> get params => {
-        'transaction': tx,
-        'resourceConfig': {'instructionLeeway': instructionLeeway}
-      };
+    'transaction': tx,
+    'resourceConfig': {'instructionLeeway': instructionLeeway},
+  };
 
   @override
   String get method => SorobanAPIMethods.simulateTransaction.name;

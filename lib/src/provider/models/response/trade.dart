@@ -82,10 +82,7 @@ class StellarPriceResponse {
   final String n;
   final String d;
 
-  StellarPriceResponse({
-    required this.n,
-    required this.d,
-  });
+  StellarPriceResponse({required this.n, required this.d});
 
   factory StellarPriceResponse.fromJson(Map<String, dynamic> json) {
     return StellarPriceResponse(
@@ -95,9 +92,6 @@ class StellarPriceResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'n': n,
-      'd': d,
-    };
+    return {'n': n, 'd': d};
   }
 }

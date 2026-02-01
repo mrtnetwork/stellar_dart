@@ -10,8 +10,10 @@ class HorizonRequestLiquidityPoolTrades
     extends HorizonRequest<Map<String, dynamic>, Map<String, dynamic>> {
   /// A unique identifier for this liquidity pool.
   final String liquidityPoolId;
-  const HorizonRequestLiquidityPoolTrades(this.liquidityPoolId,
-      {super.paginationParams});
+  const HorizonRequestLiquidityPoolTrades(
+    this.liquidityPoolId, {
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.liquidityPoolTrades.url;

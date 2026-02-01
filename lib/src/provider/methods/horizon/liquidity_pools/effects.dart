@@ -11,8 +11,10 @@ class HorizonRequestLiquidityPoolEffects
     extends HorizonRequest<Map<String, dynamic>, Map<String, dynamic>> {
   /// A unique identifier for this liquidity pool.
   final String liquidityPoolId;
-  const HorizonRequestLiquidityPoolEffects(this.liquidityPoolId,
-      {super.paginationParams});
+  const HorizonRequestLiquidityPoolEffects(
+    this.liquidityPoolId, {
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.liquidityPoolEffects.url;

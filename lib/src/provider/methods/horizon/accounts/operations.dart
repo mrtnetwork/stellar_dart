@@ -10,9 +10,10 @@ import 'package:stellar_dart/src/provider/models/response/account_operation.dart
 /// https://developers.stellar.org/docs/data/horizon/api-reference/get-operations-by-account-id
 class HorizonRequestAccountOperations
     extends HorizonRequest<AccountOperationResponse, Map<String, dynamic>> {
-  const HorizonRequestAccountOperations(this.accountId,
-      {HorizonPaymentPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+  const HorizonRequestAccountOperations(
+    this.accountId, {
+    HorizonPaymentPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   /// This account’s public key encoded in a base32 string representation.
   final String accountId;

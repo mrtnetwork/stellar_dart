@@ -23,6 +23,8 @@ mixin StellarServiceProvider
   /// return params.toResponse(response.bodyBytes, response.statusCode);
   /// }
   @override
-  Future<StellarServiceResponse<T>> doRequest<T>(StellarRequestDetails params,
-      {Duration? timeout});
+  Future<StellarServiceResponse<T>> doRequest<T>(
+    StellarRequestDetails params, {
+    Duration? timeout,
+  });
 }

@@ -30,8 +30,9 @@ class StellarPublicKey extends XDRSerialization {
     if (address.type != XlmAddrTypes.pubKey &&
         address.type != XlmAddrTypes.muxed) {
       throw DartStellarPlugingException(
-          'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to `StellarPublicKey`.',
-          details: {'type': address.type.name});
+        'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to `StellarPublicKey`.',
+        details: {'type': address.type.name},
+      );
     }
     return StellarPublicKey.fromPublicBytes(address.keyBytes());
   }
@@ -41,7 +42,9 @@ class StellarPublicKey extends XDRSerialization {
   /// Optionally accepts a `property` for specifying a custom layout.
   factory StellarPublicKey.fromXdr(List<int> bytes, {String? property}) {
     final decode = XDRSerialization.deserialize(
-        bytes: bytes, layout: layout(property: property));
+      bytes: bytes,
+      layout: layout(property: property),
+    );
     return StellarPublicKey.fromStruct(decode);
   }
 
@@ -52,7 +55,8 @@ class StellarPublicKey extends XDRSerialization {
     final int type = json.as('type');
     if (type != 0) {
       throw const DartStellarPlugingException(
-          'Invalid StellarPublicKey XDR bytes.');
+        'Invalid StellarPublicKey XDR bytes.',
+      );
     }
     return StellarPublicKey.fromPublicBytes(json.asBytes('ed25519'));
   }
@@ -63,7 +67,7 @@ class StellarPublicKey extends XDRSerialization {
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       LayoutConst.u32be(property: 'type'),
-      LayoutConst.fixedBlob32(property: 'ed25519')
+      LayoutConst.fixedBlob32(property: 'ed25519'),
     ], property: property);
   }
 

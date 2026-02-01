@@ -32,7 +32,8 @@ class StellarPaymentTransactionResponse {
   });
 
   factory StellarPaymentTransactionResponse.fromJson(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return StellarPaymentTransactionResponse(
       id: json['id'],
       pagingToken: json['paging_token'],

@@ -22,8 +22,10 @@ abstract class HorizonRequest<RESULT, RESPONSE>
   StellarRequestDetails buildRequest(int requestID) {
     final pathParams = StellarProviderUtils.extractParams(method);
     if (pathParams.length != pathParameters.length) {
-      throw DartStellarPlugingException('Invalid Path Parameters.',
-          details: {'pathParams': pathParameters, 'expected': pathParams});
+      throw DartStellarPlugingException(
+        'Invalid Path Parameters.',
+        details: {'pathParams': pathParameters, 'expected': pathParams},
+      );
     }
     String params = method;
     for (int i = 0; i < pathParams.length; i++) {
@@ -31,20 +33,21 @@ abstract class HorizonRequest<RESULT, RESPONSE>
     }
     final Map<String, dynamic> query = {
       ...queryParameters,
-      ...paginationParams?.toJson() ?? {}
+      ...paginationParams?.toJson() ?? {},
     }..removeWhere((k, v) => v == null);
 
     if (query.isNotEmpty) {
-      params = Uri.parse(params)
-          .replace(queryParameters: query)
-          .normalizePath()
-          .toString();
+      params =
+          Uri.parse(
+            params,
+          ).replace(queryParameters: query).normalizePath().toString();
     }
     return StellarRequestDetails(
-        requestID: requestID,
-        pathParams: params,
-        headers: headers ?? ServiceConst.defaultPostHeaders,
-        type: requestType);
+      requestID: requestID,
+      pathParams: params,
+      headers: headers ?? ServiceConst.defaultPostHeaders,
+      type: requestType,
+    );
   }
 }
 
@@ -67,39 +70,46 @@ abstract class SorobanRequest<RESULT, RESPONSE>
   @override
   StellarRequestDetails buildRequest(int requestID) {
     return StellarRequestDetails(
-        requestID: requestID,
-        pathParams: '',
-        headers: ServiceConst.defaultPostHeaders,
-        jsonBody: ServiceProviderUtils.buildJsonRPCParams(
-            requestId: requestID, method: method, params: params),
-        type: requestType,
-        apiType: StellarAPIType.soroban);
+      requestID: requestID,
+      pathParams: '',
+      headers: ServiceConst.defaultPostHeaders,
+      jsonBody: ServiceProviderUtils.buildJsonRPCParams(
+        requestId: requestID,
+        method: method,
+        params: params,
+      ),
+      type: requestType,
+      apiType: StellarAPIType.soroban,
+    );
   }
 }
 
 class StellarRequestDetails extends BaseServiceRequestParams {
-  const StellarRequestDetails(
-      {required super.requestID,
-      required this.pathParams,
-      required super.headers,
-      required super.type,
-      this.apiType = StellarAPIType.horizon,
-      this.jsonBody});
+  const StellarRequestDetails({
+    required super.requestID,
+    required this.pathParams,
+    required super.headers,
+    required super.type,
+    this.apiType = StellarAPIType.horizon,
+    this.jsonBody,
+  });
 
-  StellarRequestDetails copyWith(
-      {int? requestID,
-      String? pathParams,
-      RequestServiceType? type,
-      Map<String, String>? headers,
-      Map<String, dynamic>? jsonBody,
-      StellarAPIType? apiType}) {
+  StellarRequestDetails copyWith({
+    int? requestID,
+    String? pathParams,
+    RequestServiceType? type,
+    Map<String, String>? headers,
+    Map<String, dynamic>? jsonBody,
+    StellarAPIType? apiType,
+  }) {
     return StellarRequestDetails(
-        pathParams: pathParams ?? this.pathParams,
-        jsonBody: jsonBody ?? this.jsonBody,
-        apiType: apiType ?? this.apiType,
-        headers: headers ?? this.headers,
-        requestID: requestID ?? this.requestID,
-        type: type ?? this.type);
+      pathParams: pathParams ?? this.pathParams,
+      jsonBody: jsonBody ?? this.jsonBody,
+      apiType: apiType ?? this.apiType,
+      headers: headers ?? this.headers,
+      requestID: requestID ?? this.requestID,
+      type: type ?? this.type,
+    );
   }
 
   /// URL path parameters
@@ -124,7 +134,7 @@ class StellarRequestDetails extends BaseServiceRequestParams {
       'pahtParameters': pathParams,
       'body': jsonBody,
       'type': type.name,
-      'apiType': apiType.name
+      'apiType': apiType.name,
     };
   }
 

@@ -54,36 +54,37 @@ class HorizonRequestTradeAggregations
 
   /// The maximum number of records returned.
   final int? limit;
-  const HorizonRequestTradeAggregations(
-      {required this.baseAssetType,
-      required this.counterAssetType,
-      this.startTime,
-      this.endtTime,
-      this.resolution,
-      this.offset,
-      this.baseAssetCode,
-      this.baseAssetIssuer,
-      this.counterAssetCode,
-      this.counterAssetIssuer,
-      this.order,
-      this.limit});
+  const HorizonRequestTradeAggregations({
+    required this.baseAssetType,
+    required this.counterAssetType,
+    this.startTime,
+    this.endtTime,
+    this.resolution,
+    this.offset,
+    this.baseAssetCode,
+    this.baseAssetIssuer,
+    this.counterAssetCode,
+    this.counterAssetIssuer,
+    this.order,
+    this.limit,
+  });
 
   @override
   String get method => StellarHorizonMethods.tradeAggregations.url;
 
   @override
   Map<String, dynamic> get queryParameters => {
-        'start_time': startTime,
-        'end_time': endtTime,
-        'resolution': resolution,
-        'offset': offset,
-        'base_asset_type': baseAssetType.name,
-        'base_asset_issuer': baseAssetIssuer,
-        'base_asset_code': baseAssetCode,
-        'counter_asset_type': counterAssetType.name,
-        'counter_asset_issuer': counterAssetIssuer,
-        'counter_asset_code': counterAssetCode,
-        'order': order?.name,
-        'limit': limit
-      };
+    'start_time': startTime,
+    'end_time': endtTime,
+    'resolution': resolution,
+    'offset': offset,
+    'base_asset_type': baseAssetType.name,
+    'base_asset_issuer': baseAssetIssuer,
+    'base_asset_code': baseAssetCode,
+    'counter_asset_type': counterAssetType.name,
+    'counter_asset_issuer': counterAssetIssuer,
+    'counter_asset_code': counterAssetCode,
+    'order': order?.name,
+    'limit': limit,
+  };
 }

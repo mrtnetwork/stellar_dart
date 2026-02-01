@@ -8,9 +8,10 @@ class HorizonRequestTransactionOperations
     extends HorizonRequest<Map<String, dynamic>, Map<String, dynamic>> {
   /// Transactions are commands that modify the ledger state and consist of one or more operations.
   final String txId;
-  const HorizonRequestTransactionOperations(this.txId,
-      {HorizonPaymentPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+  const HorizonRequestTransactionOperations(
+    this.txId, {
+    HorizonPaymentPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   @override
   String get method => StellarHorizonMethods.transactionOperations.url;

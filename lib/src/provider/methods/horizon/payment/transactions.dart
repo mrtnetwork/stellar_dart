@@ -4,8 +4,12 @@ import 'package:stellar_dart/src/provider/models/response/payment.dart';
 
 /// This endpoint returns the payments of a specific transaction.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/retrieve-a-transactions-payments
-class HorizonRequestTransactionPayments extends HorizonRequest<
-    List<StellarPaymentTransactionResponse>, Map<String, dynamic>> {
+class HorizonRequestTransactionPayments
+    extends
+        HorizonRequest<
+          List<StellarPaymentTransactionResponse>,
+          Map<String, dynamic>
+        > {
   /// Transactions are commands that modify the ledger state and consist of one or more operations.
   final String txId;
   const HorizonRequestTransactionPayments(this.txId, {super.paginationParams});
@@ -17,7 +21,8 @@ class HorizonRequestTransactionPayments extends HorizonRequest<
   List<String> get pathParameters => [txId];
   @override
   List<StellarPaymentTransactionResponse> onResonse(
-      Map<String, dynamic> result) {
+    Map<String, dynamic> result,
+  ) {
     final records = (result['_embedded']?['records'] as List?) ?? [];
     return records
         .map((e) => StellarPaymentTransactionResponse.fromJson(e))

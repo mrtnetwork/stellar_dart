@@ -23,16 +23,20 @@ class StellarMuxedAddress extends StellarAddress {
     required String address,
     required this.muxedAddress,
     required BigInt accountId,
-  })  : accountId = accountId.asUint64,
-        super(baseAddress: address, type: XlmAddrTypes.muxed);
+  }) : accountId = accountId.asU64,
+       super(baseAddress: address, type: XlmAddrTypes.muxed);
 
   /// Factory constructor to create a `StellarMuxedAddress` from a `StellarAccountAddress` and an `accountId`.
   ///
   /// It converts the account address into a muxed address.
-  factory StellarMuxedAddress.fromAccountAddress(
-      {required StellarAccountAddress address, required BigInt accountId}) {
+  factory StellarMuxedAddress.fromAccountAddress({
+    required StellarAccountAddress address,
+    required BigInt accountId,
+  }) {
     return StellarMuxedAddress.fromPublicKey(
-        publicKey: address.keyBytes(), accountId: accountId);
+      publicKey: address.keyBytes(),
+      accountId: accountId,
+    );
   }
 
   /// Factory constructor to create a `StellarMuxedAddress` from a public key and an `accountId`.
@@ -40,18 +44,31 @@ class StellarMuxedAddress extends StellarAddress {
   /// The `publicKey` and `accountId` are used to encode the muxed address.
   ///
   /// Throws a `StellarAddressException` if the public key is invalid.
-  factory StellarMuxedAddress.fromPublicKey(
-      {required List<int> publicKey, required BigInt accountId}) {
+  factory StellarMuxedAddress.fromPublicKey({
+    required List<int> publicKey,
+    required BigInt accountId,
+  }) {
     try {
-      final address = XlmAddrEncoder().encodeKey(publicKey,
-          {'addr_type': XlmAddrTypes.pubKey, 'account_id': accountId});
-      final muxedAddress = XlmAddrEncoder().encodeKey(publicKey,
-          {'addr_type': XlmAddrTypes.muxed, 'account_id': accountId});
+      final address = XlmAddrEncoder().encodeKey(
+        publicKey,
+        addrType: XlmAddrTypes.pubKey,
+        muxedId: accountId,
+      );
+      final muxedAddress = XlmAddrEncoder().encodeKey(
+        publicKey,
+        muxedId: accountId,
+        addrType: XlmAddrTypes.muxed,
+      );
       return StellarMuxedAddress._(
-          address: address, accountId: accountId, muxedAddress: muxedAddress);
+        address: address,
+        accountId: accountId,
+        muxedAddress: muxedAddress,
+      );
     } catch (e) {
-      throw StellarAddressException('Invalid public key.',
-          details: {'stack': e.toString()});
+      throw StellarAddressException(
+        'Invalid public key.',
+        details: {'stack': e.toString()},
+      );
     }
   }
 
@@ -64,21 +81,27 @@ class StellarMuxedAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.muxed) {
-        throw StellarAddressException('Incorrect address type.', details: {
-          'expected': XlmAddrTypes.muxed.name,
-          'type': decode.type.toString()
-        });
+        throw StellarAddressException(
+          'Incorrect address type.',
+          details: {
+            'expected': XlmAddrTypes.muxed.name,
+            'type': decode.type.toString(),
+          },
+        );
       }
 
       return StellarMuxedAddress._(
-          address: decode.baseAddress,
-          accountId: decode.accountId!,
-          muxedAddress: address);
+        address: decode.baseAddress,
+        accountId: decode.accountId!,
+        muxedAddress: address,
+      );
     } on StellarAddressException {
       rethrow;
     } catch (e, s) {
-      throw StellarAddressException('Invalid Muxed address.',
-          details: {'error': e.toString(), 'stack': s.toString()});
+      throw StellarAddressException(
+        'Invalid Muxed address.',
+        details: {'error': e.toString(), 'stack': s.toString()},
+      );
     }
   }
 

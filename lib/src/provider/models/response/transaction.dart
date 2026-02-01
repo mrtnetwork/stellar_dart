@@ -106,7 +106,8 @@ class StellarTransactionResponse {
 
   TransactionResult getResult() {
     return TransactionResult.fromXdr(
-        StringUtils.encode(resultXdr, type: StringEncoding.base64));
+      StringUtils.encode(resultXdr, type: StringEncoding.base64),
+    );
   }
 }
 
@@ -125,37 +126,39 @@ class SorobanTransactionResponse {
   final String? resultXdr;
   final String? resultMetaXdr;
 
-  SorobanTransactionResponse(
-      {required this.status,
-      required this.latestLedger,
-      required this.latestLedgerCloseTime,
-      required this.oldestLedger,
-      required this.oldestLedgerCloseTime,
-      required this.applicationOrder,
-      required this.envelopeXdr,
-      required this.resultXdr,
-      required this.resultMetaXdr,
-      required this.createdAt,
-      required this.feeBump,
-      required this.ledger,
-      required this.diagnosticEventsXdr});
+  SorobanTransactionResponse({
+    required this.status,
+    required this.latestLedger,
+    required this.latestLedgerCloseTime,
+    required this.oldestLedger,
+    required this.oldestLedgerCloseTime,
+    required this.applicationOrder,
+    required this.envelopeXdr,
+    required this.resultXdr,
+    required this.resultMetaXdr,
+    required this.createdAt,
+    required this.feeBump,
+    required this.ledger,
+    required this.diagnosticEventsXdr,
+  });
 
   // Factory constructor to create an instance from JSON
   factory SorobanTransactionResponse.fromJson(Map<String, dynamic> json) {
     return SorobanTransactionResponse(
-        status: json['status'],
-        latestLedger: json['latestLedger'],
-        latestLedgerCloseTime: json['latestLedgerCloseTime'],
-        oldestLedger: json['oldestLedger'],
-        oldestLedgerCloseTime: json['oldestLedgerCloseTime'],
-        applicationOrder: json['applicationOrder'],
-        envelopeXdr: json['envelopeXdr'],
-        resultXdr: json['resultXdr'],
-        resultMetaXdr: json['resultMetaXdr'],
-        createdAt: int.tryParse(json['createdAt']?.toString() ?? ''),
-        feeBump: json['feeBump'],
-        ledger: json['ledger'],
-        diagnosticEventsXdr: (json['diagnosticEventsXdr'] as List?)?.cast());
+      status: json['status'],
+      latestLedger: json['latestLedger'],
+      latestLedgerCloseTime: json['latestLedgerCloseTime'],
+      oldestLedger: json['oldestLedger'],
+      oldestLedgerCloseTime: json['oldestLedgerCloseTime'],
+      applicationOrder: json['applicationOrder'],
+      envelopeXdr: json['envelopeXdr'],
+      resultXdr: json['resultXdr'],
+      resultMetaXdr: json['resultMetaXdr'],
+      createdAt: int.tryParse(json['createdAt']?.toString() ?? ''),
+      feeBump: json['feeBump'],
+      ledger: json['ledger'],
+      diagnosticEventsXdr: (json['diagnosticEventsXdr'] as List?)?.cast(),
+    );
   }
 
   // Convert the object back to JSON
@@ -173,7 +176,7 @@ class SorobanTransactionResponse {
       'feeBump': feeBump,
       'createdAt': createdAt,
       'ledger': ledger,
-      'diagnosticEventsXdr': diagnosticEventsXdr
+      'diagnosticEventsXdr': diagnosticEventsXdr,
     };
   }
 }
@@ -184,21 +187,24 @@ class SorobanTransactionsResponse {
   final int oldestLedger;
   final int oldestLedgerCloseTimestamp;
   final List<SorobanTransactionResponse> transactions;
-  const SorobanTransactionsResponse(
-      {required this.latestLedger,
-      required this.latestLedgerCloseTimestamp,
-      required this.oldestLedger,
-      required this.oldestLedgerCloseTimestamp,
-      required this.transactions});
+  const SorobanTransactionsResponse({
+    required this.latestLedger,
+    required this.latestLedgerCloseTimestamp,
+    required this.oldestLedger,
+    required this.oldestLedgerCloseTimestamp,
+    required this.transactions,
+  });
   factory SorobanTransactionsResponse.fromJson(Map<String, dynamic> json) {
     return SorobanTransactionsResponse(
-        latestLedger: json['latestLedger'],
-        latestLedgerCloseTimestamp: json['latestLedgerCloseTimestamp'],
-        oldestLedger: json['oldestLedger'],
-        oldestLedgerCloseTimestamp: json['oldestLedgerCloseTimestamp'],
-        transactions: (json['transactions'] as List)
-            .map((e) => SorobanTransactionResponse.fromJson(e))
-            .toList());
+      latestLedger: json['latestLedger'],
+      latestLedgerCloseTimestamp: json['latestLedgerCloseTimestamp'],
+      oldestLedger: json['oldestLedger'],
+      oldestLedgerCloseTimestamp: json['oldestLedgerCloseTimestamp'],
+      transactions:
+          (json['transactions'] as List)
+              .map((e) => SorobanTransactionResponse.fromJson(e))
+              .toList(),
+    );
   }
   Map<String, dynamic> toJson() {
     return {

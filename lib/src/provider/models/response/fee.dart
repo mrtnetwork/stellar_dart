@@ -119,8 +119,9 @@ class SorobanFeeStatsResponse {
 
   factory SorobanFeeStatsResponse.fromJson(Map<String, dynamic> json) {
     return SorobanFeeStatsResponse(
-      sorobanInclusionFee:
-          FeeStatsResponse.fromJson(json['sorobanInclusionFee']),
+      sorobanInclusionFee: FeeStatsResponse.fromJson(
+        json['sorobanInclusionFee'],
+      ),
       inclusionFee: FeeStatsResponse.fromJson(json['inclusionFee']),
       latestLedger: json['latestLedger'] as int,
     );

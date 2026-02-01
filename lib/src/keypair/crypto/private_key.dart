@@ -33,15 +33,19 @@ class StellarPrivateKey {
   /// Throws a `DartStellarPlugingException` if the secret key is invalid.
   factory StellarPrivateKey.fromBase32(String secretKey) {
     try {
-      final key = XlmAddrDecoder()
-          .decode(secretKey, {'addr_type': XlmAddrTypes.privKey});
+      final key = XlmAddrDecoder().decode(
+        secretKey,
+        addrType: XlmAddrTypes.privKey,
+      );
       if (key.type != XlmAddrTypes.privKey) {
         throw const DartStellarPlugingException('Invalid key type.');
       }
       return StellarPrivateKey.fromBytes(key.pubKeyBytes);
     } catch (e) {
-      throw DartStellarPlugingException('Invalid base32 secret key.',
-          details: {'message': e.toString()});
+      throw DartStellarPlugingException(
+        'Invalid base32 secret key.',
+        details: {'message': e.toString()},
+      );
     }
   }
 
@@ -64,8 +68,10 @@ class StellarPrivateKey {
   ///
   /// This method encodes the raw private key bytes into base32 format.
   String toBase32() {
-    return XlmAddrEncoder()
-        .encodeKey(toBytes(), {'addr_type': XlmAddrTypes.privKey});
+    return XlmAddrEncoder().encodeKey(
+      toBytes(),
+      addrType: XlmAddrTypes.privKey,
+    );
   }
 
   /// Signs the given `message` (as a list of bytes) with the private key.

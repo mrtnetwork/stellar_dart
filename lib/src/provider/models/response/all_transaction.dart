@@ -5,13 +5,17 @@ class StellarInnerTransactionResponse {
   final String hash;
   final List<String> signatures;
   final String maxFee;
-  const StellarInnerTransactionResponse(
-      {required this.hash, required this.signatures, required this.maxFee});
+  const StellarInnerTransactionResponse({
+    required this.hash,
+    required this.signatures,
+    required this.maxFee,
+  });
   factory StellarInnerTransactionResponse.fromJson(Map<String, dynamic> json) {
     return StellarInnerTransactionResponse(
-        hash: json['hash'],
-        signatures: (json['signatures'] as List).cast(),
-        maxFee: json['max_fee']);
+      hash: json['hash'],
+      signatures: (json['signatures'] as List).cast(),
+      maxFee: json['max_fee'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -22,12 +26,17 @@ class StellarInnerTransactionResponse {
 class StellarFeeBumpTransactionResponse {
   final String hash;
   final List<String> signatures;
-  const StellarFeeBumpTransactionResponse(
-      {required this.hash, required this.signatures});
+  const StellarFeeBumpTransactionResponse({
+    required this.hash,
+    required this.signatures,
+  });
   factory StellarFeeBumpTransactionResponse.fromJson(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return StellarFeeBumpTransactionResponse(
-        hash: json['hash'], signatures: (json['signatures'] as List).cast());
+      hash: json['hash'],
+      signatures: (json['signatures'] as List).cast(),
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -41,7 +50,9 @@ class TimeboundsResponse {
   const TimeboundsResponse({required this.maxTime, required this.minTime});
   factory TimeboundsResponse.fromJson(Map<String, dynamic> json) {
     return TimeboundsResponse(
-        minTime: json['min_time'], maxTime: json['max_time']);
+      minTime: json['min_time'],
+      maxTime: json['max_time'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -52,11 +63,15 @@ class TimeboundsResponse {
 class LedgerboundsResponse {
   final String minLedger;
   final String maxLedger;
-  const LedgerboundsResponse(
-      {required this.maxLedger, required this.minLedger});
+  const LedgerboundsResponse({
+    required this.maxLedger,
+    required this.minLedger,
+  });
   factory LedgerboundsResponse.fromJson(Map<String, dynamic> json) {
     return LedgerboundsResponse(
-        minLedger: json['min_ledger'], maxLedger: json['max_ledger']);
+      minLedger: json['min_ledger'],
+      maxLedger: json['max_ledger'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -71,23 +86,26 @@ class PreconditionsResponse {
   final String? minAccountSequenceAge;
   final int? minAccountSequenceLedgerGap;
   final List<String>? extraSigners;
-  const PreconditionsResponse(
-      {required this.timeBounds,
-      required this.ledgerBounds,
-      required this.minAccountSequence,
-      required this.minAccountSequenceAge,
-      required this.minAccountSequenceLedgerGap,
-      required this.extraSigners});
+  const PreconditionsResponse({
+    required this.timeBounds,
+    required this.ledgerBounds,
+    required this.minAccountSequence,
+    required this.minAccountSequenceAge,
+    required this.minAccountSequenceLedgerGap,
+    required this.extraSigners,
+  });
   factory PreconditionsResponse.fromJson(Map<String, dynamic> json) {
     return PreconditionsResponse(
-        timeBounds: TimeboundsResponse.fromJson(json['timebounds']),
-        ledgerBounds: json['ledgerbounds'] == null
-            ? null
-            : LedgerboundsResponse.fromJson(json['ledgerbounds']),
-        minAccountSequence: json['min_account_sequence'],
-        minAccountSequenceAge: json['min_account_sequence_age'],
-        minAccountSequenceLedgerGap: json['min_account_sequence_ledger_gap'],
-        extraSigners: (json['extra_signers'] as List?)?.cast());
+      timeBounds: TimeboundsResponse.fromJson(json['timebounds']),
+      ledgerBounds:
+          json['ledgerbounds'] == null
+              ? null
+              : LedgerboundsResponse.fromJson(json['ledgerbounds']),
+      minAccountSequence: json['min_account_sequence'],
+      minAccountSequenceAge: json['min_account_sequence_age'],
+      minAccountSequenceLedgerGap: json['min_account_sequence_ledger_gap'],
+      extraSigners: (json['extra_signers'] as List?)?.cast(),
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -97,7 +115,7 @@ class PreconditionsResponse {
       'min_account_sequence': minAccountSequence,
       'min_account_sequence_age': minAccountSequenceAge,
       'min_account_sequence_ledger_gap': minAccountSequenceLedgerGap,
-      'extra_signers': extraSigners
+      'extra_signers': extraSigners,
     };
   }
 }
@@ -131,34 +149,35 @@ class StellarAllTransactionResponse {
   final StellarFeeBumpTransactionResponse? feeBumpTransactionResponse;
   final StellarInnerTransactionResponse? innerTransactionResponse;
 
-  StellarAllTransactionResponse(
-      {required this.id,
-      required this.pagingToken,
-      required this.successful,
-      required this.hash,
-      required this.ledger,
-      required this.createdAt,
-      required this.sourceAccount,
-      required this.accountMuxed,
-      required this.accountMuxedId,
-      required this.sourceAccountSequence,
-      required this.feeAccount,
-      required this.feeAccountMuxed,
-      required this.feeAccountMuxedId,
-      required this.feeCharged,
-      required this.maxFee,
-      required this.operationCount,
-      required this.envelopeXdr,
-      required this.resultXdr,
-      required this.resultMetaXdr,
-      required this.feeMetaXdr,
-      required this.memoType,
-      required this.signatures,
-      this.validAfter,
-      this.validBefore,
-      this.preconditions,
-      this.feeBumpTransactionResponse,
-      this.innerTransactionResponse});
+  StellarAllTransactionResponse({
+    required this.id,
+    required this.pagingToken,
+    required this.successful,
+    required this.hash,
+    required this.ledger,
+    required this.createdAt,
+    required this.sourceAccount,
+    required this.accountMuxed,
+    required this.accountMuxedId,
+    required this.sourceAccountSequence,
+    required this.feeAccount,
+    required this.feeAccountMuxed,
+    required this.feeAccountMuxedId,
+    required this.feeCharged,
+    required this.maxFee,
+    required this.operationCount,
+    required this.envelopeXdr,
+    required this.resultXdr,
+    required this.resultMetaXdr,
+    required this.feeMetaXdr,
+    required this.memoType,
+    required this.signatures,
+    this.validAfter,
+    this.validBefore,
+    this.preconditions,
+    this.feeBumpTransactionResponse,
+    this.innerTransactionResponse,
+  });
 
   factory StellarAllTransactionResponse.fromJson(Map<String, dynamic> json) {
     return StellarAllTransactionResponse(
@@ -186,21 +205,28 @@ class StellarAllTransactionResponse {
       signatures: List<String>.from(json['signatures']),
       validAfter: json['valid_after'],
       validBefore: json['valid_before'],
-      preconditions: json['preconditions'] == null
-          ? null
-          : PreconditionsResponse.fromJson(json['preconditions']),
-      feeBumpTransactionResponse: json['fee_bump_transaction'] == null
-          ? null
-          : StellarFeeBumpTransactionResponse.fromJson(
-              json['fee_bump_transaction']),
-      innerTransactionResponse: json['inner_transaction'] == null
-          ? null
-          : StellarInnerTransactionResponse.fromJson(json['inner_transaction']),
+      preconditions:
+          json['preconditions'] == null
+              ? null
+              : PreconditionsResponse.fromJson(json['preconditions']),
+      feeBumpTransactionResponse:
+          json['fee_bump_transaction'] == null
+              ? null
+              : StellarFeeBumpTransactionResponse.fromJson(
+                json['fee_bump_transaction'],
+              ),
+      innerTransactionResponse:
+          json['inner_transaction'] == null
+              ? null
+              : StellarInnerTransactionResponse.fromJson(
+                json['inner_transaction'],
+              ),
     );
   }
   TransactionResult getResult() {
     return TransactionResult.fromXdr(
-        StringUtils.encode(resultXdr, type: StringEncoding.base64));
+      StringUtils.encode(resultXdr, type: StringEncoding.base64),
+    );
   }
 
   Map<String, dynamic> toJson() {

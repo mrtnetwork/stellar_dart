@@ -1,14 +1,18 @@
 class SorobanEventResponse {
   final int latestLedger;
   final List<SorobanEvent> events;
-  const SorobanEventResponse(
-      {required this.latestLedger, required this.events});
+  const SorobanEventResponse({
+    required this.latestLedger,
+    required this.events,
+  });
   factory SorobanEventResponse.fromJson(Map<String, dynamic> json) {
     return SorobanEventResponse(
-        latestLedger: json['latestLedger'],
-        events: (json['events'] as List)
-            .map((e) => SorobanEvent.fromJson(e))
-            .toList());
+      latestLedger: json['latestLedger'],
+      events:
+          (json['events'] as List)
+              .map((e) => SorobanEvent.fromJson(e))
+              .toList(),
+    );
   }
 }
 

@@ -80,7 +80,8 @@ void _int256Parts() {
   });
   test('int256Parts 6', () {
     final number = BigInt.parse(
-        '115792089237316195423570985008687907853269984665640564039457584007913129639935');
+      '115792089237316195423570985008687907853269984665640564039457584007913129639935',
+    );
     final n = Int256Parts.fromNumber(number);
     expect(n.hiHi, BigInt.from(-1));
     expect(n.hiLo, BigInt.parse('18446744073709551615'));
@@ -89,7 +90,8 @@ void _int256Parts() {
   });
   test('int256Parts 7', () {
     final number = BigInt.parse(
-        '-1684996666696914987166688442938726917102321526408785780068975640576');
+      '-1684996666696914987166688442938726917102321526408785780068975640576',
+    );
     final n = Int256Parts.fromNumber(number);
     expect(n.toBigInt(), number);
     expect(n.hiHi, BigInt.from(-268435456));
@@ -99,7 +101,8 @@ void _int256Parts() {
   });
   test('int256Parts 8', () {
     final number = BigInt.parse(
-        '-57896044618658097711785492504343953926634992332820282019728792003956564819967');
+      '-57896044618658097711785492504343953926634992332820282019728792003956564819967',
+    );
     final n = Int256Parts.fromNumber(number);
     expect(n.toBigInt(), number);
     expect(n.hiHi, BigInt.parse('-9223372036854775808'));
@@ -145,14 +148,19 @@ void _int256Parts() {
     expect(n.loLo, BigInt.parse('2157334501225345539'));
   });
   test('UInt128Parts', () {
-    final number =
-        BigInt.parse('-23123123123123112312312312312312312312312323');
-    expect(() => UInt256Parts.fromNumber(number),
-        throwsA(isA<DartStellarPlugingException>()));
+    final number = BigInt.parse(
+      '-23123123123123112312312312312312312312312323',
+    );
+    expect(
+      () => UInt256Parts.fromNumber(number),
+      throwsA(isA<DartStellarPlugingException>()),
+    );
   });
   test('UInt128Parts', () {
     final number = BigInt.one << 129;
-    expect(() => UInt128Parts.fromNumber(number),
-        throwsA(isA<DartStellarPlugingException>()));
+    expect(
+      () => UInt128Parts.fromNumber(number),
+      throwsA(isA<DartStellarPlugingException>()),
+    );
   });
 }

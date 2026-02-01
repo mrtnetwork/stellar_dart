@@ -4,8 +4,12 @@ import 'package:stellar_dart/src/provider/models/response/transaction_effect.dar
 
 /// This endpoint returns the effects of a specific transaction.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/retrieve-a-transactions-effects
-class HorizonRequestTransactionEffects extends HorizonRequest<
-    List<StellarTransactionEffectsResponse>, Map<String, dynamic>> {
+class HorizonRequestTransactionEffects
+    extends
+        HorizonRequest<
+          List<StellarTransactionEffectsResponse>,
+          Map<String, dynamic>
+        > {
   /// Transactions are commands that modify the ledger state and consist of one or more operations.
   final String txId;
   const HorizonRequestTransactionEffects(this.txId, {super.paginationParams});
@@ -18,7 +22,8 @@ class HorizonRequestTransactionEffects extends HorizonRequest<
 
   @override
   List<StellarTransactionEffectsResponse> onResonse(
-      Map<String, dynamic> result) {
+    Map<String, dynamic> result,
+  ) {
     final records = (result['_embedded']?['records'] as List?) ?? [];
     return records
         .map((e) => StellarTransactionEffectsResponse.fromJson(e))

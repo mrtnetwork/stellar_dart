@@ -15,8 +15,10 @@ class SorobanRequestGetTransactions
   SorobanRequestGetTransactions(this.startLedger, {super.pagination});
 
   @override
-  Map<String, dynamic> get params =>
-      {'startLedger': startLedger, 'pagination': pagination?.toJson()};
+  Map<String, dynamic> get params => {
+    'startLedger': startLedger,
+    'pagination': pagination?.toJson(),
+  };
 
   @override
   String get method => SorobanAPIMethods.getTransactions.name;

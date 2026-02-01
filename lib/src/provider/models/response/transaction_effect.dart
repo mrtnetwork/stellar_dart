@@ -16,7 +16,8 @@ class StellarTransactionEffectsResponse {
   });
 
   factory StellarTransactionEffectsResponse.fromJson(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return StellarTransactionEffectsResponse(
       id: json['id'],
       pagingToken: json['paging_token'],

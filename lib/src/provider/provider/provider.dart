@@ -12,20 +12,24 @@ class StellarProvider implements BaseProvider<StellarRequestDetails> {
   /// Constructs a new [StellarProvider] instance with the specified [rpc] service provider.
   StellarProvider(this.rpc);
 
-  static SERVICERESPONSE _findError<SERVICERESPONSE>(
-      {required BaseServiceResponse<Map<String, dynamic>> response,
-      required StellarRequestDetails params}) {
+  static SERVICERESPONSE _findError<SERVICERESPONSE>({
+    required BaseServiceResponse<Map<String, dynamic>> response,
+    required StellarRequestDetails params,
+  }) {
     final Map<String, dynamic> r = response.getResult(params);
     if (params.apiType == StellarAPIType.soroban) {
       final error = r['error'];
       if (error != null) {
         throw RPCError(
-            message: error['message']?.toString() ?? '',
-            errorCode: IntUtils.tryParse(error['code']),
-            details: Map<String, dynamic>.from(error));
+          message: error['message']?.toString() ?? '',
+          errorCode: IntUtils.tryParse(error['code']),
+          details: Map<String, dynamic>.from(error),
+        );
       }
       return ServiceProviderUtils.parseResponse(
-          object: r['result'], params: params);
+        object: r['result'],
+        params: params,
+      );
     }
     return ServiceProviderUtils.parseResponse(object: r, params: params);
   }
@@ -38,9 +42,10 @@ class StellarProvider implements BaseProvider<StellarRequestDetails> {
   /// The [timeout] parameter, if provided, sets the maximum duration for the request.
   @override
   Future<RESULT> request<RESULT, SERVICERESPONSE>(
-      BaseServiceRequest<RESULT, SERVICERESPONSE, StellarRequestDetails>
-          request,
-      {Duration? timeout}) async {
+    BaseServiceRequest<RESULT, SERVICERESPONSE, StellarRequestDetails>
+    request, {
+    Duration? timeout,
+  }) async {
     final r = await requestDynamic(request, timeout: timeout);
     return request.onResonse(r);
   }
@@ -51,12 +56,15 @@ class StellarProvider implements BaseProvider<StellarRequestDetails> {
   /// Whatever is received will be returned
   @override
   Future<SERVICERESPONSE> requestDynamic<RESULT, SERVICERESPONSE>(
-      BaseServiceRequest<RESULT, SERVICERESPONSE, StellarRequestDetails>
-          request,
-      {Duration? timeout}) async {
+    BaseServiceRequest<RESULT, SERVICERESPONSE, StellarRequestDetails>
+    request, {
+    Duration? timeout,
+  }) async {
     final params = request.buildRequest(_id++);
-    final response =
-        await rpc.doRequest<Map<String, dynamic>>(params, timeout: timeout);
+    final response = await rpc.doRequest<Map<String, dynamic>>(
+      params,
+      timeout: timeout,
+    );
     return _findError(params: params, response: response);
   }
 }

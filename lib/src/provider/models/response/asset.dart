@@ -3,7 +3,8 @@ class StellarAssetLink {
   const StellarAssetLink({required this.toml});
   factory StellarAssetLink.fromJson(Map<String, dynamic> json) {
     return StellarAssetLink(
-        toml: StellarAssetToml.fromJson(json["toml"] ?? {}));
+      toml: StellarAssetToml.fromJson(json["toml"] ?? {}),
+    );
   }
 }
 
@@ -61,26 +62,27 @@ class StellarAllAssetResponse {
 
   factory StellarAllAssetResponse.fromJson(Map<String, dynamic> json) {
     return StellarAllAssetResponse(
-        assetType: json['asset_type'],
-        link: StellarAssetLink.fromJson(json["_links"] ?? {}),
-        assetIssuer: json['asset_issuer'],
-        pagingToken: json['paging_token'],
-        accounts: AutorizationResponse.fromJson(json['accounts']),
-        numClaimableBalances: json['num_claimable_balances'],
-        numContracts: json['num_contracts'],
-        numLiquidityPools: json['num_liquidity_pools'],
-        balances: AutorizationResponse.fromJson(json['balances']),
-        authorized: json['authorized'],
-        authorizedToMaintainLiabilities:
-            json['authorized_to_maintain_liabilities'],
-        unauthorized: json['unauthorized'],
-        claimableBalancesAmount: json['claimable_balances_amount'],
-        contractsAmount: json['contracts_amount'],
-        liquidityPoolsAmount: json['liquidity_pools_amount'],
-        amount: json['amount'],
-        numAccounts: json['num_accounts'],
-        flags: FlagsResponse.fromJson(json['flags']),
-        assetCode: json["asset_code"]);
+      assetType: json['asset_type'],
+      link: StellarAssetLink.fromJson(json["_links"] ?? {}),
+      assetIssuer: json['asset_issuer'],
+      pagingToken: json['paging_token'],
+      accounts: AutorizationResponse.fromJson(json['accounts']),
+      numClaimableBalances: json['num_claimable_balances'],
+      numContracts: json['num_contracts'],
+      numLiquidityPools: json['num_liquidity_pools'],
+      balances: AutorizationResponse.fromJson(json['balances']),
+      authorized: json['authorized'],
+      authorizedToMaintainLiabilities:
+          json['authorized_to_maintain_liabilities'],
+      unauthorized: json['unauthorized'],
+      claimableBalancesAmount: json['claimable_balances_amount'],
+      contractsAmount: json['contracts_amount'],
+      liquidityPoolsAmount: json['liquidity_pools_amount'],
+      amount: json['amount'],
+      numAccounts: json['num_accounts'],
+      flags: FlagsResponse.fromJson(json['flags']),
+      assetCode: json["asset_code"],
+    );
   }
 
   Map<String, dynamic> toJson() {

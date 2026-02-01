@@ -4,20 +4,19 @@ import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
 class StellarHelper {
-  static final BigRational _lumenDecimalRational =
-      BigRational(BigInt.from(10).pow(StellarConst.lumenDecimal));
+  static final AmountConverter converter = AmountConverter(
+    decimals: StellarConst.lumenDecimal,
+    displayPrecision: StellarConst.lumenDecimal,
+  );
 
   /// /// Converts a string representation of Lumen to Stroop (as BigInt).
   static BigInt toStroop(String lumen) {
-    final parse = BigRational.parseDecimal(lumen);
-    return (parse * _lumenDecimalRational).toBigInt();
+    return converter.toUnit(lumen);
   }
 
   /// Converts a Stroop value (as BigInt) back to Lumen in decimal format.
   static String fromStroop(BigInt stroop) {
-    final parse = BigRational(stroop);
-    return (parse / _lumenDecimalRational)
-        .toDecimal(digits: StellarConst.lumenDecimal);
+    return converter.toAmount(stroop);
   }
 
   static String toAssetsCode(List<int> data) {
@@ -29,8 +28,9 @@ class StellarHelper {
   }
 
   static StellarPrice approximatePriceUsingContinuedFraction(String price) {
-    final BigInt maxInt =
-        BigInt.from(2147483647); // Equivalent to max 32-bit int
+    final BigInt maxInt = BigInt.from(
+      2147483647,
+    ); // Equivalent to max 32-bit int
     BigRational number = BigRational.parseDecimal(price);
 
     // Initialize with [n0, d0] = [0, 1] and [n1, d1] = [1, 0] for continued fraction calculation
@@ -70,24 +70,28 @@ class StellarHelper {
     final BigInt finalDenominator = denominators[1].toBigInt();
 
     if (finalNumerator == BigInt.zero || finalDenominator == BigInt.zero) {
-      throw DartStellarPlugingException("Couldn't find approximation",
-          details: {'price': price});
+      throw DartStellarPlugingException(
+        "Couldn't find approximation",
+        details: {'price': price},
+      );
     }
 
     return StellarPrice(
-        numerator: finalNumerator.toInt(),
-        denominator: finalDenominator.toInt());
+      numerator: finalNumerator.toInt(),
+      denominator: finalDenominator.toInt(),
+    );
   }
 
-  static List<int> toAlphanumAssetCode(
-      {required String code, required int length}) {
+  static List<int> toAlphanumAssetCode({
+    required String code,
+    required int length,
+  }) {
     final codeBytes = StringUtils.encode(code);
     if (code.length > length) {
-      throw DartStellarPlugingException('Invalid asset code length.', details: {
-        'expected': length,
-        'length': codeBytes.length,
-        'code': code
-      });
+      throw DartStellarPlugingException(
+        'Invalid asset code length.',
+        details: {'expected': length, 'length': codeBytes.length, 'code': code},
+      );
     }
     final toBytes = List<int>.filled(length, 0);
     toBytes.setAll(0, codeBytes);
@@ -96,8 +100,9 @@ class StellarHelper {
 
   static Object? toReadableObject(Object? val) {
     if (val is Map) {
-      final newMap =
-          val.map((key, value) => MapEntry(key, toReadableObject(value)));
+      final newMap = val.map(
+        (key, value) => MapEntry(key, toReadableObject(value)),
+      );
       return newMap..removeWhere((e, k) => k == null);
     }
     if (val is String || val is int) {
@@ -115,8 +120,10 @@ class StellarHelper {
     return val.toString();
   }
 
-  static bool isValidIssueAsset(
-      {required String code, required AssetType type}) {
+  static bool isValidIssueAsset({
+    required String code,
+    required AssetType type,
+  }) {
     assert(type != AssetType.native);
     switch (type) {
       case AssetType.creditAlphanum12:

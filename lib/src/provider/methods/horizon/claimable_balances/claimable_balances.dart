@@ -29,6 +29,9 @@ class HorizonRequestClaimableBalances
   List<String> get pathParameters => [];
 
   @override
-  Map<String, dynamic> get queryParameters =>
-      {'sponser': sponser, 'asset': asset, 'claimant': claimant};
+  Map<String, dynamic> get queryParameters => {
+    'sponser': sponser,
+    'asset': asset,
+    'claimant': claimant,
+  };
 }

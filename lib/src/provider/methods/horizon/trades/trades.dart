@@ -41,16 +41,17 @@ class HorizonRequestTrades
 
   /// Can be set to all, orderbook, or liquidity_pools to filter only trades executed across a given mechanism.
   final RequestTradeType? tradeType;
-  const HorizonRequestTrades(
-      {this.offerId,
-      this.baseAssetType,
-      this.baseAssetIssuer,
-      this.baseAssetCode,
-      this.counterAssetType,
-      this.counterAssetIssuer,
-      this.counterAssetCode,
-      this.tradeType,
-      super.paginationParams});
+  const HorizonRequestTrades({
+    this.offerId,
+    this.baseAssetType,
+    this.baseAssetIssuer,
+    this.baseAssetCode,
+    this.counterAssetType,
+    this.counterAssetIssuer,
+    this.counterAssetCode,
+    this.tradeType,
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.trades.url;
@@ -60,15 +61,15 @@ class HorizonRequestTrades
 
   @override
   Map<String, dynamic> get queryParameters => {
-        'offer_id': offerId,
-        'base_asset_type': baseAssetType?.name,
-        'base_asset_issuer': baseAssetIssuer,
-        'base_asset_code': baseAssetCode,
-        'counter_asset_type': counterAssetType?.name,
-        'counter_asset_issuer': counterAssetIssuer,
-        'counter_asset_code': counterAssetCode,
-        'trade_type': tradeType?.name
-      };
+    'offer_id': offerId,
+    'base_asset_type': baseAssetType?.name,
+    'base_asset_issuer': baseAssetIssuer,
+    'base_asset_code': baseAssetCode,
+    'counter_asset_type': counterAssetType?.name,
+    'counter_asset_issuer': counterAssetIssuer,
+    'counter_asset_code': counterAssetCode,
+    'trade_type': tradeType?.name,
+  };
 
   @override
   List<StellarTradeResponse> onResonse(Map<String, dynamic> result) {

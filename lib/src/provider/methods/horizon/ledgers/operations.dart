@@ -8,9 +8,10 @@ class HorizonRequestLedgerOperations
     extends HorizonRequest<Map<String, dynamic>, Map<String, dynamic>> {
   /// The sequence number of a specific ledger.
   final int sequence;
-  const HorizonRequestLedgerOperations(this.sequence,
-      {HorizonPaymentPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+  const HorizonRequestLedgerOperations(
+    this.sequence, {
+    HorizonPaymentPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   @override
   String get method => StellarHorizonMethods.ledgerOperations.url;

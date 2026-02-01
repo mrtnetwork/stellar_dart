@@ -11,9 +11,9 @@ import 'package:stellar_dart/src/provider/models/request/request_types.dart';
 /// https://developers.stellar.org/docs/data/horizon/api-reference/list-all-payments
 class HorizonRequestPayments
     extends HorizonRequest<Map<String, dynamic>, Map<String, dynamic>> {
-  const HorizonRequestPayments(
-      {HorizonPaymentPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+  const HorizonRequestPayments({
+    HorizonPaymentPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   @override
   String get method => StellarHorizonMethods.payments.url;

@@ -27,12 +27,18 @@ class OperationType {
 
   static const createAccount = OperationType._(name: 'CreateAccount', value: 0);
   static const payment = OperationType._(name: 'Payment', value: 1);
-  static const pathPaymentStrictReceive =
-      OperationType._(name: 'PathPaymentStrictReceive', value: 2);
-  static const manageSellOffer =
-      OperationType._(name: 'ManageSellOffer', value: 3);
-  static const createPassiveSellOffer =
-      OperationType._(name: 'CreatePassiveSellOffer', value: 4);
+  static const pathPaymentStrictReceive = OperationType._(
+    name: 'PathPaymentStrictReceive',
+    value: 2,
+  );
+  static const manageSellOffer = OperationType._(
+    name: 'ManageSellOffer',
+    value: 3,
+  );
+  static const createPassiveSellOffer = OperationType._(
+    name: 'CreatePassiveSellOffer',
+    value: 4,
+  );
   static const setOptions = OperationType._(name: 'SetOptions', value: 5);
   static const changeTrust = OperationType._(name: 'ChangeTrust', value: 6);
   static const allowTrust = OperationType._(name: 'AllowTrust', value: 7);
@@ -40,36 +46,64 @@ class OperationType {
   static const inflation = OperationType._(name: 'Inflation', value: 9);
   static const manageData = OperationType._(name: 'ManageData', value: 10);
   static const bumpSequence = OperationType._(name: 'BumpSequence', value: 11);
-  static const manageBuyOffer =
-      OperationType._(name: 'ManageBuyOffer', value: 12);
-  static const pathPaymentStrictSend =
-      OperationType._(name: 'PathPaymentStrictSend', value: 13);
-  static const createClaimableBalance =
-      OperationType._(name: 'CreateClaimableBalance', value: 14);
-  static const claimClaimableBalance =
-      OperationType._(name: 'ClaimClaimableBalance', value: 15);
-  static const beginSponsoringFutureReserves =
-      OperationType._(name: 'BeginSponsoringFutureReserves', value: 16);
+  static const manageBuyOffer = OperationType._(
+    name: 'ManageBuyOffer',
+    value: 12,
+  );
+  static const pathPaymentStrictSend = OperationType._(
+    name: 'PathPaymentStrictSend',
+    value: 13,
+  );
+  static const createClaimableBalance = OperationType._(
+    name: 'CreateClaimableBalance',
+    value: 14,
+  );
+  static const claimClaimableBalance = OperationType._(
+    name: 'ClaimClaimableBalance',
+    value: 15,
+  );
+  static const beginSponsoringFutureReserves = OperationType._(
+    name: 'BeginSponsoringFutureReserves',
+    value: 16,
+  );
 
-  static const endSponsoringFutureReserves =
-      OperationType._(name: 'EndSponsoringFutureReserves', value: 17);
-  static const revokeSponsorship =
-      OperationType._(name: 'RevokeSponsorship', value: 18);
+  static const endSponsoringFutureReserves = OperationType._(
+    name: 'EndSponsoringFutureReserves',
+    value: 17,
+  );
+  static const revokeSponsorship = OperationType._(
+    name: 'RevokeSponsorship',
+    value: 18,
+  );
   static const clawback = OperationType._(name: 'Clawback', value: 19);
-  static const clawbackClaimableBalance =
-      OperationType._(name: 'ClawbackClaimableBalance', value: 20);
-  static const setTrustLineFlags =
-      OperationType._(name: 'SetTrustLineFlags', value: 21);
-  static const liquidityPoolDeposit =
-      OperationType._(name: 'LiquidityPoolDeposit', value: 22);
-  static const liquidityPoolWithdraw =
-      OperationType._(name: 'LiquidityPoolWithdraw', value: 23);
-  static const invokeHostFunction =
-      OperationType._(name: 'InvokeHostFunction', value: 24);
-  static const extendFootprintTtl =
-      OperationType._(name: 'ExtendFootprintTtl', value: 25);
-  static const restoreFootprint =
-      OperationType._(name: 'RestoreFootprint', value: 26);
+  static const clawbackClaimableBalance = OperationType._(
+    name: 'ClawbackClaimableBalance',
+    value: 20,
+  );
+  static const setTrustLineFlags = OperationType._(
+    name: 'SetTrustLineFlags',
+    value: 21,
+  );
+  static const liquidityPoolDeposit = OperationType._(
+    name: 'LiquidityPoolDeposit',
+    value: 22,
+  );
+  static const liquidityPoolWithdraw = OperationType._(
+    name: 'LiquidityPoolWithdraw',
+    value: 23,
+  );
+  static const invokeHostFunction = OperationType._(
+    name: 'InvokeHostFunction',
+    value: 24,
+  );
+  static const extendFootprintTtl = OperationType._(
+    name: 'ExtendFootprintTtl',
+    value: 25,
+  );
+  static const restoreFootprint = OperationType._(
+    name: 'RestoreFootprint',
+    value: 26,
+  );
   static const List<OperationType> values = [
     createAccount,
     payment,
@@ -97,17 +131,20 @@ class OperationType {
     liquidityPoolWithdraw,
     invokeHostFunction,
     extendFootprintTtl,
-    restoreFootprint
+    restoreFootprint,
   ];
   static OperationType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException(
-          'Operation type not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'Operation type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 }
@@ -118,7 +155,9 @@ class Operation<T extends OperationBody> extends XDRSerialization {
   const Operation({this.sourceAccount, required this.body});
   factory Operation.fromXdr(List<int> bytes, {String? property}) {
     final decode = XDRSerialization.deserialize(
-        bytes: bytes, layout: layout(property: property));
+      bytes: bytes,
+      layout: layout(property: property),
+    );
     return Operation.fromStruct(decode);
   }
   factory Operation.fromStruct(Map<String, dynamic> json) {
@@ -127,21 +166,26 @@ class Operation<T extends OperationBody> extends XDRSerialization {
       throw const DartStellarPlugingException('Incorrect operation casting.');
     }
     return Operation(
-        body: body,
-        sourceAccount: json.mybeAs<MuxedAccount, Map<String, dynamic>>(
-            key: 'sourceAccount', onValue: (e) => MuxedAccount.fromStruct(e)));
+      body: body,
+      sourceAccount: json.mybeAs<MuxedAccount, Map<String, dynamic>>(
+        key: 'sourceAccount',
+        onValue: (e) => MuxedAccount.fromStruct(e),
+      ),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) =>
       LayoutConst.struct([
-        LayoutConst.optionalU32Be(MuxedAccount.layout(),
-            property: 'sourceAccount'),
-        OperationBody.layout(property: 'body')
+        LayoutConst.optionalU32Be(
+          MuxedAccount.layout(),
+          property: 'sourceAccount',
+        ),
+        OperationBody.layout(property: 'body'),
       ], property: property);
   @override
   Map<String, dynamic> toJson() {
     return {
       'body': body.toVariantLayoutStruct(),
-      'sourceAccount': sourceAccount?.toVariantLayoutStruct()
+      'sourceAccount': sourceAccount?.toVariantLayoutStruct(),
     };
   }
 
@@ -154,7 +198,7 @@ class Operation<T extends OperationBody> extends XDRSerialization {
   Map<String, dynamic> toLayoutStruct() {
     return {
       'body': body.toVariantLayoutStruct(),
-      'sourceAccount': sourceAccount?.toVariantLayoutStruct()
+      'sourceAccount': sourceAccount?.toVariantLayoutStruct(),
     };
   }
 }
@@ -230,153 +274,182 @@ abstract class OperationBody extends XDRVariantSerialization {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) =>
       LayoutConst.lazyEnumU32Be(
-          List.generate(OperationType.values.length, (i) {
-            final type = OperationType.values.elementAt(i);
-            switch (type) {
-              case OperationType.payment:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: PaymentOperation.layout,
-                    property: type.name);
-              case OperationType.setOptions:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: SetOptionsOperation.layout,
-                    property: type.name);
-              case OperationType.pathPaymentStrictReceive:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: PathPaymentStrictReceiveOperation.layout,
-                    property: type.name);
-              case OperationType.createAccount:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: CreateAccountOperation.layout,
-                    property: type.name);
-              case OperationType.manageSellOffer:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ManageSellOfferOperation.layout,
-                    property: type.name);
-              case OperationType.createPassiveSellOffer:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: CreatePassiveSellOfferOperation.layout,
-                    property: type.name);
-              case OperationType.changeTrust:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ChangeTrustOperation.layout,
-                    property: type.name);
-              case OperationType.allowTrust:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: AllowTrustOperation.layout,
-                    property: type.name);
-              case OperationType.accountMerge:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: AccountMergeOperation.layout,
-                    property: type.name);
-              case OperationType.inflation:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: InflationOperation.layout,
-                    property: type.name);
-              case OperationType.manageData:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ManageDataOperation.layout,
-                    property: type.name);
-              case OperationType.bumpSequence:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: BumpSequenceOperation.layout,
-                    property: type.name);
-              case OperationType.manageBuyOffer:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ManageBuyOfferOperation.layout,
-                    property: type.name);
-              case OperationType.pathPaymentStrictSend:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: PathPaymentStrictSendOperation.layout,
-                    property: type.name);
-              case OperationType.createClaimableBalance:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: CreateClaimableBalanceOperation.layout,
-                    property: type.name);
+        List.generate(OperationType.values.length, (i) {
+          final type = OperationType.values.elementAt(i);
+          switch (type) {
+            case OperationType.payment:
+              return LazyVariantModel(
+                index: type.value,
+                layout: PaymentOperation.layout,
+                property: type.name,
+              );
+            case OperationType.setOptions:
+              return LazyVariantModel(
+                index: type.value,
+                layout: SetOptionsOperation.layout,
+                property: type.name,
+              );
+            case OperationType.pathPaymentStrictReceive:
+              return LazyVariantModel(
+                index: type.value,
+                layout: PathPaymentStrictReceiveOperation.layout,
+                property: type.name,
+              );
+            case OperationType.createAccount:
+              return LazyVariantModel(
+                index: type.value,
+                layout: CreateAccountOperation.layout,
+                property: type.name,
+              );
+            case OperationType.manageSellOffer:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ManageSellOfferOperation.layout,
+                property: type.name,
+              );
+            case OperationType.createPassiveSellOffer:
+              return LazyVariantModel(
+                index: type.value,
+                layout: CreatePassiveSellOfferOperation.layout,
+                property: type.name,
+              );
+            case OperationType.changeTrust:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ChangeTrustOperation.layout,
+                property: type.name,
+              );
+            case OperationType.allowTrust:
+              return LazyVariantModel(
+                index: type.value,
+                layout: AllowTrustOperation.layout,
+                property: type.name,
+              );
+            case OperationType.accountMerge:
+              return LazyVariantModel(
+                index: type.value,
+                layout: AccountMergeOperation.layout,
+                property: type.name,
+              );
+            case OperationType.inflation:
+              return LazyVariantModel(
+                index: type.value,
+                layout: InflationOperation.layout,
+                property: type.name,
+              );
+            case OperationType.manageData:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ManageDataOperation.layout,
+                property: type.name,
+              );
+            case OperationType.bumpSequence:
+              return LazyVariantModel(
+                index: type.value,
+                layout: BumpSequenceOperation.layout,
+                property: type.name,
+              );
+            case OperationType.manageBuyOffer:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ManageBuyOfferOperation.layout,
+                property: type.name,
+              );
+            case OperationType.pathPaymentStrictSend:
+              return LazyVariantModel(
+                index: type.value,
+                layout: PathPaymentStrictSendOperation.layout,
+                property: type.name,
+              );
+            case OperationType.createClaimableBalance:
+              return LazyVariantModel(
+                index: type.value,
+                layout: CreateClaimableBalanceOperation.layout,
+                property: type.name,
+              );
 
-              case OperationType.claimClaimableBalance:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ClaimClaimableBalanceOperation.layout,
-                    property: type.name);
-              case OperationType.beginSponsoringFutureReserves:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: BeginSponsoringFutureReservesOperation.layout,
-                    property: type.name);
+            case OperationType.claimClaimableBalance:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ClaimClaimableBalanceOperation.layout,
+                property: type.name,
+              );
+            case OperationType.beginSponsoringFutureReserves:
+              return LazyVariantModel(
+                index: type.value,
+                layout: BeginSponsoringFutureReservesOperation.layout,
+                property: type.name,
+              );
 
-              case OperationType.endSponsoringFutureReserves:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: EndSponsoringFutureReservesOperation.layout,
-                    property: type.name);
+            case OperationType.endSponsoringFutureReserves:
+              return LazyVariantModel(
+                index: type.value,
+                layout: EndSponsoringFutureReservesOperation.layout,
+                property: type.name,
+              );
 
-              case OperationType.revokeSponsorship:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: RevokeSponsorshipOperation.layout,
-                    property: type.name);
-              case OperationType.clawback:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ClawbackOperation.layout,
-                    property: type.name);
-              case OperationType.clawbackClaimableBalance:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ClawbackClaimableBalanceOperation.layout,
-                    property: type.name);
-              case OperationType.setTrustLineFlags:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: SetTrustLineFlagsOperation.layout,
-                    property: type.name);
-              case OperationType.liquidityPoolDeposit:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: LiquidityPoolDepositOperation.layout,
-                    property: type.name);
-              case OperationType.liquidityPoolWithdraw:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: LiquidityPoolWithdrawOperation.layout,
-                    property: type.name);
-              case OperationType.invokeHostFunction:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: InvokeHostFunctionOperation.layout,
-                    property: type.name);
-              case OperationType.extendFootprintTtl:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: ExtendFootprintTTLOperation.layout,
-                    property: type.name);
-              case OperationType.restoreFootprint:
-                return LazyVariantModel(
-                    index: type.value,
-                    layout: RestoreFootprintOperation.layout,
-                    property: type.name);
-              default:
-                throw const DartStellarPlugingException(
-                    'Invalid Operation type.');
-            }
-          }),
-          property: property);
+            case OperationType.revokeSponsorship:
+              return LazyVariantModel(
+                index: type.value,
+                layout: RevokeSponsorshipOperation.layout,
+                property: type.name,
+              );
+            case OperationType.clawback:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ClawbackOperation.layout,
+                property: type.name,
+              );
+            case OperationType.clawbackClaimableBalance:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ClawbackClaimableBalanceOperation.layout,
+                property: type.name,
+              );
+            case OperationType.setTrustLineFlags:
+              return LazyVariantModel(
+                index: type.value,
+                layout: SetTrustLineFlagsOperation.layout,
+                property: type.name,
+              );
+            case OperationType.liquidityPoolDeposit:
+              return LazyVariantModel(
+                index: type.value,
+                layout: LiquidityPoolDepositOperation.layout,
+                property: type.name,
+              );
+            case OperationType.liquidityPoolWithdraw:
+              return LazyVariantModel(
+                index: type.value,
+                layout: LiquidityPoolWithdrawOperation.layout,
+                property: type.name,
+              );
+            case OperationType.invokeHostFunction:
+              return LazyVariantModel(
+                index: type.value,
+                layout: InvokeHostFunctionOperation.layout,
+                property: type.name,
+              );
+            case OperationType.extendFootprintTtl:
+              return LazyVariantModel(
+                index: type.value,
+                layout: ExtendFootprintTTLOperation.layout,
+                property: type.name,
+              );
+            case OperationType.restoreFootprint:
+              return LazyVariantModel(
+                index: type.value,
+                layout: RestoreFootprintOperation.layout,
+                property: type.name,
+              );
+            default:
+              throw const DartStellarPlugingException(
+                'Invalid Operation type.',
+              );
+          }
+        }),
+        property: property,
+      );
 
   @override
   Layout<Map<String, dynamic>> createVariantLayout({String? property}) {
@@ -388,8 +461,10 @@ abstract class OperationBody extends XDRVariantSerialization {
 
   T cast<T extends OperationBody>() {
     if (this is! T) {
-      throw DartStellarPlugingException('Operation body casting failed.',
-          details: {'expected': '$T', 'body': runtimeType.toString()});
+      throw DartStellarPlugingException(
+        'Operation body casting failed.',
+        details: {'expected': '$T', 'body': runtimeType.toString()},
+      );
     }
     return this as T;
   }
@@ -407,23 +482,26 @@ class PaymentOperation extends OperationBody {
 
   /// amount they end up with
   final BigInt amount;
-  PaymentOperation(
-      {required this.destination, required this.asset, required BigInt amount})
-      : amount = amount.asInt64,
-        super(OperationType.payment);
+  PaymentOperation({
+    required this.destination,
+    required this.asset,
+    required BigInt amount,
+  }) : amount = amount.asI64,
+       super(OperationType.payment);
 
   factory PaymentOperation.fromStruct(Map<String, dynamic> json) {
     return PaymentOperation(
-        destination: MuxedAccount.fromStruct(json.asMap('destination')),
-        asset: StellarAsset.fromStruct(json.asMap('asset')),
-        amount: json.as('amount'));
+      destination: MuxedAccount.fromStruct(json.asMap('destination')),
+      asset: StellarAsset.fromStruct(json.asMap('asset')),
+      amount: json.as('amount'),
+    );
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       MuxedAccount.layout(property: 'destination'),
       StellarAsset.layout(property: 'asset'),
-      LayoutConst.s64be(property: 'amount')
+      LayoutConst.s64be(property: 'amount'),
     ], property: property);
   }
 
@@ -437,7 +515,7 @@ class PaymentOperation extends OperationBody {
     return {
       'destination': destination.toVariantLayoutStruct(),
       'asset': asset.toVariantLayoutStruct(),
-      'amount': amount
+      'amount': amount,
     };
   }
 
@@ -446,7 +524,7 @@ class PaymentOperation extends OperationBody {
     return {
       'destination': destination.address.toString(),
       'asset': asset.toJson(),
-      'amount': amount
+      'amount': amount,
     };
   }
 }
@@ -460,20 +538,22 @@ class CreateAccountOperation extends OperationBody {
 
   /// amount they end up with
   final BigInt startingBalance;
-  CreateAccountOperation(
-      {required this.destination, required BigInt startingBalance})
-      : startingBalance = startingBalance.asInt64,
-        super(OperationType.createAccount);
+  CreateAccountOperation({
+    required this.destination,
+    required BigInt startingBalance,
+  }) : startingBalance = startingBalance.asI64,
+       super(OperationType.createAccount);
 
   factory CreateAccountOperation.fromStruct(Map<String, dynamic> json) {
     return CreateAccountOperation(
-        destination: StellarPublicKey.fromStruct(json.asMap('destination')),
-        startingBalance: json.as('startingBalance'));
+      destination: StellarPublicKey.fromStruct(json.asMap('destination')),
+      startingBalance: json.as('startingBalance'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarPublicKey.layout(property: 'destination'),
-      LayoutConst.s64be(property: 'startingBalance')
+      LayoutConst.s64be(property: 'startingBalance'),
     ], property: property);
   }
 
@@ -486,7 +566,7 @@ class CreateAccountOperation extends OperationBody {
   Map<String, dynamic> toLayoutStruct() {
     return {
       'destination': destination.toLayoutStruct(),
-      'startingBalance': startingBalance
+      'startingBalance': startingBalance,
     };
   }
 
@@ -494,7 +574,7 @@ class CreateAccountOperation extends OperationBody {
   Map<String, dynamic> toJson() {
     return {
       'destination': destination.toAddress().toString(),
-      'startingBalance': startingBalance
+      'startingBalance': startingBalance,
     };
   }
 }
@@ -522,30 +602,37 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
   final List<StellarAsset> path;
 
   factory PathPaymentStrictReceiveOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return PathPaymentStrictReceiveOperation(
       sendAsset: StellarAsset.fromStruct(json.asMap('sendAsset')),
       sendMax: json.as('sendMax'),
       destination: MuxedAccount.fromStruct(json.asMap('destination')),
       destAsset: StellarAsset.fromStruct(json.asMap('destAsset')),
       destAmount: json.as('destAmount'),
-      path: json
-          .asListOfMap('path')!
-          .map((e) => StellarAsset.fromStruct(e))
-          .toList(),
+      path:
+          json
+              .asListOfMap('path')!
+              .map((e) => StellarAsset.fromStruct(e))
+              .toList(),
     );
   }
-  PathPaymentStrictReceiveOperation(
-      {required this.sendAsset,
-      required BigInt sendMax,
-      required this.destination,
-      required this.destAsset,
-      required BigInt destAmount,
-      List<StellarAsset> path = const []})
-      : sendMax = sendMax.asInt64,
-        destAmount = destAmount.asInt64,
-        path = path.immutable.max(5, name: 'Path'),
-        super(OperationType.pathPaymentStrictReceive);
+  PathPaymentStrictReceiveOperation({
+    required this.sendAsset,
+    required BigInt sendMax,
+    required this.destination,
+    required this.destAsset,
+    required BigInt destAmount,
+    List<StellarAsset> path = const [],
+  }) : sendMax = sendMax.asI64,
+       destAmount = destAmount.asI64,
+       path = path.immutable.max(
+         length: 5,
+         name: 'path',
+         operation: "PathPaymentStrictReceiveOperation",
+         reason: "Invalid path length.",
+       ),
+       super(OperationType.pathPaymentStrictReceive);
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarAsset.layout(property: 'sendAsset'),
@@ -553,7 +640,7 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
       MuxedAccount.layout(property: 'destination'),
       StellarAsset.layout(property: 'destAsset'),
       LayoutConst.s64be(property: 'destAmount'),
-      LayoutConst.xdrVec(StellarAsset.layout(), property: 'path')
+      LayoutConst.xdrVec(StellarAsset.layout(), property: 'path'),
     ], property: property);
   }
 
@@ -570,7 +657,7 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
       'destination': destination.toVariantLayoutStruct(),
       'destAsset': destAsset.toVariantLayoutStruct(),
       'destAmount': destAmount,
-      'path': path.map((e) => e.toVariantLayoutStruct()).toList()
+      'path': path.map((e) => e.toVariantLayoutStruct()).toList(),
     };
   }
 
@@ -582,7 +669,7 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
       'destination': destination.address.toString(),
       'destAsset': destAsset.toJson(),
       'destAmount': destAmount,
-      'path': path.map((e) => e.toJson()).toList()
+      'path': path.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -602,22 +689,23 @@ class ManageSellOfferOperation extends OperationBody {
 
   /// // 0=create a new offer, otherwise edit an existing offer
   final BigInt offerId;
-  ManageSellOfferOperation(
-      {required this.selling,
-      required this.buying,
-      required BigInt amount,
-      required this.price,
-      required BigInt offerId})
-      : amount = amount.asInt64,
-        offerId = offerId.asInt64,
-        super(OperationType.manageSellOffer);
+  ManageSellOfferOperation({
+    required this.selling,
+    required this.buying,
+    required BigInt amount,
+    required this.price,
+    required BigInt offerId,
+  }) : amount = amount.asI64,
+       offerId = offerId.asI64,
+       super(OperationType.manageSellOffer);
   factory ManageSellOfferOperation.fromStruct(Map<String, dynamic> json) {
     return ManageSellOfferOperation(
-        selling: StellarAsset.fromStruct(json.asMap('selling')),
-        buying: StellarAsset.fromStruct(json.asMap('buying')),
-        amount: json.as('amount'),
-        price: StellarPrice.fromStruct(json.asMap('price')),
-        offerId: json.as('offerId'));
+      selling: StellarAsset.fromStruct(json.asMap('selling')),
+      buying: StellarAsset.fromStruct(json.asMap('buying')),
+      amount: json.as('amount'),
+      price: StellarPrice.fromStruct(json.asMap('price')),
+      offerId: json.as('offerId'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -641,7 +729,7 @@ class ManageSellOfferOperation extends OperationBody {
       'buying': buying.toVariantLayoutStruct(),
       'amount': amount,
       'price': price.toLayoutStruct(),
-      'offerId': offerId
+      'offerId': offerId,
     };
   }
 
@@ -652,7 +740,7 @@ class ManageSellOfferOperation extends OperationBody {
       'buying': buying.toJson(),
       'amount': amount,
       'price': price.toPrice(7),
-      'offerId': offerId.toString()
+      'offerId': offerId.toString(),
     };
   }
 }
@@ -678,10 +766,11 @@ class CreatePassiveSellOfferOperation extends OperationBody {
     required this.buying,
     required BigInt amount,
     required this.price,
-  })  : amount = amount.asInt64,
-        super(OperationType.createPassiveSellOffer);
+  }) : amount = amount.asI64,
+       super(OperationType.createPassiveSellOffer);
   factory CreatePassiveSellOfferOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return CreatePassiveSellOfferOperation(
       selling: StellarAsset.fromStruct(json.asMap('selling')),
       buying: StellarAsset.fromStruct(json.asMap('buying')),
@@ -709,7 +798,7 @@ class CreatePassiveSellOfferOperation extends OperationBody {
       'selling': selling.toVariantLayoutStruct(),
       'buying': buying.toVariantLayoutStruct(),
       'amount': amount,
-      'price': price.toLayoutStruct()
+      'price': price.toLayoutStruct(),
     };
   }
 
@@ -719,7 +808,7 @@ class CreatePassiveSellOfferOperation extends OperationBody {
       'selling': selling.toJson(),
       'buying': buying.toJson(),
       'amount': amount,
-      'price': price.toPrice(7)
+      'price': price.toPrice(7),
     };
   }
 }
@@ -753,52 +842,64 @@ class SetOptionsOperation extends OperationBody {
   final Signer? signer;
   factory SetOptionsOperation.fromStruct(Map<String, dynamic> json) {
     return SetOptionsOperation(
-        inflationDest: json.mybeAs<StellarPublicKey, Map<String, dynamic>>(
-            key: 'inflationDest',
-            onValue: (e) => StellarPublicKey.fromStruct(e)),
-        clearFlags: json.mybeAs<AuthFlag, int>(
-            key: 'clearFlags', onValue: (e) => AuthFlag.fromValue(e)),
-        setFlags: json.mybeAs<AuthFlag, int>(
-            key: 'setFlags', onValue: (e) => AuthFlag.fromValue(e)),
-        masterWeight: json.as('masterWeight'),
-        highThreshold: json.as('highThreshold'),
-        lowThreshold: json.as('lowThreshold'),
-        medThreshold: json.as('medThreshold'),
-        homeDomain: json.as('homeDomain'),
-        signer: json.mybeAs<Signer, Map<String, dynamic>>(
-            key: 'signer', onValue: (e) => Signer.fromStruct(e)));
+      inflationDest: json.mybeAs<StellarPublicKey, Map<String, dynamic>>(
+        key: 'inflationDest',
+        onValue: (e) => StellarPublicKey.fromStruct(e),
+      ),
+      clearFlags: json.mybeAs<AuthFlag, int>(
+        key: 'clearFlags',
+        onValue: (e) => AuthFlag.fromValue(e),
+      ),
+      setFlags: json.mybeAs<AuthFlag, int>(
+        key: 'setFlags',
+        onValue: (e) => AuthFlag.fromValue(e),
+      ),
+      masterWeight: json.as('masterWeight'),
+      highThreshold: json.as('highThreshold'),
+      lowThreshold: json.as('lowThreshold'),
+      medThreshold: json.as('medThreshold'),
+      homeDomain: json.as('homeDomain'),
+      signer: json.mybeAs<Signer, Map<String, dynamic>>(
+        key: 'signer',
+        onValue: (e) => Signer.fromStruct(e),
+      ),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.optionalU32Be(StellarPublicKey.layout(),
-          property: 'inflationDest'),
+      LayoutConst.optionalU32Be(
+        StellarPublicKey.layout(),
+        property: 'inflationDest',
+      ),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'clearFlags'),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'setFlags'),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'masterWeight'),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'lowThreshold'),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'medThreshold'),
       LayoutConst.optionalU32Be(LayoutConst.u32be(), property: 'highThreshold'),
-      LayoutConst.optionalU32Be(LayoutConst.xdrString(),
-          property: 'homeDomain'),
+      LayoutConst.optionalU32Be(
+        LayoutConst.xdrString(),
+        property: 'homeDomain',
+      ),
       LayoutConst.optionalU32Be(Signer.layout(), property: 'signer'),
     ], property: property);
   }
 
-  SetOptionsOperation(
-      {this.inflationDest,
-      this.clearFlags,
-      this.setFlags,
-      int? masterWeight,
-      int? lowThreshold,
-      int? medThreshold,
-      int? highThreshold,
-      this.homeDomain,
-      this.signer})
-      : masterWeight = masterWeight?.asUint32,
-        lowThreshold = lowThreshold?.asUint32,
-        medThreshold = medThreshold?.asUint32,
-        highThreshold = highThreshold?.asUint32,
-        super(OperationType.setOptions);
+  SetOptionsOperation({
+    this.inflationDest,
+    this.clearFlags,
+    this.setFlags,
+    int? masterWeight,
+    int? lowThreshold,
+    int? medThreshold,
+    int? highThreshold,
+    this.homeDomain,
+    this.signer,
+  }) : masterWeight = masterWeight?.asU32,
+       lowThreshold = lowThreshold?.asU32,
+       medThreshold = medThreshold?.asU32,
+       highThreshold = highThreshold?.asU32,
+       super(OperationType.setOptions);
 
   @override
   Layout<Map<String, dynamic>> createLayout({String? property}) {
@@ -816,7 +917,7 @@ class SetOptionsOperation extends OperationBody {
       'medThreshold': medThreshold,
       'highThreshold': highThreshold,
       'homeDomain': homeDomain,
-      'signer': signer?.toLayoutStruct()
+      'signer': signer?.toLayoutStruct(),
     };
   }
 
@@ -831,7 +932,7 @@ class SetOptionsOperation extends OperationBody {
       'medThreshold': medThreshold,
       'highThreshold': highThreshold,
       'homeDomain': homeDomain,
-      'signer': signer?.toJson()
+      'signer': signer?.toJson(),
     };
   }
 
@@ -851,12 +952,13 @@ class ChangeTrustOperation extends OperationBody {
   /// if limit is set to 0, deletes the trust line
   final BigInt limit;
   ChangeTrustOperation({required this.asset, required BigInt limit})
-      : limit = limit.asInt64,
-        super(OperationType.changeTrust);
+    : limit = limit.asI64,
+      super(OperationType.changeTrust);
   factory ChangeTrustOperation.fromStruct(Map<String, dynamic> json) {
     return ChangeTrustOperation(
-        asset: ChangeTrustAsset.fromStruct(json.asMap('asset')),
-        limit: json.as('limit'));
+      asset: ChangeTrustAsset.fromStruct(json.asMap('asset')),
+      limit: json.as('limit'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -895,21 +997,24 @@ class AllowTrustOperation extends OperationBody {
 
   ///  One of 0, AUTHORIZED_FLAG, or AUTHORIZED_TO_MAINTAIN_LIABILITIES_FLAG
   final TrustAuthFlag authorize;
-  AllowTrustOperation(
-      {required this.trustor, required this.asset, required this.authorize})
-      : super(OperationType.allowTrust);
+  AllowTrustOperation({
+    required this.trustor,
+    required this.asset,
+    required this.authorize,
+  }) : super(OperationType.allowTrust);
   factory AllowTrustOperation.fromStruct(Map<String, dynamic> json) {
     return AllowTrustOperation(
-        trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
-        asset: AssetCode.fromStruct(json.asMap('asset')),
-        authorize: TrustAuthFlag.fromValue(json.as('authorize')));
+      trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
+      asset: AssetCode.fromStruct(json.asMap('asset')),
+      authorize: TrustAuthFlag.fromValue(json.as('authorize')),
+    );
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarPublicKey.layout(property: 'trustor'),
       AssetCode.layout(property: 'asset'),
-      LayoutConst.u32be(property: 'authorize')
+      LayoutConst.u32be(property: 'authorize'),
     ], property: property);
   }
 
@@ -923,7 +1028,7 @@ class AllowTrustOperation extends OperationBody {
     return {
       'trustor': trustor.toLayoutStruct(),
       'asset': asset.toVariantLayoutStruct(),
-      'authorize': authorize.value
+      'authorize': authorize.value,
     };
   }
 
@@ -932,7 +1037,7 @@ class AllowTrustOperation extends OperationBody {
     return {
       'trustor': trustor.toAddress().toString(),
       'asset': asset.toJson(),
-      'authorize': authorize.name
+      'authorize': authorize.name,
     };
   }
 
@@ -949,7 +1054,8 @@ class AccountMergeOperation extends OperationBody {
   AccountMergeOperation(this.account) : super(OperationType.accountMerge);
   factory AccountMergeOperation.fromStruct(Map<String, dynamic> json) {
     return AccountMergeOperation(
-        MuxedAccount.fromStruct(json.asMap('account')));
+      MuxedAccount.fromStruct(json.asMap('account')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1012,21 +1118,29 @@ class ManageDataOperation extends OperationBody {
   /// set to null to clear
   final List<int>? dataValue;
   ManageDataOperation({required String dataName, List<int>? dataValue})
-      : dataValue = dataValue?.asImmutableBytes
-            .max(StellarConst.dataValueLength, name: 'dataValue'),
-        dataName = dataName.max(StellarConst.str64),
-        super(OperationType.manageData);
+    : dataValue = dataValue?.asImmutableBytes.max(
+        length: StellarConst.dataValueLength,
+        name: 'dataValue',
+        operation: "ManageDataOperation",
+        reason: "Invalid dataValue bytes length.",
+      ),
+      dataName = dataName.max(StellarConst.str64),
+      super(OperationType.manageData);
 
   factory ManageDataOperation.fromStruct(Map<String, dynamic> json) {
     return ManageDataOperation(
-        dataName: json.as('dataName'), dataValue: json.asBytes('dataValue'));
+      dataName: json.as('dataName'),
+      dataValue: json.asBytes('dataValue'),
+    );
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       LayoutConst.xdrString(property: 'dataName'),
-      LayoutConst.optionalU32Be(LayoutConst.xdrVecBytes(),
-          property: 'dataValue'),
+      LayoutConst.optionalU32Be(
+        LayoutConst.xdrVecBytes(),
+        property: 'dataValue',
+      ),
     ], property: property);
   }
 
@@ -1044,7 +1158,7 @@ class ManageDataOperation extends OperationBody {
   Map<String, dynamic> toJson() {
     return {
       'dataName': dataName,
-      'dataValue': BytesUtils.tryToHexString(dataValue)
+      'dataValue': BytesUtils.tryToHexString(dataValue),
     };
   }
 }
@@ -1056,8 +1170,8 @@ class ManageDataOperation extends OperationBody {
 class BumpSequenceOperation extends OperationBody {
   final BigInt bumpTo;
   BumpSequenceOperation(BigInt bumpTo)
-      : bumpTo = bumpTo.asInt64,
-        super(OperationType.bumpSequence);
+    : bumpTo = bumpTo.asI64,
+      super(OperationType.bumpSequence);
   factory BumpSequenceOperation.fromStruct(Map<String, dynamic> json) {
     return BumpSequenceOperation(json.as('bumpTo'));
   }
@@ -1102,22 +1216,23 @@ class ManageBuyOfferOperation extends OperationBody {
 
   /// 0=create a new offer, otherwise edit an existing offer
   final BigInt offerId;
-  ManageBuyOfferOperation(
-      {required this.selling,
-      required this.buying,
-      required BigInt buyAmount,
-      required this.price,
-      required BigInt offerId})
-      : buyAmount = buyAmount.asInt64,
-        offerId = offerId.asInt64,
-        super(OperationType.manageBuyOffer);
+  ManageBuyOfferOperation({
+    required this.selling,
+    required this.buying,
+    required BigInt buyAmount,
+    required this.price,
+    required BigInt offerId,
+  }) : buyAmount = buyAmount.asI64,
+       offerId = offerId.asI64,
+       super(OperationType.manageBuyOffer);
   factory ManageBuyOfferOperation.fromStruct(Map<String, dynamic> json) {
     return ManageBuyOfferOperation(
-        buyAmount: json.as('buyAmount'),
-        buying: StellarAsset.fromStruct(json.asMap('buying')),
-        selling: StellarAsset.fromStruct(json.asMap('selling')),
-        price: StellarPrice.fromStruct(json.asMap('price')),
-        offerId: json.as('offerId'));
+      buyAmount: json.as('buyAmount'),
+      buying: StellarAsset.fromStruct(json.asMap('buying')),
+      selling: StellarAsset.fromStruct(json.asMap('selling')),
+      price: StellarPrice.fromStruct(json.asMap('price')),
+      offerId: json.as('offerId'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1141,7 +1256,7 @@ class ManageBuyOfferOperation extends OperationBody {
       'buying': buying.toVariantLayoutStruct(),
       'buyAmount': buyAmount,
       'price': price.toLayoutStruct(),
-      'offerId': offerId
+      'offerId': offerId,
     };
   }
 
@@ -1152,7 +1267,7 @@ class ManageBuyOfferOperation extends OperationBody {
       'buying': buying.toJson(),
       'buyAmount': buyAmount.toString(),
       'price': price.toPrice(),
-      'offerId': offerId.toString()
+      'offerId': offerId.toString(),
     };
   }
 }
@@ -1176,15 +1291,17 @@ class PathPaymentStrictSendOperation extends OperationBody {
   final List<StellarAsset> path;
   factory PathPaymentStrictSendOperation.fromStruct(Map<String, dynamic> json) {
     return PathPaymentStrictSendOperation(
-        sendAmount: json.as('sendAmount'),
-        destMin: json.as('destMin'),
-        sendAsset: StellarAsset.fromStruct(json.asMap('sendAsset')),
-        destAsset: StellarAsset.fromStruct(json.asMap('destAsset')),
-        destination: MuxedAccount.fromStruct(json.asMap('destination')),
-        path: json
-            .asListOfMap('path')!
-            .map((e) => StellarAsset.fromStruct(e))
-            .toList());
+      sendAmount: json.as('sendAmount'),
+      destMin: json.as('destMin'),
+      sendAsset: StellarAsset.fromStruct(json.asMap('sendAsset')),
+      destAsset: StellarAsset.fromStruct(json.asMap('destAsset')),
+      destination: MuxedAccount.fromStruct(json.asMap('destination')),
+      path:
+          json
+              .asListOfMap('path')!
+              .map((e) => StellarAsset.fromStruct(e))
+              .toList(),
+    );
   }
 
   PathPaymentStrictSendOperation({
@@ -1194,10 +1311,15 @@ class PathPaymentStrictSendOperation extends OperationBody {
     required this.destAsset,
     required BigInt destMin,
     List<StellarAsset> path = const [],
-  })  : sendAmount = sendAmount.asInt64,
-        destMin = destMin.asInt64,
-        path = path.immutable.max(5, name: 'Path'),
-        super(OperationType.pathPaymentStrictSend);
+  }) : sendAmount = sendAmount.asI64,
+       destMin = destMin.asI64,
+       path = path.immutable.max(
+         length: 5,
+         name: 'path',
+         operation: "PathPaymentStrictSendOperation",
+         reason: "Invalid path length.",
+       ),
+       super(OperationType.pathPaymentStrictSend);
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarAsset.layout(property: 'sendAsset'),
@@ -1205,7 +1327,7 @@ class PathPaymentStrictSendOperation extends OperationBody {
       MuxedAccount.layout(property: 'destination'),
       StellarAsset.layout(property: 'destAsset'),
       LayoutConst.s64be(property: 'destMin'),
-      LayoutConst.xdrVec(StellarAsset.layout(), property: 'path')
+      LayoutConst.xdrVec(StellarAsset.layout(), property: 'path'),
     ], property: property);
   }
 
@@ -1222,7 +1344,7 @@ class PathPaymentStrictSendOperation extends OperationBody {
       'destination': destination.toVariantLayoutStruct(),
       'destAsset': destAsset.toVariantLayoutStruct(),
       'destMin': destMin,
-      'path': path.map((e) => e.toVariantLayoutStruct()).toList()
+      'path': path.map((e) => e.toVariantLayoutStruct()).toList(),
     };
   }
 
@@ -1234,7 +1356,7 @@ class PathPaymentStrictSendOperation extends OperationBody {
       'destination': destination.address.toString(),
       'destAsset': destAsset.toJson(),
       'destMin': destMin.toString(),
-      'path': path.map((e) => e.toJson()).toList()
+      'path': path.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -1246,30 +1368,43 @@ class CreateClaimableBalanceOperation extends OperationBody {
   final StellarAsset asset;
   final BigInt amount;
   final List<Claimant> claimants;
-  CreateClaimableBalanceOperation(
-      {required this.asset,
-      required BigInt amount,
-      required List<Claimant> claimants})
-      : amount = amount.asInt64,
-        claimants = claimants.immutable
-            .max(10, name: 'claimants')
-            .min(1, name: 'claimants'),
-        super(OperationType.createClaimableBalance);
+  CreateClaimableBalanceOperation({
+    required this.asset,
+    required BigInt amount,
+    required List<Claimant> claimants,
+  }) : amount = amount.asI64,
+       claimants = claimants.immutable
+           .max(
+             length: 10,
+             name: 'claimants',
+             operation: "CreateClaimableBalanceOperation",
+             reason: "Invalid claimants length.",
+           )
+           .min(
+             length: 1,
+             name: 'claimants',
+             operation: "CreateClaimableBalanceOperation",
+             reason: "Invalid claimants length.",
+           ),
+       super(OperationType.createClaimableBalance);
   factory CreateClaimableBalanceOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return CreateClaimableBalanceOperation(
-        asset: StellarAsset.fromStruct(json.asMap('asset')),
-        amount: json.as('amount'),
-        claimants: json
-            .asListOfMap('claimants')!
-            .map((e) => Claimant.fromStruct(e))
-            .toList());
+      asset: StellarAsset.fromStruct(json.asMap('asset')),
+      amount: json.as('amount'),
+      claimants:
+          json
+              .asListOfMap('claimants')!
+              .map((e) => Claimant.fromStruct(e))
+              .toList(),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarAsset.layout(property: 'asset'),
       LayoutConst.s64be(property: 'amount'),
-      LayoutConst.xdrVec(Claimant.layout(), property: 'claimants')
+      LayoutConst.xdrVec(Claimant.layout(), property: 'claimants'),
     ], property: property);
   }
 
@@ -1283,7 +1418,7 @@ class CreateClaimableBalanceOperation extends OperationBody {
     return {
       'asset': asset.toVariantLayoutStruct(),
       'amount': amount,
-      'claimants': claimants.map((e) => e.toVariantLayoutStruct()).toList()
+      'claimants': claimants.map((e) => e.toVariantLayoutStruct()).toList(),
     };
   }
 
@@ -1292,7 +1427,7 @@ class CreateClaimableBalanceOperation extends OperationBody {
     return {
       'asset': asset.toJson(),
       'amount': amount.toString(),
-      'claimants': claimants.map((e) => e.toJson()).toList()
+      'claimants': claimants.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -1304,15 +1439,16 @@ class ClaimClaimableBalanceOperation extends OperationBody {
   final ClaimableBalanceId balanceID;
   factory ClaimClaimableBalanceOperation.fromStruct(Map<String, dynamic> json) {
     return ClaimClaimableBalanceOperation(
-        ClaimableBalanceId.fromStruct(json.asMap('balanceID')));
+      ClaimableBalanceId.fromStruct(json.asMap('balanceID')),
+    );
   }
   ClaimClaimableBalanceOperation(this.balanceID)
-      : super(OperationType.claimClaimableBalance);
+    : super(OperationType.claimClaimableBalance);
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [ClaimableBalanceId.layout(property: 'balanceID')],
-        property: property);
+    return LayoutConst.struct([
+      ClaimableBalanceId.layout(property: 'balanceID'),
+    ], property: property);
   }
 
   @override
@@ -1342,16 +1478,18 @@ class ClaimClaimableBalanceOperation extends OperationBody {
 class BeginSponsoringFutureReservesOperation extends OperationBody {
   final StellarPublicKey sponsoredId;
   const BeginSponsoringFutureReservesOperation(this.sponsoredId)
-      : super(OperationType.beginSponsoringFutureReserves);
+    : super(OperationType.beginSponsoringFutureReserves);
   factory BeginSponsoringFutureReservesOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return BeginSponsoringFutureReservesOperation(
-        StellarPublicKey.fromStruct(json.asMap('sponsoredId')));
+      StellarPublicKey.fromStruct(json.asMap('sponsoredId')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [StellarPublicKey.layout(property: 'sponsoredId')],
-        property: property);
+    return LayoutConst.struct([
+      StellarPublicKey.layout(property: 'sponsoredId'),
+    ], property: property);
   }
 
   @override
@@ -1372,9 +1510,10 @@ class BeginSponsoringFutureReservesOperation extends OperationBody {
 
 class EndSponsoringFutureReservesOperation extends OperationBody {
   const EndSponsoringFutureReservesOperation()
-      : super(OperationType.endSponsoringFutureReserves);
+    : super(OperationType.endSponsoringFutureReserves);
   factory EndSponsoringFutureReservesOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return const EndSponsoringFutureReservesOperation();
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1401,15 +1540,16 @@ class EndSponsoringFutureReservesOperation extends OperationBody {
 class RevokeSponsorshipOperation extends OperationBody {
   final RevokeSponsorship revokeSponsorship;
   const RevokeSponsorshipOperation(this.revokeSponsorship)
-      : super(OperationType.revokeSponsorship);
+    : super(OperationType.revokeSponsorship);
   factory RevokeSponsorshipOperation.fromStruct(Map<String, dynamic> json) {
     return RevokeSponsorshipOperation(
-        RevokeSponsorship.fromStruct(json.asMap('revokeSponsorship')));
+      RevokeSponsorship.fromStruct(json.asMap('revokeSponsorship')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct(
-        [RevokeSponsorship.layout(property: 'revokeSponsorship')],
-        property: property);
+    return LayoutConst.struct([
+      RevokeSponsorship.layout(property: 'revokeSponsorship'),
+    ], property: property);
   }
 
   @override
@@ -1435,21 +1575,24 @@ class ClawbackOperation extends OperationBody {
   final StellarAsset asset;
   final MuxedAccount from;
   final BigInt amount;
-  ClawbackOperation(
-      {required this.asset, required this.from, required BigInt amount})
-      : amount = amount.asInt64,
-        super(OperationType.clawback);
+  ClawbackOperation({
+    required this.asset,
+    required this.from,
+    required BigInt amount,
+  }) : amount = amount.asI64,
+       super(OperationType.clawback);
   factory ClawbackOperation.fromStruct(Map<String, dynamic> json) {
     return ClawbackOperation(
-        asset: StellarAsset.fromStruct(json.asMap('asset')),
-        amount: json.as('amount'),
-        from: MuxedAccount.fromStruct(json.asMap('from')));
+      asset: StellarAsset.fromStruct(json.asMap('asset')),
+      amount: json.as('amount'),
+      from: MuxedAccount.fromStruct(json.asMap('from')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       StellarAsset.layout(property: 'asset'),
       MuxedAccount.layout(property: 'from'),
-      LayoutConst.s64be(property: 'amount')
+      LayoutConst.s64be(property: 'amount'),
     ], property: property);
   }
 
@@ -1483,11 +1626,13 @@ class ClawbackOperation extends OperationBody {
 class ClawbackClaimableBalanceOperation extends OperationBody {
   final ClaimableBalanceId balanceId;
   const ClawbackClaimableBalanceOperation(this.balanceId)
-      : super(OperationType.clawbackClaimableBalance);
+    : super(OperationType.clawbackClaimableBalance);
   factory ClawbackClaimableBalanceOperation.fromStruct(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return ClawbackClaimableBalanceOperation(
-        ClaimableBalanceId.fromStruct(json.asMap('balanceId')));
+      ClaimableBalanceId.fromStruct(json.asMap('balanceId')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1522,18 +1667,19 @@ class SetTrustLineFlagsOperation extends OperationBody {
   final TrustLineFlag clearFlags;
   final TrustLineFlag setFlags;
 
-  SetTrustLineFlagsOperation(
-      {required this.trustor,
-      required this.asset,
-      required this.clearFlags,
-      required this.setFlags})
-      : super(OperationType.setTrustLineFlags);
+  SetTrustLineFlagsOperation({
+    required this.trustor,
+    required this.asset,
+    required this.clearFlags,
+    required this.setFlags,
+  }) : super(OperationType.setTrustLineFlags);
   factory SetTrustLineFlagsOperation.fromStruct(Map<String, dynamic> json) {
     return SetTrustLineFlagsOperation(
-        asset: StellarAsset.fromStruct(json.asMap('asset')),
-        trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
-        clearFlags: TrustLineFlag.fromValue(json.as('clearFlags')),
-        setFlags: TrustLineFlag.fromValue(json.as('setFlags')));
+      asset: StellarAsset.fromStruct(json.asMap('asset')),
+      trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
+      clearFlags: TrustLineFlag.fromValue(json.as('clearFlags')),
+      setFlags: TrustLineFlag.fromValue(json.as('setFlags')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1555,7 +1701,7 @@ class SetTrustLineFlagsOperation extends OperationBody {
       'trustor': trustor.toLayoutStruct(),
       'asset': asset.toVariantLayoutStruct(),
       'clearFlags': clearFlags.value,
-      'setFlags': setFlags.value
+      'setFlags': setFlags.value,
     };
   }
 
@@ -1565,7 +1711,7 @@ class SetTrustLineFlagsOperation extends OperationBody {
       'trustor': trustor.toAddress().toString(),
       'asset': asset.toJson(),
       'clearFlags': clearFlags.name,
-      'setFlags': setFlags.name
+      'setFlags': setFlags.name,
     };
   }
 
@@ -1583,17 +1729,21 @@ class LiquidityPoolDepositOperation extends OperationBody {
   final StellarPrice minPrice;
   final StellarPrice maxPrice;
 
-  LiquidityPoolDepositOperation(
-      {required List<int> liquidityPoolId,
-      required BigInt maxAmountA,
-      required BigInt maxAmountB,
-      required this.minPrice,
-      required this.maxPrice})
-      : liquidityPoolId = liquidityPoolId.asImmutableBytes
-            .exc(StellarConst.hash256Length, name: 'liquidityPoolId'),
-        maxAmountA = maxAmountA.asInt64,
-        maxAmountB = maxAmountB.asInt64,
-        super(OperationType.liquidityPoolDeposit);
+  LiquidityPoolDepositOperation({
+    required List<int> liquidityPoolId,
+    required BigInt maxAmountA,
+    required BigInt maxAmountB,
+    required this.minPrice,
+    required this.maxPrice,
+  }) : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
+         length: StellarConst.hash256Length,
+         name: 'liquidityPoolId',
+         operation: "LiquidityPoolDepositOperation",
+         reason: "Invalid liquidityPoolId bytes length.",
+       ),
+       maxAmountA = maxAmountA.asI64,
+       maxAmountB = maxAmountB.asI64,
+       super(OperationType.liquidityPoolDeposit);
   factory LiquidityPoolDepositOperation.fromStruct(Map<String, dynamic> json) {
     return LiquidityPoolDepositOperation(
       liquidityPoolId: json.asBytes('liquidityPoolId'),
@@ -1605,12 +1755,14 @@ class LiquidityPoolDepositOperation extends OperationBody {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.hash256Length,
-          property: 'liquidityPoolId'),
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'liquidityPoolId',
+      ),
       LayoutConst.s64be(property: 'maxAmountA'),
       LayoutConst.s64be(property: 'maxAmountB'),
       StellarPrice.layout(property: 'minPrice'),
-      StellarPrice.layout(property: 'maxPrice')
+      StellarPrice.layout(property: 'maxPrice'),
     ], property: property);
   }
 
@@ -1626,7 +1778,7 @@ class LiquidityPoolDepositOperation extends OperationBody {
       'maxAmountA': maxAmountA,
       'maxAmountB': maxAmountB,
       'minPrice': minPrice.toLayoutStruct(),
-      'maxPrice': maxPrice.toLayoutStruct()
+      'maxPrice': maxPrice.toLayoutStruct(),
     };
   }
 
@@ -1637,7 +1789,7 @@ class LiquidityPoolDepositOperation extends OperationBody {
       'maxAmountA': maxAmountA.toString(),
       'maxAmountB': maxAmountB.toString(),
       'minPrice': minPrice.toPrice(7),
-      'maxPrice': maxPrice.toPrice(7)
+      'maxPrice': maxPrice.toPrice(7),
     };
   }
 }
@@ -1656,12 +1808,16 @@ class LiquidityPoolWithdrawOperation extends OperationBody {
     required BigInt amount,
     required BigInt minAmountA,
     required BigInt minAmountB,
-  })  : liquidityPoolId = liquidityPoolId.asImmutableBytes
-            .exc(StellarConst.hash256Length, name: 'liquidityPoolId'),
-        amount = amount.asInt64,
-        minAmountA = minAmountA.asInt64,
-        minAmountB = minAmountB.asInt64,
-        super(OperationType.liquidityPoolWithdraw);
+  }) : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
+         length: StellarConst.hash256Length,
+         name: 'liquidityPoolId',
+         operation: "LiquidityPoolWithdrawOperation",
+         reason: "Invalid liquidityPoolId bytes length.",
+       ),
+       amount = amount.asI64,
+       minAmountA = minAmountA.asI64,
+       minAmountB = minAmountB.asI64,
+       super(OperationType.liquidityPoolWithdraw);
   factory LiquidityPoolWithdrawOperation.fromStruct(Map<String, dynamic> json) {
     return LiquidityPoolWithdrawOperation(
       liquidityPoolId: json.asBytes('liquidityPoolId'),
@@ -1672,8 +1828,10 @@ class LiquidityPoolWithdrawOperation extends OperationBody {
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.fixedBlobN(StellarConst.hash256Length,
-          property: 'liquidityPoolId'),
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'liquidityPoolId',
+      ),
       LayoutConst.s64be(property: 'amount'),
       LayoutConst.s64be(property: 'minAmountA'),
       LayoutConst.s64be(property: 'minAmountB'),
@@ -1715,31 +1873,36 @@ class InvokeHostFunctionOperation extends OperationBody {
 
   /// Per-address authorizations for this host function.
   final List<SorobanAuthorizationEntry> auth;
-  InvokeHostFunctionOperation(
-      {required this.hostFunction,
-      List<SorobanAuthorizationEntry> auth = const []})
-      : auth = auth.immutable,
-        super(OperationType.invokeHostFunction);
+  InvokeHostFunctionOperation({
+    required this.hostFunction,
+    List<SorobanAuthorizationEntry> auth = const [],
+  }) : auth = auth.immutable,
+       super(OperationType.invokeHostFunction);
   factory InvokeHostFunctionOperation.fromStruct(Map<String, dynamic> json) {
     return InvokeHostFunctionOperation(
-        hostFunction: HostFunction.fromStruct(json.asMap('hostFunction')),
-        auth: json
-            .asListOfMap('auth')!
-            .map((e) => SorobanAuthorizationEntry.fromStruct(e))
-            .toList());
+      hostFunction: HostFunction.fromStruct(json.asMap('hostFunction')),
+      auth:
+          json
+              .asListOfMap('auth')!
+              .map((e) => SorobanAuthorizationEntry.fromStruct(e))
+              .toList(),
+    );
   }
 
-  InvokeHostFunctionOperation copyWith(
-      {HostFunction? hostFunction, List<SorobanAuthorizationEntry>? auth}) {
+  InvokeHostFunctionOperation copyWith({
+    HostFunction? hostFunction,
+    List<SorobanAuthorizationEntry>? auth,
+  }) {
     return InvokeHostFunctionOperation(
-        hostFunction: hostFunction ?? this.hostFunction,
-        auth: auth ?? this.auth);
+      hostFunction: hostFunction ?? this.hostFunction,
+      auth: auth ?? this.auth,
+    );
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       HostFunction.layout(property: 'hostFunction'),
-      LayoutConst.xdrVec(SorobanAuthorizationEntry.layout(), property: 'auth')
+      LayoutConst.xdrVec(SorobanAuthorizationEntry.layout(), property: 'auth'),
     ], property: property);
   }
 
@@ -1752,7 +1915,7 @@ class InvokeHostFunctionOperation extends OperationBody {
   Map<String, dynamic> toLayoutStruct() {
     return {
       'hostFunction': hostFunction.toVariantLayoutStruct(),
-      'auth': auth.map((e) => e.toLayoutStruct()).toList()
+      'auth': auth.map((e) => e.toLayoutStruct()).toList(),
     };
   }
 
@@ -1760,7 +1923,7 @@ class InvokeHostFunctionOperation extends OperationBody {
   Map<String, dynamic> toJson() {
     return {
       'hostFunction': hostFunction.toJson(),
-      'auth': auth.map((e) => e.toJson()).toList()
+      'auth': auth.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -1772,14 +1935,16 @@ class InvokeHostFunctionOperation extends OperationBody {
 class ExtendFootprintTTLOperation extends OperationBody {
   final ExtentionPointVoid ext;
   final int extendTo;
-  ExtendFootprintTTLOperation(
-      {required int extendTo, this.ext = const ExtentionPointVoid()})
-      : extendTo = extendTo.asUint32,
-        super(OperationType.extendFootprintTtl);
+  ExtendFootprintTTLOperation({
+    required int extendTo,
+    this.ext = const ExtentionPointVoid(),
+  }) : extendTo = extendTo.asU32,
+       super(OperationType.extendFootprintTtl);
   factory ExtendFootprintTTLOperation.fromStruct(Map<String, dynamic> json) {
     return ExtendFootprintTTLOperation(
-        ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
-        extendTo: json.as('extendTo'));
+      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
+      extendTo: json.as('extendTo'),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1813,15 +1978,17 @@ class ExtendFootprintTTLOperation extends OperationBody {
 class RestoreFootprintOperation extends OperationBody {
   final ExtentionPointVoid ext;
   RestoreFootprintOperation({this.ext = const ExtentionPointVoid()})
-      : super(OperationType.restoreFootprint);
+    : super(OperationType.restoreFootprint);
 
   factory RestoreFootprintOperation.fromStruct(Map<String, dynamic> json) {
     return RestoreFootprintOperation(
-        ext: ExtentionPointVoid.fromStruct(json.asMap('ext')));
+      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
+    );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct([ExtentionPointVoid.layout(property: 'ext')],
-        property: property);
+    return LayoutConst.struct([
+      ExtentionPointVoid.layout(property: 'ext'),
+    ], property: property);
   }
 
   @override

@@ -3,9 +3,10 @@ import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/helper/helper.dart';
 
 abstract class XDRSerialization {
-  static Map<String, dynamic> deserialize(
-      {required List<int> bytes,
-      required Layout<Map<String, dynamic>> layout}) {
+  static Map<String, dynamic> deserialize({
+    required List<int> bytes,
+    required Layout<Map<String, dynamic>> layout,
+  }) {
     final decode = layout.deserialize(bytes);
     return decode.value;
   }
@@ -38,7 +39,7 @@ class XDRVariantDecodeResult {
   String get variantName => result['key'];
   Map<String, dynamic> get value => result['value'];
   XDRVariantDecodeResult(Map<String, dynamic> result)
-      : result = result.immutable;
+    : result = result.immutable;
 
   @override
   String toString() {
@@ -49,21 +50,25 @@ class XDRVariantDecodeResult {
 abstract class XDRVariantSerialization extends XDRSerialization {
   const XDRVariantSerialization();
   static XDRVariantDecodeResult toVariantDecodeResult(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     if (json['key'] is! String || !json.containsKey('value')) {
       throw const DartStellarPlugingException(
-          'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.');
+        'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.',
+      );
     }
     return XDRVariantDecodeResult(json);
   }
 
-  static Map<String, dynamic> deserialize(
-      {required List<int> bytes,
-      required Layout<Map<String, dynamic>> layout}) {
+  static Map<String, dynamic> deserialize({
+    required List<int> bytes,
+    required Layout<Map<String, dynamic>> layout,
+  }) {
     final json = layout.deserialize(bytes).value;
     if (json['key'] is! String || !json.containsKey('value')) {
       throw const DartStellarPlugingException(
-          'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.');
+        'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.',
+      );
     }
     return json;
   }

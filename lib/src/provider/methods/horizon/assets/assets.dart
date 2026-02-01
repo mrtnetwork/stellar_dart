@@ -4,16 +4,20 @@ import 'package:stellar_dart/src/provider/models/response/asset.dart';
 
 /// This endpoint lists all assets.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/list-all-assets
-class HorizonRequestAssets extends HorizonRequest<List<StellarAllAssetResponse>,
-    Map<String, dynamic>> {
+class HorizonRequestAssets
+    extends
+        HorizonRequest<List<StellarAllAssetResponse>, Map<String, dynamic>> {
   /// The code of the asset you would like to filter by.
   final String? assetCode;
 
   /// The Stellar address of the issuer for the asset you would like to filter by.
   final String? assetIssuer;
 
-  const HorizonRequestAssets(
-      {this.assetCode, this.assetIssuer, super.paginationParams});
+  const HorizonRequestAssets({
+    this.assetCode,
+    this.assetIssuer,
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.assets.url;
@@ -22,8 +26,10 @@ class HorizonRequestAssets extends HorizonRequest<List<StellarAllAssetResponse>,
   List<String> get pathParameters => [];
 
   @override
-  Map<String, dynamic> get queryParameters =>
-      {'asset_code': assetCode, 'asset_issuer': assetIssuer};
+  Map<String, dynamic> get queryParameters => {
+    'asset_code': assetCode,
+    'asset_issuer': assetIssuer,
+  };
 
   @override
   List<StellarAllAssetResponse> onResonse(Map<String, dynamic> result) {

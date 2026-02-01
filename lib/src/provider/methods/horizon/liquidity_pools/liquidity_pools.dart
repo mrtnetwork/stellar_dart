@@ -13,8 +13,11 @@ class HorizonRequestLiquidityPools
   /// is participating in (i.e. holds pool shares to).
   final Object? account;
 
-  const HorizonRequestLiquidityPools(
-      {this.reserves, this.account, super.paginationParams});
+  const HorizonRequestLiquidityPools({
+    this.reserves,
+    this.account,
+    super.paginationParams,
+  });
 
   @override
   String get method => StellarHorizonMethods.liquidityPools.url;

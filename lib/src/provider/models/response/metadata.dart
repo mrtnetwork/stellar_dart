@@ -13,14 +13,15 @@ class StellarAssetMetadata {
 
   factory StellarAssetMetadata.fromJson(Map<String, String> map) {
     return StellarAssetMetadata(
-        code: map['code']!,
-        issuer: StellarAddress.fromBase32Addr(map['issuer']!),
-        name: map['name']!,
-        displayDecimals: int.tryParse(map['display_decimals'] ?? '7') ?? 7,
-        desc: map['desc'],
-        image: map['image'],
-        conditions: map['conditions'],
-        isAnchored: map['is_asset_anchored']?.toLowerCase() == 'true');
+      code: map['code']!,
+      issuer: StellarAddress.fromBase32Addr(map['issuer']!),
+      name: map['name']!,
+      displayDecimals: int.tryParse(map['display_decimals'] ?? '7') ?? 7,
+      desc: map['desc'],
+      image: map['image'],
+      conditions: map['conditions'],
+      isAnchored: map['is_asset_anchored']?.toLowerCase() == 'true',
+    );
   }
 
   static List<StellarAssetMetadata> fromToml(String toml) {
@@ -28,7 +29,8 @@ class StellarAssetMetadata {
       return StellarProviderUtils.parseTomlCurrencies(toml);
     } catch (_) {
       throw const DartStellarPlugingException(
-          "Failed to parse Stellar TOML data: Invalid or unexpected format.");
+        "Failed to parse Stellar TOML data: Invalid or unexpected format.",
+      );
     }
   }
 
@@ -41,7 +43,7 @@ class StellarAssetMetadata {
       "desc": desc,
       "image": image,
       "conditions": conditions,
-      "isAnchored": isAnchored
+      "isAnchored": isAnchored,
     };
   }
 

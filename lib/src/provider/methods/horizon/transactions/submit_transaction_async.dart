@@ -9,8 +9,12 @@ import 'package:stellar_dart/src/provider/models/response/async_transaction_subm
 /// submitted transaction. You can then use Horizon's GET transaction endpoint to wait
 /// for the transaction to be included in a ledger and ingested by Horizon.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/submit-async-transaction
-class HorizonRequestSubmitTransactionAsynchronously extends HorizonPostRequest<
-    AsyncTransactionSubmissionResponse, Map<String, dynamic>> {
+class HorizonRequestSubmitTransactionAsynchronously
+    extends
+        HorizonPostRequest<
+          AsyncTransactionSubmissionResponse,
+          Map<String, dynamic>
+        > {
   final String tx;
   const HorizonRequestSubmitTransactionAsynchronously(this.tx);
 
@@ -18,8 +22,9 @@ class HorizonRequestSubmitTransactionAsynchronously extends HorizonPostRequest<
   String get method =>
       StellarHorizonMethods.submitTransactionAsynchronously.url;
   @override
-  Map<String, String>? get headers =>
-      {'Content-Type': 'application/x-www-form-urlencoded'};
+  Map<String, String>? get headers => {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
 
   @override
   Map<String, dynamic> get queryParameters => {'tx': tx};

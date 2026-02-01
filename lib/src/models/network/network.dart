@@ -4,28 +4,37 @@ class StellarNetwork {
   final List<int> passphraseHash;
   final String name;
   final String passphrase;
-  const StellarNetwork._(
-      {required this.passphrase,
-      required this.passphraseHash,
-      required this.name});
+  const StellarNetwork._({
+    required this.passphrase,
+    required this.passphraseHash,
+    required this.name,
+  });
   static const StellarNetwork mainnet = StellarNetwork._(
-      passphrase: _StellarNetworkConst.mainnet,
-      passphraseHash: _StellarNetworkConst.mainnetHash,
-      name: 'Mainnet');
+    passphrase: _StellarNetworkConst.mainnet,
+    passphraseHash: _StellarNetworkConst.mainnetHash,
+    name: 'Mainnet',
+  );
   static const StellarNetwork testnet = StellarNetwork._(
-      passphrase: _StellarNetworkConst.testnet,
-      passphraseHash: _StellarNetworkConst.testnetHash,
-      name: 'Testnet');
+    passphrase: _StellarNetworkConst.testnet,
+    passphraseHash: _StellarNetworkConst.testnetHash,
+    name: 'Testnet',
+  );
   static const StellarNetwork futurenet = StellarNetwork._(
-      passphrase: _StellarNetworkConst.future,
-      passphraseHash: _StellarNetworkConst.futureHash,
-      name: 'Futurenet');
+    passphrase: _StellarNetworkConst.future,
+    passphraseHash: _StellarNetworkConst.futureHash,
+    name: 'Futurenet',
+  );
   static const List<StellarNetwork> values = [mainnet, testnet, futurenet];
   static StellarNetwork fromPassphrase(String? passphrase) {
-    return values.firstWhere((e) => e.passphrase == passphrase,
-        orElse: () => throw DartStellarPlugingException(
-            'Network not found with the provided passphrase.',
-            details: {'passphrase': passphrase}));
+    return values.firstWhere(
+      (e) => e.passphrase == passphrase,
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'Network not found with the provided passphrase.',
+                details: {'passphrase': passphrase},
+              ),
+    );
   }
 }
 
@@ -66,7 +75,7 @@ class _StellarNetworkConst {
     16,
     69,
     169,
-    121
+    121,
   ];
   static const List<int> testnetHash = [
     206,
@@ -100,7 +109,7 @@ class _StellarNetworkConst {
     40,
     236,
     212,
-    114
+    114,
   ];
   static const List<int> futureHash = [
     163,
@@ -134,6 +143,6 @@ class _StellarNetworkConst {
     222,
     188,
     127,
-    213
+    213,
   ];
 }

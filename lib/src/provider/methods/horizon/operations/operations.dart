@@ -9,11 +9,15 @@ import 'package:stellar_dart/src/provider/models/response/transaction_operation.
 /// in which case it will start from that cursor. By setting the cursor value to now,
 /// you can stream operations created since your request time.
 /// https://developers.stellar.org/docs/data/horizon/api-reference/list-all-operations
-class HorizonRequestOperations extends HorizonRequest<
-    List<StellarTransactionOperationResponse>, Map<String, dynamic>> {
-  const HorizonRequestOperations(
-      {HorizonPaymentPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+class HorizonRequestOperations
+    extends
+        HorizonRequest<
+          List<StellarTransactionOperationResponse>,
+          Map<String, dynamic>
+        > {
+  const HorizonRequestOperations({
+    HorizonPaymentPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   @override
   String get method => StellarHorizonMethods.operations.url;
@@ -23,7 +27,8 @@ class HorizonRequestOperations extends HorizonRequest<
 
   @override
   List<StellarTransactionOperationResponse> onResonse(
-      Map<String, dynamic> result) {
+    Map<String, dynamic> result,
+  ) {
     final records = (result['_embedded']?['records'] as List?) ?? [];
     return records
         .map((e) => StellarTransactionOperationResponse.fromJson(e))

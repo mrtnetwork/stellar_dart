@@ -1,29 +1,34 @@
 import 'package:blockchain_utils/helper/helper.dart';
 import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
-import 'package:stellar_dart/src/utils/validator.dart';
 
 class RequestAssetType {
   final String name;
   const RequestAssetType._(this.name);
   static const RequestAssetType native = RequestAssetType._('native');
-  static const RequestAssetType creditAlphanum4 =
-      RequestAssetType._('credit_alphanum4');
-  static const RequestAssetType creditAlphanum12 =
-      RequestAssetType._('credit_alphanum12');
+  static const RequestAssetType creditAlphanum4 = RequestAssetType._(
+    'credit_alphanum4',
+  );
+  static const RequestAssetType creditAlphanum12 = RequestAssetType._(
+    'credit_alphanum12',
+  );
   static const List<RequestAssetType> values = [
     native,
     creditAlphanum4,
-    creditAlphanum12
+    creditAlphanum12,
   ];
   static RequestAssetType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
-      orElse: () => throw DartStellarPlugingException('Asset type not found.',
-          details: {
-            'name': name,
-            'values': values.map((e) => e.name).join(', ')
-          }),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'Asset type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
     );
   }
 
@@ -36,8 +41,10 @@ class RequestAssetType {
       case RequestAssetType.creditAlphanum4:
         return AssetType.creditAlphanum4;
       default:
-        throw DartStellarPlugingException('Invalid response asset type.',
-            details: {'type': name});
+        throw DartStellarPlugingException(
+          'Invalid response asset type.',
+          details: {'type': name},
+        );
     }
   }
 
@@ -52,8 +59,9 @@ class RequestTradeType {
   const RequestTradeType._(this.name);
   static const RequestTradeType all = RequestTradeType._('all');
   static const RequestTradeType orderbook = RequestTradeType._('orderbook');
-  static const RequestTradeType liquidityPools =
-      RequestTradeType._('liquidity_pools');
+  static const RequestTradeType liquidityPools = RequestTradeType._(
+    'liquidity_pools',
+  );
   @override
   String toString() {
     return 'RequestTradeType.$name';
@@ -99,17 +107,18 @@ class HorizonPaginationParams {
     return {
       'cursor': cursor?.toString(),
       'order': order?.name,
-      'limit': limit?.toString()
+      'limit': limit?.toString(),
     };
   }
 }
 
 class HorizonTransactionPaginationParams extends HorizonPaginationParams {
-  HorizonTransactionPaginationParams(
-      {required super.cursor,
-      required super.order,
-      required super.limit,
-      this.includeFailed});
+  HorizonTransactionPaginationParams({
+    required super.cursor,
+    required super.order,
+    required super.limit,
+    this.includeFailed,
+  });
 
   /// Set to true to include failed operations in results. Options include true and false.
   final bool? includeFailed;
@@ -122,8 +131,13 @@ class HorizonTransactionPaginationParams extends HorizonPaginationParams {
 
 class HorizonPaymentPaginationParams
     extends HorizonTransactionPaginationParams {
-  HorizonPaymentPaginationParams(
-      {super.cursor, super.order, super.limit, super.includeFailed, this.join});
+  HorizonPaymentPaginationParams({
+    super.cursor,
+    super.order,
+    super.limit,
+    super.includeFailed,
+    this.join,
+  });
 
   /// Set to transactions to include the transactions which created each of the operations in the response.
   final Object? join;
@@ -139,12 +153,22 @@ class SorobanEventFilter {
   final SorobanEventType type;
   final List<String> contractIds;
   final List<String> topics;
-  SorobanEventFilter(
-      {required List<String> topics,
-      required List<String> contractIds,
-      required this.type})
-      : topics = topics.immutable.max(5, name: 'topics'),
-        contractIds = contractIds.immutable.max(5, name: 'contractIds');
+  SorobanEventFilter({
+    required List<String> topics,
+    required List<String> contractIds,
+    required this.type,
+  }) : topics = topics.immutable.max(
+         length: 5,
+         name: 'topics',
+         operation: "SorobanEventFilter",
+         reason: "Invalid topics length.",
+       ),
+       contractIds = contractIds.immutable.max(
+         length: 5,
+         name: 'contractIds',
+         operation: "SorobanEventFilter",
+         reason: "Invalid contractIds length.",
+       );
   Map<String, dynamic> toJson() {
     return {'type': type.name, 'contractIds': contractIds, 'topics': topics};
   }

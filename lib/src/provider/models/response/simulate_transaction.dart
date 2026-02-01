@@ -8,7 +8,9 @@ class ResourcesCostResponse {
   const ResourcesCostResponse({required this.cpuInsns, required this.memBytes});
   factory ResourcesCostResponse.fromJson(Map<String, dynamic> json) {
     return ResourcesCostResponse(
-        cpuInsns: json['cpuInsns'], memBytes: json['memBytes']);
+      cpuInsns: json['cpuInsns'],
+      memBytes: json['memBytes'],
+    );
   }
   Map<String, dynamic> toJson() {
     return {'cpuInsns': cpuInsns, 'memBytes': memBytes};
@@ -34,7 +36,8 @@ class SorobanSimulateResponse {
   SorobanTransactionData? get sorobanTransactionData {
     if (transactionData == null) return null;
     return SorobanTransactionData.fromXdr(
-        StringUtils.encode(transactionData!, type: StringEncoding.base64));
+      StringUtils.encode(transactionData!, type: StringEncoding.base64),
+    );
   }
 
   ScVal? get xdrResult {
@@ -65,22 +68,26 @@ class SorobanSimulateResponse {
     return SorobanSimulateResponse(
       latestLedger: json['latestLedger'] as int,
       minResourceFee: json['minResourceFee'] as String?,
-      cost: json['cost'] == null
-          ? null
-          : ResourcesCostResponse.fromJson(json['cost']),
-      results: (json['results'] as List?)
-          ?.map((result) => HostFunctionInvocationResult.fromJson(result))
-          .toList(),
+      cost:
+          json['cost'] == null
+              ? null
+              : ResourcesCostResponse.fromJson(json['cost']),
+      results:
+          (json['results'] as List?)
+              ?.map((result) => HostFunctionInvocationResult.fromJson(result))
+              .toList(),
       transactionData: json['transactionData'] as String?,
       events: json['events'] != null ? List<String>.from(json['events']) : null,
-      restorePreamble: json['restorePreamble'] != null
-          ? RestorePreamble.fromJson(json['restorePreamble'])
-          : null,
-      stateChanges: json['stateChanges'] != null
-          ? (json['stateChanges'] as List)
-              .map((change) => StateChange.fromJson(change))
-              .toList()
-          : null,
+      restorePreamble:
+          json['restorePreamble'] != null
+              ? RestorePreamble.fromJson(json['restorePreamble'])
+              : null,
+      stateChanges:
+          json['stateChanges'] != null
+              ? (json['stateChanges'] as List)
+                  .map((change) => StateChange.fromJson(change))
+                  .toList()
+              : null,
       error: json['error'] as String?,
     );
   }
@@ -94,7 +101,9 @@ class HostFunctionInvocationResult {
 
   factory HostFunctionInvocationResult.fromJson(Map<String, dynamic> json) {
     return HostFunctionInvocationResult(
-        xdr: json['xdr'], auth: (json['auth'] as List).cast());
+      xdr: json['xdr'],
+      auth: (json['auth'] as List).cast(),
+    );
   }
   ScVal? get xdrResult {
     return ScVal.fromXdr(StringUtils.encode(xdr, type: StringEncoding.base64));
@@ -129,21 +138,30 @@ class StateChangeType {
   final String name;
   final int value;
   const StateChangeType._({required this.name, required this.value});
-  static const StateChangeType created =
-      StateChangeType._(name: 'created', value: 1);
-  static const StateChangeType updated =
-      StateChangeType._(name: 'updated', value: 2);
-  static const StateChangeType deleted =
-      StateChangeType._(name: 'deleted', value: 1);
+  static const StateChangeType created = StateChangeType._(
+    name: 'created',
+    value: 1,
+  );
+  static const StateChangeType updated = StateChangeType._(
+    name: 'updated',
+    value: 2,
+  );
+  static const StateChangeType deleted = StateChangeType._(
+    name: 'deleted',
+    value: 1,
+  );
   // created (1), updated (2), or deleted (3)
   static const List<StateChangeType> values = [created, updated, deleted];
 
   static StateChangeType fromValue(Object? type) {
     return values.firstWhere(
       (e) => e.value == type || e.name == type,
-      orElse: () => throw DartStellarPlugingException(
-          'Invalid StateChange type.',
-          details: {'type': type}),
+      orElse:
+          () =>
+              throw DartStellarPlugingException(
+                'Invalid StateChange type.',
+                details: {'type': type},
+              ),
     );
   }
 
@@ -159,8 +177,12 @@ class StateChange {
   final String? before;
   final String? after;
 
-  const StateChange(
-      {required this.type, required this.key, this.before, this.after});
+  const StateChange({
+    required this.type,
+    required this.key,
+    this.before,
+    this.after,
+  });
 
   factory StateChange.fromJson(Map<String, dynamic> json) {
     return StateChange(

@@ -4,14 +4,16 @@ class StellarTransactionOperationResponse {
   final int typeI;
   final String type;
 
-  const StellarTransactionOperationResponse(
-      {required this.id,
-      required this.pagingToken,
-      required this.typeI,
-      required this.type});
+  const StellarTransactionOperationResponse({
+    required this.id,
+    required this.pagingToken,
+    required this.typeI,
+    required this.type,
+  });
 
   factory StellarTransactionOperationResponse.fromJson(
-      Map<String, dynamic> json) {
+    Map<String, dynamic> json,
+  ) {
     return StellarTransactionOperationResponse(
       id: json['id'],
       pagingToken: json['paging_token'],

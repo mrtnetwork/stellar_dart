@@ -12,9 +12,10 @@ class HorizonRequestClaimableBalanceTransactions
   /// A unique identifier for this claimable balance.
   final String claimableBalanceId;
 
-  const HorizonRequestClaimableBalanceTransactions(this.claimableBalanceId,
-      {HorizonTransactionPaginationParams? paginationParams})
-      : super(paginationParams: paginationParams);
+  const HorizonRequestClaimableBalanceTransactions(
+    this.claimableBalanceId, {
+    HorizonTransactionPaginationParams? paginationParams,
+  }) : super(paginationParams: paginationParams);
 
   @override
   String get method => StellarHorizonMethods.claimableBalanceTransactions.url;
