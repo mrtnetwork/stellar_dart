@@ -5,7 +5,6 @@ import 'package:stellar_dart/src/keypair/crypto/public_key.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/models/operations/operation.dart';
 import 'package:stellar_dart/src/serialization/serialization.dart';
-import 'package:stellar_dart/src/utils/validator.dart';
 
 class ClaimAtomType {
   static const ClaimAtomType claimAtomTypeV0 = ClaimAtomType._(
@@ -125,12 +124,16 @@ class ClaimOfferAtomV0 extends ClaimAtom {
 
   factory ClaimOfferAtomV0.fromStruct(Map<String, dynamic> json) {
     return ClaimOfferAtomV0(
-      sellerEd25519: json.asBytes('sellerEd25519'),
-      offerID: json.as('offerID'),
-      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-      amountSold: json.as('amountSold'),
-      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-      amountBought: json.as('amountBought'),
+      sellerEd25519: json.valueAs('sellerEd25519'),
+      offerID: json.valueAs('offerID'),
+      assetSold: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetSold'),
+      ),
+      amountSold: json.valueAs('amountSold'),
+      assetBought: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetBought'),
+      ),
+      amountBought: json.valueAs('amountBought'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -186,12 +189,18 @@ class ClaimOfferAtom extends ClaimAtom {
 
   factory ClaimOfferAtom.fromStruct(Map<String, dynamic> json) {
     return ClaimOfferAtom(
-      accountId: StellarPublicKey.fromStruct(json.asMap('accountId')),
-      offerID: json.as('offerID'),
-      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-      amountSold: json.as('amountSold'),
-      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-      amountBought: json.as('amountBought'),
+      accountId: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('accountId'),
+      ),
+      offerID: json.valueAs('offerID'),
+      assetSold: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetSold'),
+      ),
+      amountSold: json.valueAs('amountSold'),
+      assetBought: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetBought'),
+      ),
+      amountBought: json.valueAs('amountBought'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -247,11 +256,15 @@ class ClaimLiquidityAtom extends ClaimAtom {
 
   factory ClaimLiquidityAtom.fromStruct(Map<String, dynamic> json) {
     return ClaimLiquidityAtom(
-      liquidityPoolID: json.asBytes('liquidityPoolID'),
-      assetSold: StellarAsset.fromStruct(json.asMap('assetSold')),
-      amountSold: json.as('amountSold'),
-      assetBought: StellarAsset.fromStruct(json.asMap('assetBought')),
-      amountBought: json.as('amountBought'),
+      liquidityPoolID: json.valueAs('liquidityPoolID'),
+      assetSold: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetSold'),
+      ),
+      amountSold: json.valueAs('amountSold'),
+      assetBought: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('assetBought'),
+      ),
+      amountBought: json.valueAs('amountBought'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -711,9 +724,13 @@ class SimplePaymentResult extends XDRSerialization {
 
   factory SimplePaymentResult.fromStruct(Map<String, dynamic> json) {
     return SimplePaymentResult(
-      destination: StellarPublicKey.fromStruct(json.asMap('destination')),
-      asset: StellarAsset.fromStruct(json.asMap('asset')),
-      amount: json.as('amount'),
+      destination: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
+      asset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      amount: json.valueAs('amount'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -756,10 +773,12 @@ class PathPaymentStrictReceiveResultSuccesss
     return PathPaymentStrictReceiveResultSuccesss(
       offers:
           json
-              .asListOfMap('offers')!
+              .valueEnsureAsList<Map<String, dynamic>>('offers')
               .map((e) => ClaimAtom.fromStruct(e))
               .toList(),
-      last: SimplePaymentResult.fromStruct(json.asMap('last')),
+      last: SimplePaymentResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('last'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -795,7 +814,9 @@ class PathPaymentStrictReceiveResultNoIssuer
     Map<String, dynamic> json,
   ) {
     return PathPaymentStrictReceiveResultNoIssuer(
-      StellarAsset.fromStruct(json.asMap('noIssuer')),
+      StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('noIssuer'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -855,13 +876,21 @@ class OfferEntryResult extends XDRSerialization {
        flags = flags.asU32;
   factory OfferEntryResult.fromStruct(Map<String, dynamic> json) {
     return OfferEntryResult(
-      sellerID: StellarPublicKey.fromStruct(json.asMap('sellerID')),
-      amount: json.as('amount'),
-      buying: StellarAsset.fromStruct(json.asMap('buying')),
-      selling: StellarAsset.fromStruct(json.asMap('selling')),
-      flags: json.as('flags'),
-      offerID: json.as('offerID'),
-      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
+      sellerID: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('sellerID'),
+      ),
+      amount: json.valueAs('amount'),
+      buying: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('buying'),
+      ),
+      selling: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('selling'),
+      ),
+      flags: json.valueAs('flags'),
+      offerID: json.valueAs('offerID'),
+      ext: ExtentionPointVoid.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('ext'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1006,7 +1035,9 @@ class ManageOfferEffectUpdated extends ManageOfferEffect {
     : super(ManageOfferEffectType.manageOfferUpdated);
   factory ManageOfferEffectUpdated.fromStruct(Map<String, dynamic> json) {
     return ManageOfferEffectUpdated(
-      OfferEntryResult.fromStruct(json.asMap('offerEntry')),
+      OfferEntryResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('offerEntry'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1178,10 +1209,12 @@ class ManageOfferSuccessResult extends XDRSerialization {
     return ManageOfferSuccessResult(
       offersClaimed:
           json
-              .asListOfMap('offersClaimed')!
+              .valueEnsureAsList<Map<String, dynamic>>('offersClaimed')
               .map((e) => ClaimAtom.fromStruct(e))
               .toList(),
-      offer: ManageOfferEffect.fromStruct(json.asMap('offer')),
+      offer: ManageOfferEffect.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('offer'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1212,7 +1245,9 @@ class ManageSellOfferResultSuccess extends ManageSellOfferResult {
     : super(ManageSellOfferResultCode.manageSellOfferSuccess);
   factory ManageSellOfferResultSuccess.fromStruct(Map<String, dynamic> json) {
     return ManageSellOfferResultSuccess(
-      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+      ManageOfferSuccessResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('success'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1303,7 +1338,9 @@ class CreatePassiveSellOfferResultSuccess extends CreatePassiveSellOfferResult {
     Map<String, dynamic> json,
   ) {
     return CreatePassiveSellOfferResultSuccess(
-      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+      ManageOfferSuccessResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('success'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1813,7 +1850,7 @@ class AccountMergeResultSuccess extends AccountMergeResult {
     : sourceAccountBalance = sourceAccountBalance.asI64,
       super(AccountMergeResultCode.accountMergeSuccess);
   factory AccountMergeResultSuccess.fromStruct(Map<String, dynamic> json) {
-    return AccountMergeResultSuccess(json.as('sourceAccountBalance'));
+    return AccountMergeResultSuccess(json.valueAs('sourceAccountBalance'));
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -1920,8 +1957,10 @@ class InflationPayout extends XDRSerialization {
     : amount = amount.asI64;
   factory InflationPayout.fromStruct(Map<String, dynamic> json) {
     return InflationPayout(
-      destination: StellarPublicKey.fromStruct(json.asMap('destination')),
-      amount: json.as('amount'),
+      destination: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
+      amount: json.valueAs('amount'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1967,7 +2006,7 @@ class InflationResultSuccess extends InflationResult {
   factory InflationResultSuccess.fromStruct(Map<String, dynamic> json) {
     return InflationResultSuccess(
       json
-          .asListOfMap('payouts')!
+          .valueEnsureAsList<Map<String, dynamic>>('payouts')
           .map((e) => InflationPayout.fromStruct(e))
           .toList(),
     );
@@ -2302,7 +2341,9 @@ class ManageBuyOfferResultSuccess extends ManageBuyOfferResult {
     : super(ManageBuyOfferResultCode.manageBuyOfferSuccess);
   factory ManageBuyOfferResultSuccess.fromStruct(Map<String, dynamic> json) {
     return ManageBuyOfferResultSuccess(
-      ManageOfferSuccessResult.fromStruct(json.asMap('success')),
+      ManageOfferSuccessResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('success'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -2635,7 +2676,9 @@ class CreateClaimableBalanceResultSuccess extends CreateClaimableBalanceResult {
     Map<String, dynamic> json,
   ) {
     return CreateClaimableBalanceResultSuccess(
-      ClaimableBalanceId.fromStruct(json.asMap('balanceId')),
+      ClaimableBalanceId.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('balanceId'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -3618,7 +3661,7 @@ class InvokeHostFunctionResultSuccess extends InvokeHostFunctionResult {
   factory InvokeHostFunctionResultSuccess.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return InvokeHostFunctionResultSuccess(json.asBytes('success'));
+    return InvokeHostFunctionResultSuccess(json.valueAs('success'));
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
@@ -4480,8 +4523,10 @@ class InnerTransactionResultPair extends TransactionResultCode {
        super(code: TransactionResultType.txFeeBumpInnerFailed);
   factory InnerTransactionResultPair.fromStruct(Map<String, dynamic> json) {
     return InnerTransactionResultPair(
-      result: TransactionResult.fromStruct(json.asMap('result')),
-      transactionHash: json.asBytes('transactionHash'),
+      result: TransactionResult.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('result'),
+      ),
+      transactionHash: json.valueAs('transactionHash'),
     );
   }
 
@@ -4605,7 +4650,7 @@ class TransactionResultTxSuccess extends TransactionResultCode {
     return TransactionResultTxSuccess(
       operationResult:
           json
-              .asListOfMap('operationResult')!
+              .valueEnsureAsList<Map<String, dynamic>>('operationResult')
               .map((e) => OperationResult.fromStruct(e))
               .toList(),
     );
@@ -4639,7 +4684,7 @@ class TransactionResultTxFailed extends TransactionResultCode {
     return TransactionResultTxFailed(
       operationResult:
           json
-              .asListOfMap('operationResult')!
+              .valueEnsureAsList<Map<String, dynamic>>('operationResult')
               .map((e) => OperationResult.fromStruct(e))
               .toList(),
     );
@@ -4679,8 +4724,10 @@ class TransactionResult extends XDRSerialization {
   }
   factory TransactionResult.fromStruct(Map<String, dynamic> json) {
     return TransactionResult(
-      feeCharged: json.as('feeCharged'),
-      code: TransactionResultCode.fromStruct(json.asMap('code')),
+      feeCharged: json.valueAs('feeCharged'),
+      code: TransactionResultCode.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('code'),
+      ),
     );
   }
 

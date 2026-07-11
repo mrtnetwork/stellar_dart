@@ -36,7 +36,7 @@ class SorobanSimulateResponse {
   SorobanTransactionData? get sorobanTransactionData {
     if (transactionData == null) return null;
     return SorobanTransactionData.fromXdr(
-      StringUtils.encode(transactionData!, type: StringEncoding.base64),
+      StringUtils.encode(transactionData!, encoding: StringEncoding.base64),
     );
   }
 
@@ -106,12 +106,14 @@ class HostFunctionInvocationResult {
     );
   }
   ScVal? get xdrResult {
-    return ScVal.fromXdr(StringUtils.encode(xdr, type: StringEncoding.base64));
+    return ScVal.fromXdr(
+      StringUtils.encode(xdr, encoding: StringEncoding.base64),
+    );
   }
 
   List<SorobanAuthorizationEntry> get auths {
     return auth.map((e) {
-      final xdrBytes = StringUtils.encode(e, type: StringEncoding.base64);
+      final xdrBytes = StringUtils.encode(e, encoding: StringEncoding.base64);
       return SorobanAuthorizationEntry.fromXdr(xdrBytes);
     }).toList();
   }
@@ -160,7 +162,7 @@ class StateChangeType {
           () =>
               throw DartStellarPlugingException(
                 'Invalid StateChange type.',
-                details: {'type': type},
+                details: {'type': type?.toString()},
               ),
     );
   }

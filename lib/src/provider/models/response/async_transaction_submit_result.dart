@@ -66,7 +66,7 @@ class AsyncTransactionSubmissionResponse {
   TransactionResult? get errorResult {
     if (errorResultXdr == null) return null;
     return TransactionResult.fromXdr(
-      StringUtils.encode(errorResultXdr!, type: StringEncoding.base64),
+      StringUtils.encode(errorResultXdr!, encoding: StringEncoding.base64),
     );
   }
 }

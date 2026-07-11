@@ -25,7 +25,7 @@ abstract class XDRSerialization {
   }
 
   String toXDRBase64() {
-    return StringUtils.decode(toXDR(), type: StringEncoding.base64);
+    return StringUtils.decode(toXDR(), encoding: StringEncoding.base64);
   }
 
   Map<String, dynamic> toJson() {
@@ -89,7 +89,7 @@ abstract class XDRVariantSerialization extends XDRSerialization {
   }
 
   String toVariantXDRBase64() {
-    return StringUtils.decode(toVariantXDR(), type: StringEncoding.base64);
+    return StringUtils.decode(toVariantXDR(), encoding: StringEncoding.base64);
   }
 
   @override

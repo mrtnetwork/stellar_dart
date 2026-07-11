@@ -1,3 +1,7 @@
+## 2.3.0
+- Updated dependencies.
+- Updated StellarAddress to inherit from IAddress provided by blockchain_utils.
+
 ## 2.2.0
 
 - Update dependencies.

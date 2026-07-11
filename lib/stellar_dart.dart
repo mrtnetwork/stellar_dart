@@ -4,5 +4,3 @@
 library;
 
 export 'src/stellar_dart.dart';
-
-// TODO: Export any libraries intended for clients of this package.

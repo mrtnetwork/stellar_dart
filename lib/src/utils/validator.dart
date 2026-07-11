@@ -13,212 +13,27 @@ class StellarValidator {
     if (code.length > length) {
       throw DartStellarPlugingException(
         'Invalid  assets code length.',
-        details: {'maximum': length, 'length': code.length, 'code': code},
+        details: {
+          'maximum': length.toString(),
+          'length': code.length.toString(),
+          'code': code,
+        },
       );
     }
     return code;
   }
-}
 
-extension StringValidator on String {
-  String max(int length, {String? name}) {
-    if (this.length > length) {
-      throw DartStellarPlugingException(
-        "Incorrect ${name == null ? '' : '$name '}String length.",
-        details: {'maximum': length, 'length': this.length},
-      );
-    }
-    return this;
-  }
-
-  String min(int length, {String? name}) {
-    if (this.length < length) {
-      throw DartStellarPlugingException(
-        "Incorrect ${name == null ? '' : '$name '}String length.",
-        details: {'minimum': length, 'length': this.length},
-      );
-    }
-    return this;
-  }
-
-  String exc(int length, {String? name}) {
-    if (this.length != length) {
-      throw DartStellarPlugingException(
-        "Incorrect ${name == null ? '' : '$name '}String length.",
-        details: {'expected': length, 'length': this.length},
-      );
-    }
-    return this;
-  }
-}
-
-extension QuickMap on Map<String, dynamic> {
-  static const Map<String, dynamic> _map = {};
-  static const List _list = [];
-  T as<T>(String key) {
-    final value = this[key];
-    if (value == null) {
-      if (null is T) {
-        return null as T;
-      }
-      throw DartStellarPlugingException(
-        'Key not found.',
-        details: {'key': key, 'data': this},
-      );
-    }
-    try {
-      return value as T;
-    } on TypeError {
-      throw DartStellarPlugingException(
-        'Incorrect value.',
-        details: {
-          'key': key,
-          'expected': '$T',
-          'value': value.runtimeType,
-          'data': this,
-        },
-      );
-    }
-  }
-
-  E asMap<E>(String key) {
-    if (_map is! E) {
-      throw const DartStellarPlugingException(
-        'Invalid map casting. only use `asMap` method for casting Map<String,dynamic>.',
-      );
-    }
-    final Map? value = as(key);
-    if (value == null) {
-      if (null is E) {
-        return null as E;
-      }
-      throw DartStellarPlugingException(
-        'Key not found.',
-        details: {'key': key, 'data': this},
-      );
-    }
-    try {
-      return value.cast<String, dynamic>() as E;
-    } on TypeError {
-      throw DartStellarPlugingException(
-        'Incorrect value.',
-        details: {
-          'key': key,
-          'expected': '$E',
-          'value': value.runtimeType,
-          'data': this,
-        },
-      );
-    }
-  }
-
-  E asBytes<E>(String key) {
-    if (<int>[] is! E) {
-      throw const DartStellarPlugingException(
-        'Invalid bytes casting. only use `valueAsList` method for bytes.',
-      );
-    }
-    final List? value = as(key);
-    if (value == null) {
-      if (null is E) {
-        return null as E;
-      }
-      throw DartStellarPlugingException(
-        'Key not found.',
-        details: {'key': key, 'data': this},
-      );
-    }
-    try {
-      return value.cast<int>() as E;
-    } on TypeError {
-      throw DartStellarPlugingException(
-        'Incorrect value.',
-        details: {
-          'key': key,
-          'expected': '$E',
-          'value': value.runtimeType,
-          'data': this,
-        },
-      );
-    }
-  }
-
-  List<Map<String, dynamic>>? asListOfMap(
-    String key, {
-    bool throwOnNull = true,
+  static String validateString({
+    required String value,
+    required int max,
+    String? name,
   }) {
-    final List? value = as(key);
-    if (value == null) {
-      if (!throwOnNull) {
-        return null;
-      }
+    if (value.length > max) {
       throw DartStellarPlugingException(
-        'Key not found.',
-        details: {'key': key, 'data': this},
+        "Incorrect ${name == null ? '' : '$name '}String length.",
+        details: {'maximum': max.toString(), 'length': value.length.toString()},
       );
     }
-    try {
-      return value.map((e) => (e as Map).cast<String, dynamic>()).toList();
-    } catch (e, s) {
-      throw DartStellarPlugingException(
-        'Incorrect value.',
-        details: {
-          'key': key,
-          'value': value.runtimeType,
-          'data': this,
-          'error': e.toString(),
-          'stack': s.toString(),
-        },
-      );
-    }
-  }
-
-  E _valueAsList<T, E>(String key) {
-    if (_list is! E) {
-      throw const DartStellarPlugingException(
-        'Invalid list casting. only use `valueAsList` method for list casting.',
-      );
-    }
-    final List? value = as(key);
-    if (value == null) {
-      if (null is E) {
-        return null as E;
-      }
-      throw DartStellarPlugingException(
-        'Key not found.',
-        details: {'key': key, 'data': this},
-      );
-    }
-    try {
-      if (_map is T) {
-        return value.map((e) => (e as Map).cast<String, dynamic>()).toList()
-            as E;
-      }
-      return value.cast<T>() as E;
-    } on TypeError {
-      throw DartStellarPlugingException(
-        'Incorrect value.',
-        details: {
-          'key': key,
-          'expected': '$T',
-          'value': value.runtimeType,
-          'data': this,
-        },
-      );
-    }
-  }
-
-  E? mybeAs<E, T>({required String key, required E Function(T) onValue}) {
-    if (this[key] != null) {
-      if (_map is T) {
-        return onValue(asMap(key));
-      }
-
-      if (_list is T) {
-        return onValue(_valueAsList(key));
-      }
-      return onValue(as(key));
-    }
-    return null;
+    return value;
   }
 }

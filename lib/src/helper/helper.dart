@@ -4,19 +4,14 @@ import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
 class StellarHelper {
-  static final AmountConverter converter = AmountConverter(
-    decimals: StellarConst.lumenDecimal,
-    displayPrecision: StellarConst.lumenDecimal,
-  );
-
   /// /// Converts a string representation of Lumen to Stroop (as BigInt).
   static BigInt toStroop(String lumen) {
-    return converter.toUnit(lumen);
+    return AmountConverter.stellar.toUnit(lumen);
   }
 
   /// Converts a Stroop value (as BigInt) back to Lumen in decimal format.
   static String fromStroop(BigInt stroop) {
-    return converter.toAmount(stroop);
+    return AmountConverter.stellar.toAmount(stroop);
   }
 
   static String toAssetsCode(List<int> data) {
@@ -90,7 +85,11 @@ class StellarHelper {
     if (code.length > length) {
       throw DartStellarPlugingException(
         'Invalid asset code length.',
-        details: {'expected': length, 'length': codeBytes.length, 'code': code},
+        details: {
+          'expected': length.toString(),
+          'length': codeBytes.length.toString(),
+          'code': code,
+        },
       );
     }
     final toBytes = List<int>.filled(length, 0);

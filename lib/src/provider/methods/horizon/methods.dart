@@ -52,3 +52,4 @@ export 'transactions/transactions.dart';
 export 'transactions/trasaction.dart';
 
 export 'aggregations/aggregations.dart';
+export 'info/info.dart';

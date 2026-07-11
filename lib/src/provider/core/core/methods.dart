@@ -8,6 +8,11 @@ class StellarHorizonMethods {
     url: '/health',
   );
 
+  static const StellarHorizonMethods info = StellarHorizonMethods._(
+    name: 'info',
+    url: '/',
+  );
+
   static const StellarHorizonMethods transactions = StellarHorizonMethods._(
     name: 'transactions',
     url: '/transactions',

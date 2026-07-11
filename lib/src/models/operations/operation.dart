@@ -161,15 +161,17 @@ class Operation<T extends OperationBody> extends XDRSerialization {
     return Operation.fromStruct(decode);
   }
   factory Operation.fromStruct(Map<String, dynamic> json) {
-    final body = OperationBody.fromStruct(json.asMap('body'));
+    final body = OperationBody.fromStruct(
+      json.valueEnsureAsMap<String, dynamic>('body'),
+    );
     if (body is! T) {
       throw const DartStellarPlugingException('Incorrect operation casting.');
     }
     return Operation(
       body: body,
-      sourceAccount: json.mybeAs<MuxedAccount, Map<String, dynamic>>(
+      sourceAccount: json.valueTo<MuxedAccount?, Map<String, dynamic>>(
         key: 'sourceAccount',
-        onValue: (e) => MuxedAccount.fromStruct(e),
+        parse: (e) => MuxedAccount.fromStruct(e),
       ),
     );
   }
@@ -491,9 +493,13 @@ class PaymentOperation extends OperationBody {
 
   factory PaymentOperation.fromStruct(Map<String, dynamic> json) {
     return PaymentOperation(
-      destination: MuxedAccount.fromStruct(json.asMap('destination')),
-      asset: StellarAsset.fromStruct(json.asMap('asset')),
-      amount: json.as('amount'),
+      destination: MuxedAccount.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
+      asset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      amount: json.valueAs('amount'),
     );
   }
 
@@ -546,8 +552,10 @@ class CreateAccountOperation extends OperationBody {
 
   factory CreateAccountOperation.fromStruct(Map<String, dynamic> json) {
     return CreateAccountOperation(
-      destination: StellarPublicKey.fromStruct(json.asMap('destination')),
-      startingBalance: json.as('startingBalance'),
+      destination: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
+      startingBalance: json.valueAs('startingBalance'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -605,14 +613,20 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
     Map<String, dynamic> json,
   ) {
     return PathPaymentStrictReceiveOperation(
-      sendAsset: StellarAsset.fromStruct(json.asMap('sendAsset')),
-      sendMax: json.as('sendMax'),
-      destination: MuxedAccount.fromStruct(json.asMap('destination')),
-      destAsset: StellarAsset.fromStruct(json.asMap('destAsset')),
-      destAmount: json.as('destAmount'),
+      sendAsset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('sendAsset'),
+      ),
+      sendMax: json.valueAs('sendMax'),
+      destination: MuxedAccount.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
+      destAsset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destAsset'),
+      ),
+      destAmount: json.valueAs('destAmount'),
       path:
           json
-              .asListOfMap('path')!
+              .valueEnsureAsList<Map<String, dynamic>>('path')
               .map((e) => StellarAsset.fromStruct(e))
               .toList(),
     );
@@ -700,11 +714,17 @@ class ManageSellOfferOperation extends OperationBody {
        super(OperationType.manageSellOffer);
   factory ManageSellOfferOperation.fromStruct(Map<String, dynamic> json) {
     return ManageSellOfferOperation(
-      selling: StellarAsset.fromStruct(json.asMap('selling')),
-      buying: StellarAsset.fromStruct(json.asMap('buying')),
-      amount: json.as('amount'),
-      price: StellarPrice.fromStruct(json.asMap('price')),
-      offerId: json.as('offerId'),
+      selling: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('selling'),
+      ),
+      buying: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('buying'),
+      ),
+      amount: json.valueAs('amount'),
+      price: StellarPrice.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('price'),
+      ),
+      offerId: json.valueAs('offerId'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -772,10 +792,16 @@ class CreatePassiveSellOfferOperation extends OperationBody {
     Map<String, dynamic> json,
   ) {
     return CreatePassiveSellOfferOperation(
-      selling: StellarAsset.fromStruct(json.asMap('selling')),
-      buying: StellarAsset.fromStruct(json.asMap('buying')),
-      amount: json.as('amount'),
-      price: StellarPrice.fromStruct(json.asMap('price')),
+      selling: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('selling'),
+      ),
+      buying: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('buying'),
+      ),
+      amount: json.valueAs('amount'),
+      price: StellarPrice.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('price'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -842,26 +868,26 @@ class SetOptionsOperation extends OperationBody {
   final Signer? signer;
   factory SetOptionsOperation.fromStruct(Map<String, dynamic> json) {
     return SetOptionsOperation(
-      inflationDest: json.mybeAs<StellarPublicKey, Map<String, dynamic>>(
+      inflationDest: json.valueTo<StellarPublicKey?, Map<String, dynamic>>(
         key: 'inflationDest',
-        onValue: (e) => StellarPublicKey.fromStruct(e),
+        parse: (e) => StellarPublicKey.fromStruct(e),
       ),
-      clearFlags: json.mybeAs<AuthFlag, int>(
+      clearFlags: json.valueTo<AuthFlag?, int>(
         key: 'clearFlags',
-        onValue: (e) => AuthFlag.fromValue(e),
+        parse: (e) => AuthFlag.fromValue(e),
       ),
-      setFlags: json.mybeAs<AuthFlag, int>(
+      setFlags: json.valueTo<AuthFlag?, int>(
         key: 'setFlags',
-        onValue: (e) => AuthFlag.fromValue(e),
+        parse: (e) => AuthFlag.fromValue(e),
       ),
-      masterWeight: json.as('masterWeight'),
-      highThreshold: json.as('highThreshold'),
-      lowThreshold: json.as('lowThreshold'),
-      medThreshold: json.as('medThreshold'),
-      homeDomain: json.as('homeDomain'),
-      signer: json.mybeAs<Signer, Map<String, dynamic>>(
+      masterWeight: json.valueAs('masterWeight'),
+      highThreshold: json.valueAs('highThreshold'),
+      lowThreshold: json.valueAs('lowThreshold'),
+      medThreshold: json.valueAs('medThreshold'),
+      homeDomain: json.valueAs('homeDomain'),
+      signer: json.valueTo<Signer?, Map<String, dynamic>>(
         key: 'signer',
-        onValue: (e) => Signer.fromStruct(e),
+        parse: (e) => Signer.fromStruct(e),
       ),
     );
   }
@@ -956,8 +982,10 @@ class ChangeTrustOperation extends OperationBody {
       super(OperationType.changeTrust);
   factory ChangeTrustOperation.fromStruct(Map<String, dynamic> json) {
     return ChangeTrustOperation(
-      asset: ChangeTrustAsset.fromStruct(json.asMap('asset')),
-      limit: json.as('limit'),
+      asset: ChangeTrustAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      limit: json.valueAs('limit'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1004,9 +1032,13 @@ class AllowTrustOperation extends OperationBody {
   }) : super(OperationType.allowTrust);
   factory AllowTrustOperation.fromStruct(Map<String, dynamic> json) {
     return AllowTrustOperation(
-      trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
-      asset: AssetCode.fromStruct(json.asMap('asset')),
-      authorize: TrustAuthFlag.fromValue(json.as('authorize')),
+      trustor: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('trustor'),
+      ),
+      asset: AssetCode.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      authorize: TrustAuthFlag.fromValue(json.valueAs('authorize')),
     );
   }
 
@@ -1054,7 +1086,9 @@ class AccountMergeOperation extends OperationBody {
   AccountMergeOperation(this.account) : super(OperationType.accountMerge);
   factory AccountMergeOperation.fromStruct(Map<String, dynamic> json) {
     return AccountMergeOperation(
-      MuxedAccount.fromStruct(json.asMap('account')),
+      MuxedAccount.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('account'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1124,13 +1158,16 @@ class ManageDataOperation extends OperationBody {
         operation: "ManageDataOperation",
         reason: "Invalid dataValue bytes length.",
       ),
-      dataName = dataName.max(StellarConst.str64),
+      dataName = StellarValidator.validateString(
+        value: dataName,
+        max: StellarConst.str64,
+      ),
       super(OperationType.manageData);
 
   factory ManageDataOperation.fromStruct(Map<String, dynamic> json) {
     return ManageDataOperation(
-      dataName: json.as('dataName'),
-      dataValue: json.asBytes('dataValue'),
+      dataName: json.valueAs('dataName'),
+      dataValue: json.valueAs('dataValue'),
     );
   }
 
@@ -1173,7 +1210,7 @@ class BumpSequenceOperation extends OperationBody {
     : bumpTo = bumpTo.asI64,
       super(OperationType.bumpSequence);
   factory BumpSequenceOperation.fromStruct(Map<String, dynamic> json) {
-    return BumpSequenceOperation(json.as('bumpTo'));
+    return BumpSequenceOperation(json.valueAs('bumpTo'));
   }
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1227,11 +1264,17 @@ class ManageBuyOfferOperation extends OperationBody {
        super(OperationType.manageBuyOffer);
   factory ManageBuyOfferOperation.fromStruct(Map<String, dynamic> json) {
     return ManageBuyOfferOperation(
-      buyAmount: json.as('buyAmount'),
-      buying: StellarAsset.fromStruct(json.asMap('buying')),
-      selling: StellarAsset.fromStruct(json.asMap('selling')),
-      price: StellarPrice.fromStruct(json.asMap('price')),
-      offerId: json.as('offerId'),
+      buyAmount: json.valueAs('buyAmount'),
+      buying: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('buying'),
+      ),
+      selling: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('selling'),
+      ),
+      price: StellarPrice.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('price'),
+      ),
+      offerId: json.valueAs('offerId'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1291,14 +1334,20 @@ class PathPaymentStrictSendOperation extends OperationBody {
   final List<StellarAsset> path;
   factory PathPaymentStrictSendOperation.fromStruct(Map<String, dynamic> json) {
     return PathPaymentStrictSendOperation(
-      sendAmount: json.as('sendAmount'),
-      destMin: json.as('destMin'),
-      sendAsset: StellarAsset.fromStruct(json.asMap('sendAsset')),
-      destAsset: StellarAsset.fromStruct(json.asMap('destAsset')),
-      destination: MuxedAccount.fromStruct(json.asMap('destination')),
+      sendAmount: json.valueAs('sendAmount'),
+      destMin: json.valueAs('destMin'),
+      sendAsset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('sendAsset'),
+      ),
+      destAsset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destAsset'),
+      ),
+      destination: MuxedAccount.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('destination'),
+      ),
       path:
           json
-              .asListOfMap('path')!
+              .valueEnsureAsList<Map<String, dynamic>>('path')
               .map((e) => StellarAsset.fromStruct(e))
               .toList(),
     );
@@ -1391,11 +1440,13 @@ class CreateClaimableBalanceOperation extends OperationBody {
     Map<String, dynamic> json,
   ) {
     return CreateClaimableBalanceOperation(
-      asset: StellarAsset.fromStruct(json.asMap('asset')),
-      amount: json.as('amount'),
+      asset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      amount: json.valueAs('amount'),
       claimants:
           json
-              .asListOfMap('claimants')!
+              .valueEnsureAsList<Map<String, dynamic>>('claimants')
               .map((e) => Claimant.fromStruct(e))
               .toList(),
     );
@@ -1439,7 +1490,9 @@ class ClaimClaimableBalanceOperation extends OperationBody {
   final ClaimableBalanceId balanceID;
   factory ClaimClaimableBalanceOperation.fromStruct(Map<String, dynamic> json) {
     return ClaimClaimableBalanceOperation(
-      ClaimableBalanceId.fromStruct(json.asMap('balanceID')),
+      ClaimableBalanceId.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('balanceID'),
+      ),
     );
   }
   ClaimClaimableBalanceOperation(this.balanceID)
@@ -1483,7 +1536,9 @@ class BeginSponsoringFutureReservesOperation extends OperationBody {
     Map<String, dynamic> json,
   ) {
     return BeginSponsoringFutureReservesOperation(
-      StellarPublicKey.fromStruct(json.asMap('sponsoredId')),
+      StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('sponsoredId'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1543,7 +1598,9 @@ class RevokeSponsorshipOperation extends OperationBody {
     : super(OperationType.revokeSponsorship);
   factory RevokeSponsorshipOperation.fromStruct(Map<String, dynamic> json) {
     return RevokeSponsorshipOperation(
-      RevokeSponsorship.fromStruct(json.asMap('revokeSponsorship')),
+      RevokeSponsorship.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('revokeSponsorship'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1583,9 +1640,13 @@ class ClawbackOperation extends OperationBody {
        super(OperationType.clawback);
   factory ClawbackOperation.fromStruct(Map<String, dynamic> json) {
     return ClawbackOperation(
-      asset: StellarAsset.fromStruct(json.asMap('asset')),
-      amount: json.as('amount'),
-      from: MuxedAccount.fromStruct(json.asMap('from')),
+      asset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      amount: json.valueAs('amount'),
+      from: MuxedAccount.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('from'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1631,7 +1692,9 @@ class ClawbackClaimableBalanceOperation extends OperationBody {
     Map<String, dynamic> json,
   ) {
     return ClawbackClaimableBalanceOperation(
-      ClaimableBalanceId.fromStruct(json.asMap('balanceId')),
+      ClaimableBalanceId.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('balanceId'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1675,10 +1738,14 @@ class SetTrustLineFlagsOperation extends OperationBody {
   }) : super(OperationType.setTrustLineFlags);
   factory SetTrustLineFlagsOperation.fromStruct(Map<String, dynamic> json) {
     return SetTrustLineFlagsOperation(
-      asset: StellarAsset.fromStruct(json.asMap('asset')),
-      trustor: StellarPublicKey.fromStruct(json.asMap('trustor')),
-      clearFlags: TrustLineFlag.fromValue(json.as('clearFlags')),
-      setFlags: TrustLineFlag.fromValue(json.as('setFlags')),
+      asset: StellarAsset.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('asset'),
+      ),
+      trustor: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('trustor'),
+      ),
+      clearFlags: TrustLineFlag.fromValue(json.valueAs('clearFlags')),
+      setFlags: TrustLineFlag.fromValue(json.valueAs('setFlags')),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1746,11 +1813,15 @@ class LiquidityPoolDepositOperation extends OperationBody {
        super(OperationType.liquidityPoolDeposit);
   factory LiquidityPoolDepositOperation.fromStruct(Map<String, dynamic> json) {
     return LiquidityPoolDepositOperation(
-      liquidityPoolId: json.asBytes('liquidityPoolId'),
-      maxAmountA: json.as('maxAmountA'),
-      maxAmountB: json.as('maxAmountB'),
-      minPrice: StellarPrice.fromStruct(json.asMap('minPrice')),
-      maxPrice: StellarPrice.fromStruct(json.asMap('maxPrice')),
+      liquidityPoolId: json.valueAs('liquidityPoolId'),
+      maxAmountA: json.valueAs('maxAmountA'),
+      maxAmountB: json.valueAs('maxAmountB'),
+      minPrice: StellarPrice.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('minPrice'),
+      ),
+      maxPrice: StellarPrice.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('maxPrice'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1820,10 +1891,10 @@ class LiquidityPoolWithdrawOperation extends OperationBody {
        super(OperationType.liquidityPoolWithdraw);
   factory LiquidityPoolWithdrawOperation.fromStruct(Map<String, dynamic> json) {
     return LiquidityPoolWithdrawOperation(
-      liquidityPoolId: json.asBytes('liquidityPoolId'),
-      amount: json.as('amount'),
-      minAmountA: json.as('minAmountA'),
-      minAmountB: json.as('minAmountB'),
+      liquidityPoolId: json.valueAs('liquidityPoolId'),
+      amount: json.valueAs('amount'),
+      minAmountA: json.valueAs('minAmountA'),
+      minAmountB: json.valueAs('minAmountB'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1880,10 +1951,12 @@ class InvokeHostFunctionOperation extends OperationBody {
        super(OperationType.invokeHostFunction);
   factory InvokeHostFunctionOperation.fromStruct(Map<String, dynamic> json) {
     return InvokeHostFunctionOperation(
-      hostFunction: HostFunction.fromStruct(json.asMap('hostFunction')),
+      hostFunction: HostFunction.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('hostFunction'),
+      ),
       auth:
           json
-              .asListOfMap('auth')!
+              .valueEnsureAsList<Map<String, dynamic>>('auth')
               .map((e) => SorobanAuthorizationEntry.fromStruct(e))
               .toList(),
     );
@@ -1942,8 +2015,10 @@ class ExtendFootprintTTLOperation extends OperationBody {
        super(OperationType.extendFootprintTtl);
   factory ExtendFootprintTTLOperation.fromStruct(Map<String, dynamic> json) {
     return ExtendFootprintTTLOperation(
-      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
-      extendTo: json.as('extendTo'),
+      ext: ExtentionPointVoid.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('ext'),
+      ),
+      extendTo: json.valueAs('extendTo'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1982,7 +2057,9 @@ class RestoreFootprintOperation extends OperationBody {
 
   factory RestoreFootprintOperation.fromStruct(Map<String, dynamic> json) {
     return RestoreFootprintOperation(
-      ext: ExtentionPointVoid.fromStruct(json.asMap('ext')),
+      ext: ExtentionPointVoid.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('ext'),
+      ),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {

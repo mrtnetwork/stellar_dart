@@ -1,5 +1,4 @@
-import 'package:blockchain_utils/bip/address/decoders.dart';
-import 'package:blockchain_utils/bip/address/encoders.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/address/core/address.dart';
 import 'package:stellar_dart/src/address/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
@@ -81,15 +80,4 @@ class StellarAccountAddress extends StellarAddress {
   ScAddress toScAddress() {
     return ScAddressAccountId(toPublicKey());
   }
-
-  /// Equality operator for comparing two `StellarAccountAddress` instances.
-  @override
-  bool operator ==(other) {
-    if (other is! StellarAccountAddress) return false;
-    return other.baseAddress == baseAddress;
-  }
-
-  /// Returns the hash code for this Stellar account address, based on its `baseAddress`.
-  @override
-  int get hashCode => baseAddress.hashCode;
 }

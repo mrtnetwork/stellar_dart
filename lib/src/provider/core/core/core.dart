@@ -1,12 +1,21 @@
-import 'package:blockchain_utils/service/service.dart';
-import 'package:blockchain_utils/utils/string/string.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/provider/models/models.dart';
 import 'package:stellar_dart/src/provider/utils/utils.dart';
 
-enum APIRequestType { get, post }
+enum StellarAPIType {
+  horizon(0),
+  soroban(1);
 
-enum StellarAPIType { horizon, soroban }
+  final int value;
+  const StellarAPIType(this.value);
+  static StellarAPIType fromValue(int? value) {
+    return values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => throw ItemNotFoundException(name: "StellarAPIType"),
+    );
+  }
+}
 
 abstract class HorizonRequest<RESULT, RESPONSE>
     extends BaseServiceRequest<RESULT, RESPONSE, StellarRequestDetails> {
@@ -17,14 +26,17 @@ abstract class HorizonRequest<RESULT, RESPONSE>
   Map<String, String>? get headers => null;
   abstract final String method;
   @override
-  RequestServiceType get requestType => RequestServiceType.get;
+  RequestMethod get requestMethod => RequestMethod.get;
   @override
   StellarRequestDetails buildRequest(int requestID) {
     final pathParams = StellarProviderUtils.extractParams(method);
     if (pathParams.length != pathParameters.length) {
       throw DartStellarPlugingException(
         'Invalid Path Parameters.',
-        details: {'pathParams': pathParameters, 'expected': pathParams},
+        details: {
+          'pathParams': pathParameters.join(","),
+          'expected': pathParams.join(","),
+        },
       );
     }
     String params = method;
@@ -44,9 +56,11 @@ abstract class HorizonRequest<RESULT, RESPONSE>
     }
     return StellarRequestDetails(
       requestID: requestID,
-      pathParams: params,
+      path: params,
       headers: headers ?? ServiceConst.defaultPostHeaders,
-      type: requestType,
+      errorStatusCodes: [504, 503, 410, 400, 404],
+      requestMethod: requestMethod,
+      responseEncoding: ServiceReponseEncoding.fromType<RESPONSE>(),
     );
   }
 }
@@ -55,7 +69,7 @@ abstract class HorizonPostRequest<RESULT, RESPONSE>
     extends HorizonRequest<RESULT, RESPONSE> {
   const HorizonPostRequest();
   @override
-  RequestServiceType get requestType => RequestServiceType.post;
+  RequestMethod get requestMethod => RequestMethod.post;
 }
 
 abstract class SorobanRequest<RESULT, RESPONSE>
@@ -65,86 +79,144 @@ abstract class SorobanRequest<RESULT, RESPONSE>
   const SorobanRequest({this.pagination});
   Map<String, dynamic>? get params => null;
   @override
-  RequestServiceType get requestType => RequestServiceType.post;
+  RequestMethod get requestMethod => RequestMethod.post;
 
   @override
   StellarRequestDetails buildRequest(int requestID) {
     return StellarRequestDetails(
       requestID: requestID,
-      pathParams: '',
+      path: '',
       headers: ServiceConst.defaultPostHeaders,
-      jsonBody: ServiceProviderUtils.buildJsonRPCParams(
-        requestId: requestID,
-        method: method,
-        params: params,
+      bodyString: StringUtils.fromJson(
+        ServiceProviderUtils.buildJsonRPCParams(
+          requestId: requestID,
+          method: method,
+          params: params,
+        ),
       ),
-      type: requestType,
-      apiType: StellarAPIType.soroban,
+      requestMethod: requestMethod,
+      api: StellarAPIType.soroban,
+      responseEncoding: ServiceReponseEncoding.map,
     );
   }
 }
 
 class StellarRequestDetails extends BaseServiceRequestParams {
+  final StellarAPIType api;
+
   const StellarRequestDetails({
     required super.requestID,
-    required this.pathParams,
+    required super.path,
+    required super.responseEncoding,
     required super.headers,
-    required super.type,
-    this.apiType = StellarAPIType.horizon,
-    this.jsonBody,
-  });
-
+    super.successStatusCodes,
+    super.errorStatusCodes,
+    required super.requestMethod,
+    super.bodyBytes,
+    super.bodyString,
+    this.api = StellarAPIType.horizon,
+  }) : super(network: BlockchainNetwork.stellar);
+  factory StellarRequestDetails.deserialize({
+    List<int>? bytes,
+    CborObject? obj,
+  }) {
+    final values = CborTagSerializable.decodeTaggedValue(
+      identifier: BlockchainNetwork.stellar.identifier,
+      cborBytes: bytes,
+      cborObject: obj,
+    );
+    return StellarRequestDetails(
+      headers: values
+          .mapAt<CborStringValue, CborStringValue>(0)
+          .map((k, v) => MapEntry(k.value, v.value)),
+      requestMethod: RequestMethod.fromValue(values.rawValueAt(1)),
+      responseEncoding: ServiceReponseEncoding.fromValue(values.rawValueAt(2)),
+      successStatusCodes:
+          values
+              .listAt<CborIntValue>(3)
+              .map((e) => e.value)
+              .toList()
+              .emptyAsNull,
+      errorStatusCodes:
+          values
+              .listAt<CborIntValue>(4)
+              .map((e) => e.value)
+              .toList()
+              .emptyAsNull,
+      bodyBytes: values.rawValueAt(5),
+      bodyString: values.rawValueAt(6),
+      path: values.rawValueAt(7),
+      requestID: values.rawValueAt(8),
+      api: StellarAPIType.fromValue(values.rawValueAt(9)),
+    );
+  }
   StellarRequestDetails copyWith({
     int? requestID,
-    String? pathParams,
-    RequestServiceType? type,
+    String? path,
+    RequestMethod? requestMethod,
     Map<String, String>? headers,
-    Map<String, dynamic>? jsonBody,
-    StellarAPIType? apiType,
+    List<int>? bodyBytes,
+    String? bodyString,
+    ServiceReponseEncoding? responseEncoding,
+    List<int>? errorStatusCodes,
+    List<int>? successStatusCodes,
+    StellarAPIType? api,
   }) {
     return StellarRequestDetails(
-      pathParams: pathParams ?? this.pathParams,
-      jsonBody: jsonBody ?? this.jsonBody,
-      apiType: apiType ?? this.apiType,
-      headers: headers ?? this.headers,
       requestID: requestID ?? this.requestID,
-      type: type ?? this.type,
+      headers: headers ?? this.headers,
+      path: path ?? this.path,
+      responseEncoding: responseEncoding ?? this.responseEncoding,
+      requestMethod: requestMethod ?? this.requestMethod,
+      bodyString: bodyString ?? this.bodyString,
+      errorStatusCodes: errorStatusCodes ?? this.errorStatusCodes,
+      bodyBytes: bodyBytes ?? this.bodyBytes,
+      successStatusCodes: successStatusCodes ?? this.successStatusCodes,
+      api: api ?? this.api,
     );
   }
 
-  /// URL path parameters
-  final String pathParams;
-
-  // final Object? body;
-  final StellarAPIType apiType;
-
   @override
-  List<int>? body() {
-    if (jsonBody != null) {
-      return StringUtils.encode(StringUtils.fromJson(jsonBody!));
+  Uri encodeUrl(String uri) {
+    if (api == StellarAPIType.soroban) return Uri.parse(uri);
+    if (uri.endsWith('/')) {
+      uri = uri.substring(0, uri.length - 1);
     }
-    return null;
+    final finalUrl = '$uri${path ?? ''}';
+    return Uri.parse(finalUrl);
   }
-
-  final Map<String, dynamic>? jsonBody;
 
   @override
   Map<String, dynamic> toJson() {
     return {
-      'pahtParameters': pathParams,
-      'body': jsonBody,
-      'type': type.name,
-      'apiType': apiType.name,
+      'path': path,
+      'type': requestMethod.name,
+      'api': api.name,
+      'body': bodyString ?? BytesUtils.tryToHexString(bodyBytes),
     };
   }
 
   @override
-  Uri toUri(String uri) {
-    if (apiType == StellarAPIType.soroban) return Uri.parse(uri);
-    if (uri.endsWith('/')) {
-      uri = uri.substring(0, uri.length - 1);
-    }
-    final finalUrl = '$uri$pathParams';
-    return Uri.parse(finalUrl);
-  }
+  SerializationIdentifier get serializationIdentifier =>
+      BlockchainNetwork.stellar.identifier;
+
+  @override
+  List<CborObject?> get serializationItems => [
+    CborMapValue.definite(
+      headers.map((k, v) => MapEntry(CborStringValue(k), CborStringValue(v))),
+    ),
+    requestMethod.value.toCbor(),
+    responseEncoding.value.toCbor(),
+    CborTagSerializable.listFromDynamic(
+      successStatusCodes?.map((e) => CborIntValue(e)).toList() ?? [],
+    ),
+    CborTagSerializable.listFromDynamic(
+      errorStatusCodes?.map((e) => CborIntValue(e)).toList() ?? [],
+    ),
+    bodyBytes?.toCborBytes(),
+    bodyString?.toCbor(),
+    path?.toCbor(),
+    requestID.toCbor(),
+    api.value.toCbor(),
+  ];
 }

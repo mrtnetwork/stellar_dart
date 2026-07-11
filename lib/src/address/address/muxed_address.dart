@@ -1,5 +1,5 @@
-import 'package:blockchain_utils/bip/address/decoders.dart';
 import 'package:blockchain_utils/bip/address/encoders.dart';
+import 'package:blockchain_utils/cbor/cbor.dart';
 import 'package:blockchain_utils/helper/extensions/extensions.dart';
 import 'package:stellar_dart/src/address/address/account_address.dart';
 import 'package:stellar_dart/src/address/core/address.dart';
@@ -116,20 +116,19 @@ class StellarMuxedAddress extends StellarAddress {
     return ScAddressAccountId(toPublicKey());
   }
 
-  /// Equality operator for comparing two `StellarMuxedAddress` instances.
-  @override
-  bool operator ==(other) {
-    if (other is! StellarMuxedAddress) return false;
-    return other.accountId == accountId && other.muxedAddress == muxedAddress;
-  }
-
-  /// Returns the hash code for this Stellar muxed address, based on its account ID and muxed address.
-  @override
-  int get hashCode => accountId.hashCode ^ muxedAddress.hashCode;
-
   /// Returns the muxed address as a string.
   @override
   String toString() {
     return muxedAddress;
   }
+
+  @override
+  List<CborObject?> get serializationItems => [
+    type.value.toCbor(),
+    CborBytesValue(keyBytes()),
+    accountId.toCbor(),
+  ];
+
+  @override
+  List<dynamic> get variables => [muxedAddress, type];
 }

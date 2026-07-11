@@ -106,7 +106,7 @@ class StellarTransactionResponse {
 
   TransactionResult getResult() {
     return TransactionResult.fromXdr(
-      StringUtils.encode(resultXdr, type: StringEncoding.base64),
+      StringUtils.encode(resultXdr, encoding: StringEncoding.base64),
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:blockchain_utils/bip/address/decoders.dart';
 import 'package:blockchain_utils/bip/address/encoders.dart';
 import 'package:stellar_dart/src/address/core/address.dart';
 import 'package:stellar_dart/src/address/exception/exception.dart';
@@ -69,15 +68,4 @@ class StellarContractAddress extends StellarAddress {
   ScAddress toScAddress() {
     return ScAddressContract(this);
   }
-
-  /// Equality operator for comparing two `StellarContractAddress` instances.
-  @override
-  bool operator ==(other) {
-    if (other is! StellarContractAddress) return false;
-    return other.baseAddress == baseAddress;
-  }
-
-  /// Returns the hash code for this Stellar contract address, based on its `baseAddress`.
-  @override
-  int get hashCode => baseAddress.hashCode;
 }

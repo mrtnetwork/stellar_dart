@@ -4,7 +4,6 @@ import 'package:stellar_dart/src/constants/constant.dart';
 import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/serialization/serialization.dart';
-import 'package:stellar_dart/src/utils/validator.dart';
 
 /// Represents a Stellar public key using the Ed25519 cryptographic system.
 /// Extends `XDRSerialization` for XDR serialization/deserialization support.
@@ -52,13 +51,13 @@ class StellarPublicKey extends XDRSerialization {
   ///
   /// The `json` must include a valid type and `ed25519` public key.
   factory StellarPublicKey.fromStruct(Map<String, dynamic> json) {
-    final int type = json.as('type');
+    final int type = json.valueAs('type');
     if (type != 0) {
       throw const DartStellarPlugingException(
         'Invalid StellarPublicKey XDR bytes.',
       );
     }
-    return StellarPublicKey.fromPublicBytes(json.asBytes('ed25519'));
+    return StellarPublicKey.fromPublicBytes(json.valueAs('ed25519'));
   }
 
   /// Defines the layout for XDR serialization/deserialization.

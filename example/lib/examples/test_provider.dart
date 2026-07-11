@@ -2,7 +2,7 @@ import 'package:blockchain_utils/service/models/params.dart';
 import 'package:http/http.dart' as http;
 import 'package:stellar_dart/stellar_dart.dart';
 
-class StellarHTTPProvider implements StellarServiceProvider {
+class StellarHTTPProvider with StellarServiceProvider {
   StellarHTTPProvider(
       {required this.url,
       required this.soroban,
@@ -16,20 +16,22 @@ class StellarHTTPProvider implements StellarServiceProvider {
   final Duration defaultRequestTimeout;
 
   @override
-  Future<BaseServiceResponse<T>> doRequest<T>(StellarRequestDetails params,
+  Future<BaseServiceResponse> doRequest(StellarRequestDetails params,
       {Duration? timeout}) async {
-    final corretUrl = params.apiType == StellarAPIType.horizon ? url : soroban;
-    if (params.type.isPostRequest) {
+    final corretUrl = params.api == StellarAPIType.horizon ? url : soroban;
+    if (params.requestMethod.isPost) {
       final response = await client
-          .post(params.toUri(corretUrl),
-              headers: params.headers, body: params.body())
+          .post(params.encodeUrl(corretUrl),
+              headers: params.headers, body: params.encodeBody())
           .timeout(timeout ?? defaultRequestTimeout);
-      return params.toResponse(response.bodyBytes, response.statusCode);
+      return params.toResponse(response.bodyBytes,
+          statusCode: response.statusCode);
     }
     final response = await client
-        .get(params.toUri(corretUrl), headers: params.headers)
+        .get(params.encodeUrl(corretUrl), headers: params.headers)
         .timeout(timeout ?? defaultRequestTimeout);
-    return params.toResponse(response.bodyBytes, response.statusCode);
+    return params.toResponse(response.bodyBytes,
+        statusCode: response.statusCode);
   }
 }
 
