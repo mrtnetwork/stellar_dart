@@ -1,45 +1,140 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Dart
 
+# Three backends: pure Dart (VM + browser) and Rust FFI (VM).
+# There are no WASM-backend test entries yet (no test/wasm_assets consumers),
+# so no wasm build job: `dart test -p chrome` exercises the pure-Dart suite
+# compiled to JS. The Rust crate is checked out from
+# mrtnetwork/blockchain-utils ($BU_RUST_CRATE) for the FFI job.
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_TERM_COLOR: always
+  BU_RUST_CRATE: ${{ github.workspace }}/rust-crate
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  dart-vm:
+    name: Dart backend (VM)
     runs-on: ubuntu-latest
-
+    timeout-minutes: 120
+    env:
+      BU_BACKEND: dart
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout stellar_dart
+        uses: actions/checkout@v4
+        with:
+          path: stellar_dart
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - name: Checkout blockchain_utils (path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain_utils
+          path: blockchain_utils
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
 
       - name: Install dependencies
+        working-directory: stellar_dart
         run: dart pub get --no-example
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze
+        working-directory: stellar_dart
+        run: dart analyze lib test tool
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      #- name: Analyze project source
-      #  run: dart analyze
+      - name: Run tests (pure Dart)
+        working-directory: stellar_dart
+        run: dart test test --timeout=5m
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      - name: Run tests
-        run: dart test ./test
+  ffi-vm:
+    name: Rust FFI backend (VM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      BU_BACKEND: ffi
+    steps:
+      - name: Checkout stellar_dart
+        uses: actions/checkout@v4
+        with:
+          path: stellar_dart
 
-      - name: Run tests chrome
-        run: dart test ./test -p chrome
+      - name: Checkout blockchain_utils (path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain_utils
+          path: blockchain_utils
+
+      - name: Checkout Rust crate
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain-utils
+          path: rust-crate
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust-crate -> target"
+
+      - name: Install dependencies
+        working-directory: stellar_dart
+        run: dart pub get --no-example
+
+      - name: Analyze
+        working-directory: stellar_dart
+        run: dart analyze lib test tool
+
+      - name: Build FFI backend
+        working-directory: stellar_dart
+        run: dart tool/build_backends.dart --ffi
+
+      - name: Run tests (FFI)
+        working-directory: stellar_dart
+        run: dart test test --timeout=5m
+
+  dart-web:
+    name: Dart backend (browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout stellar_dart
+        uses: actions/checkout@v4
+        with:
+          path: stellar_dart
+
+      - name: Checkout blockchain_utils (path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain_utils
+          path: blockchain_utils
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        working-directory: stellar_dart
+        run: dart pub get --no-example
+
+      - name: Chrome wrapper (no-sandbox)
+        run: |
+          printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox "$@"\n' \
+            > /tmp/chrome-nosandbox.sh
+          chmod +x /tmp/chrome-nosandbox.sh
+
+      - name: Run browser tests (pure Dart)
+        working-directory: stellar_dart
+        env:
+          CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
+        run: dart test -p chrome test --timeout=20m
