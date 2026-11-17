@@ -1,21 +1,20 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/keypair/crypto/public_key.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
 /// Represents a Stellar private key using the Ed25519 cryptographic system.
-class StellarPrivateKey {
+class StellarPrivateKey with SecretState {
   /// The underlying Ed25519 private key.
-  final Ed25519PrivateKey _privateKey;
+  final ED25519PrivateKey privateKey;
 
   /// Private constructor that accepts an `Ed25519PrivateKey`.
-  const StellarPrivateKey._(this._privateKey);
+  const StellarPrivateKey(this.privateKey);
 
   /// Creates a `StellarPrivateKey` from a raw byte array.
   ///
   /// The byte array must represent a valid Ed25519 private key.
   factory StellarPrivateKey.fromBytes(List<int> bytes) {
-    return StellarPrivateKey._(Ed25519PrivateKey.fromBytes(bytes));
+    return StellarPrivateKey(ED25519PrivateKey.fromBytes(bytes));
   }
 
   /// Creates a `StellarPrivateKey` from a hexadecimal string.
@@ -30,7 +29,7 @@ class StellarPrivateKey {
   /// This method decodes a base32 Stellar secret key (private key) and
   /// returns a `StellarPrivateKey` instance.
   ///
-  /// Throws a `DartStellarPlugingException` if the secret key is invalid.
+  /// Throws a `BuError` if the secret key is invalid.
   factory StellarPrivateKey.fromBase32(String secretKey) {
     try {
       final key = XlmAddrDecoder().decode(
@@ -38,11 +37,11 @@ class StellarPrivateKey {
         addrType: XlmAddrTypes.privKey,
       );
       if (key.type != XlmAddrTypes.privKey) {
-        throw const DartStellarPlugingException('Invalid key type.');
+        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid key type.');
       }
       return StellarPrivateKey.fromBytes(key.pubKeyBytes);
     } catch (e) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.badBase32, 
         'Invalid base32 secret key.',
         details: {'message': e.toString()},
       );
@@ -51,26 +50,25 @@ class StellarPrivateKey {
 
   /// Returns the corresponding `StellarPublicKey` for the current private key.
   StellarPublicKey toPublicKey() {
-    return StellarPublicKey.fromPublicBytes(_privateKey.publicKey.compressed);
+    return StellarPublicKey(privateKey.publicKey);
   }
 
   /// Returns the private key as a raw byte array.
-  List<int> toBytes() {
-    return _privateKey.raw;
+  SecretBytes toBytes() {
+    return privateKey.toBytes();
   }
 
   /// Returns the private key as a hexadecimal string.
   String toHex() {
-    return _privateKey.toHex(prefix: '0x');
+    return privateKey.takeSecretKey().toHex(prefix: '0x');
   }
 
   /// Returns the private key as a base32 encoded string.
   ///
   /// This method encodes the raw private key bytes into base32 format.
   String toBase32() {
-    return XlmAddrEncoder().encodeKey(
-      toBytes(),
-      addrType: XlmAddrTypes.privKey,
+    return privateKey.takeSecretKey().useValue(
+      (k) => XlmAddrEncoder().encodeKey(k, addrType: XlmAddrTypes.privKey),
     );
   }
 
@@ -78,9 +76,14 @@ class StellarPrivateKey {
   ///
   /// Returns a `DecoratedSignature`, which includes the signature and the key hint.
   DecoratedSignature sign(List<int> message) {
-    final signer = Ed25519Signer.fromKeyBytes(_privateKey.raw);
-    final sign = signer.signConst(message);
+    final signer = ED25519Signer(privateKey);
+    final sign = signer.sign(message);
     final hint = toPublicKey().hint();
-    return DecoratedSignature(hint: hint, signature: sign);
+    return DecoratedSignature(hint: hint, signature: sign.encoded);
+  }
+
+  @override
+  void dispose() {
+    privateKey.dispose();
   }
 }

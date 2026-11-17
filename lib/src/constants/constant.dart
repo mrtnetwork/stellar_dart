@@ -1,3 +1,4 @@
+/// Protocol-level constants (key/hash lengths, limits, decimals).
 class StellarConst {
   static const int hash256Length = 32;
   static const int payloadLength = 64;

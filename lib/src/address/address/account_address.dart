@@ -1,6 +1,5 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/address/core/address.dart';
-import 'package:stellar_dart/src/address/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
 import 'muxed_address.dart';
@@ -17,7 +16,7 @@ class StellarAccountAddress extends StellarAddress {
   /// The `publicKey` must be a valid ED25519 public key, and it will be
   /// encoded into a Stellar public address.
   ///
-  /// Throws a `StellarAddressException` if the public key bytes are invalid.
+  /// Throws a `BuError` if the public key bytes are invalid.
   factory StellarAccountAddress.fromPublicKey(List<int> publicKey) {
     try {
       final encode = XlmAddrEncoder().encodeKey(
@@ -29,7 +28,7 @@ class StellarAccountAddress extends StellarAddress {
         type: XlmAddrTypes.pubKey,
       );
     } catch (e, s) {
-      throw StellarAddressException(
+      throw BuError(DefaultErrorType.badPublicKey, 
         'Invalid ED25519 public key bytes.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );
@@ -41,24 +40,24 @@ class StellarAccountAddress extends StellarAddress {
   /// The address must be a valid Stellar ED25519 public key address. It will decode
   /// the address and validate the type to ensure it is of type `XlmAddrTypes.pubKey`.
   ///
-  /// Throws a `StellarAddressException` if the address is invalid or of the wrong type.
+  /// Throws a `BuError` if the address is invalid or of the wrong type.
   factory StellarAccountAddress(String address) {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.pubKey) {
-        throw StellarAddressException(
+        throw BuError(DefaultErrorType.invalidAddress, 
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.pubKey.name,
-            'type': decode.type.toString(),
+            'type': decode.type.name,
           },
         );
       }
       return StellarAccountAddress._(address: address, type: decode.type);
-    } on StellarAddressException {
+    } on BuError {
       rethrow;
     } catch (e, s) {
-      throw StellarAddressException(
+      throw BuError(DefaultErrorType.invalidAddress, 
         'Invalid Stellar ED25519 public key address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );

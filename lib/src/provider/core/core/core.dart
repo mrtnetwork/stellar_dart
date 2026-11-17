@@ -1,8 +1,6 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
-import 'package:stellar_dart/src/provider/models/models.dart';
-import 'package:stellar_dart/src/provider/utils/utils.dart';
 
+/// Which Stellar API a request targets (Horizon or Stellar RPC).
 enum StellarAPIType {
   horizon(0),
   soroban(1);
@@ -12,95 +10,16 @@ enum StellarAPIType {
   static StellarAPIType fromValue(int? value) {
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw ItemNotFoundException(name: "StellarAPIType"),
+      orElse:
+          () =>
+              throw BuError(DefaultErrorType.invalidArgument, 
+                'Unknown StellarAPIType value "$value".',
+              ),
     );
   }
 }
 
-abstract class HorizonRequest<RESULT, RESPONSE>
-    extends BaseServiceRequest<RESULT, RESPONSE, StellarRequestDetails> {
-  const HorizonRequest({this.paginationParams});
-  final HorizonPaginationParams? paginationParams;
-  List<String> get pathParameters => [];
-  Map<String, dynamic> get queryParameters => {};
-  Map<String, String>? get headers => null;
-  abstract final String method;
-  @override
-  RequestMethod get requestMethod => RequestMethod.get;
-  @override
-  StellarRequestDetails buildRequest(int requestID) {
-    final pathParams = StellarProviderUtils.extractParams(method);
-    if (pathParams.length != pathParameters.length) {
-      throw DartStellarPlugingException(
-        'Invalid Path Parameters.',
-        details: {
-          'pathParams': pathParameters.join(","),
-          'expected': pathParams.join(","),
-        },
-      );
-    }
-    String params = method;
-    for (int i = 0; i < pathParams.length; i++) {
-      params = params.replaceFirst(pathParams[i], pathParameters[i]);
-    }
-    final Map<String, dynamic> query = {
-      ...queryParameters,
-      ...paginationParams?.toJson() ?? {},
-    }..removeWhere((k, v) => v == null);
-
-    if (query.isNotEmpty) {
-      params =
-          Uri.parse(
-            params,
-          ).replace(queryParameters: query).normalizePath().toString();
-    }
-    return StellarRequestDetails(
-      requestID: requestID,
-      path: params,
-      headers: headers ?? ServiceConst.defaultPostHeaders,
-      errorStatusCodes: [504, 503, 410, 400, 404],
-      requestMethod: requestMethod,
-      responseEncoding: ServiceReponseEncoding.fromType<RESPONSE>(),
-    );
-  }
-}
-
-abstract class HorizonPostRequest<RESULT, RESPONSE>
-    extends HorizonRequest<RESULT, RESPONSE> {
-  const HorizonPostRequest();
-  @override
-  RequestMethod get requestMethod => RequestMethod.post;
-}
-
-abstract class SorobanRequest<RESULT, RESPONSE>
-    extends BaseServiceRequest<RESULT, RESPONSE, StellarRequestDetails> {
-  abstract final String method;
-  final SorobanPaginationParams? pagination;
-  const SorobanRequest({this.pagination});
-  Map<String, dynamic>? get params => null;
-  @override
-  RequestMethod get requestMethod => RequestMethod.post;
-
-  @override
-  StellarRequestDetails buildRequest(int requestID) {
-    return StellarRequestDetails(
-      requestID: requestID,
-      path: '',
-      headers: ServiceConst.defaultPostHeaders,
-      bodyString: StringUtils.fromJson(
-        ServiceProviderUtils.buildJsonRPCParams(
-          requestId: requestID,
-          method: method,
-          params: params,
-        ),
-      ),
-      requestMethod: requestMethod,
-      api: StellarAPIType.soroban,
-      responseEncoding: ServiceReponseEncoding.map,
-    );
-  }
-}
-
+/// Resolved URL, method and body for an outgoing request.
 class StellarRequestDetails extends BaseServiceRequestParams {
   final StellarAPIType api;
 
@@ -143,9 +62,9 @@ class StellarRequestDetails extends BaseServiceRequestParams {
               .map((e) => e.value)
               .toList()
               .emptyAsNull,
-      bodyBytes: values.rawValueAt(5),
-      bodyString: values.rawValueAt(6),
-      path: values.rawValueAt(7),
+      bodyBytes: values.rawValueAt<List<int>?>(5),
+      bodyString: values.rawValueAt<String?>(6),
+      path: values.rawValueAt<String?>(7),
       requestID: values.rawValueAt(8),
       api: StellarAPIType.fromValue(values.rawValueAt(9)),
     );

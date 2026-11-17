@@ -12,6 +12,12 @@
 # The core lints are also what is used by pub.dev for scoring packages.
 
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # blockchain_utils stays a path dependency (see pubspec.yaml); downgrade
+    # this publish-time warning so it never fails `dart analyze` in CI.
+    invalid_dependency: ignore
 # Uncomment the following section to specify additional rules.
 linter:
   rules:

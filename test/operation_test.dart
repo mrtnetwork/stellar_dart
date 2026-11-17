@@ -1,11 +1,11 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:blockchain_utils/utils/binary/utils.dart';
 import 'package:stellar_dart/src/address/address.dart';
 import 'package:stellar_dart/src/helper/helper.dart';
 import 'package:stellar_dart/src/keypair/crypto/public_key.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/models/operations/operation.dart';
 import 'package:test/test.dart';
+import 'suite_setup.dart';
 
 final _contract = StellarContractAddress(
   'CAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAKAL',
@@ -25,6 +25,7 @@ final _asset2 = StellarAssetCreditAlphanum4(
   issuer: StellarPublicKey.fromAddress(_source),
 );
 void main() {
+  setUpAll(initSuiteBackend);
   group('Operation', () {
     _restoreFootprintOperation();
     _extendFootprintTtlOperation();

@@ -1,7 +1,4 @@
-import 'package:blockchain_utils/exception/exceptions.dart';
-import 'package:blockchain_utils/networks/types/network.dart';
-import 'package:blockchain_utils/service/service.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/core/core.dart';
 
 /// Facilitates communication with the stellar horizon api by making requests using a provided [StellarProvider].
@@ -73,7 +70,7 @@ class StellarProvider<SERVICE extends IServiceProvider>
       request,
       timeout: timeout,
     );
-    return request.onResonse(r);
+    return request.onResponse(r);
   }
 
   /// Sends a request to the stellar network (Horizon) using the specified [request] parameter.
@@ -85,7 +82,7 @@ class StellarProvider<SERVICE extends IServiceProvider>
     IServiceRequest<RESULT, SERVICERESPONSE, StellarRequestDetails> request, {
     Duration? timeout,
   }) async {
-    final params = request.buildRequest(_id++);
+    final params = await request.buildRequest(_id++);
     final response = await service.doRequest(params, timeout: timeout);
     return _findError<SERVICERESPONSE>(params: params, response: response);
   }

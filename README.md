@@ -1,170 +1,122 @@
 # Stellar Dart
 
-Stellar Dart is a powerful package designed for seamless integration with the Stellar network, specifically tailored for developers looking to create, sign, and dispatch transactions effortlessly. It provides robust support for Stellar's transaction models, including native asset transfers and smart contract interactions.
+Cross-platform Dart toolkit for the Stellar network: build, sign, and submit transactions, manage accounts and assets, run multisig flows, and deploy/interact with Soroban smart contracts.
 
-Designed to facilitate interactions with various Stellar wallet types and features, Stellar Dart ensures efficient communication and transaction management within the Stellar ecosystem. It supports operations with accounts, managing assets, and implementing multi-signature transactions with ease.
+This package is the expanded successor of the original
+[mrtnetwork/stellar_dart](https://github.com/mrtnetwork/stellar_dart).
+Everything from that release is still here; the address types, regenerated
+providers, and backend-parity tests below are new.
 
-With Stellar Dart, developers can leverage advanced cryptographic capabilities for secure transaction signing and verification, enhancing the integrity and security of their operations. Whether you're executing transactions, querying account balances, or interacting with Stellar smart contracts, Stellar Dart offers a comprehensive toolkit to handle diverse data formats and cryptographic operations efficiently.
+## Crypto engine: `blockchain_utils` dual backend
 
-To maximize the benefits of Stellar Dart, a solid understanding of Stellar's network and API interactions is recommended. Stellar Dart simplifies complex tasks, making it an essential resource for developers navigating the Stellar ecosystem.
+All cryptography (Ed25519 signing/verification, hashing) delegates to
+[`blockchain_utils`](https://github.com/mrtnetwork/blockchain_utils), which now
+runs a **dual backend behind one typed API**: pure Dart by default, optional
+zero-dependency Rust backend (FFI on native, WASM on web).
 
-## Futures
+- Details and backend tables live in the
+  [`blockchain_utils` README](https://github.com/mrtnetwork/blockchain_utils).
+- The Rust core is maintained at
+  [mrtnetwork/blockchain-utils](https://github.com/mrtnetwork/blockchain-utils).
+- When the Rust backend is set (`blockchainUtils.setRustApi()`), all
+  high-level crypto used here routes through Rust.
 
-- **Transaction Management**
-  - Create, sign, and verify transactions using ED25519.
+## Capability tables
 
-- **Provider**
-  - Communication with Horizon and Soroban api.
+### Transactions & accounts
 
-- **Operation**
-  - Supports all Stellar operations, including Payments, Path Payments, Create Account, and Manage Data.
+| Area | Support |
+|---|---|
+| Envelopes | V1, fee bump |
+| Preconditions | Time bounds, ledger bounds, min seq, extra signers |
+| Multisig | Thresholds, extra signers, multisig payments |
+| Sequence handling | Classic + Soroban footprint (restore / extend TTL) |
+| Key management | BIP-39 / BIP-44 (`Bip44Coins.stellar`), muxed IDs |
 
-- **Contract**
-  - Supports deployment and interaction with Soroban smart contracts.
+### Operations
 
-### Examples
+| Group | Operations |
+|---|---|
+| Payments | Payment, path payment strict send/receive |
+| Offers & liquidity | Manage / create passive sell offers, manage buy offers, liquidity pool deposit / withdraw |
+| Trust | Change trust, allow trust, set trust-line flags, clawback (+ claimable) |
+| Balances | Create / claim claimable balance |
+| Account | Create account, merge, manage data, set options, bump sequence, inflation |
+| Sponsorship | Begin / end sponsoring future reserves, revoke sponsorship |
 
-  - [Payment](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/send_assets.dart)
-  - [DeployContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/deploy_contract.dart)
-  - [CallContract](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/transfer.dart)
-  - [CreateSellOffer](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/create_sell_offer.dart)
-  - [EnableMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/enable_multisig_account.dart)
-  - [PaymentUsingMultisigAccount](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/payment_using_multisig.dart)
-  - [PathPaymentStrict](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples/path_payment_strict.dart)
+### Soroban contracts
 
+| Area | Support |
+|---|---|
+| Lifecycle | Deploy, initialize, invoke host functions |
+| Footprint | Extend TTL, restore footprint |
+| Spec | On-chain contract-spec parsing, XDR encode/decode |
+| Assets | Stellar asset contract bindings, WASM upload hash |
 
-transfer
+### Addresses
 
-```dart
-  /// Initialize the StellarProvider with the specified URLs for the testnet.
-  final rpc = StellarProvider(StellarHTTPProvider(
-      url: "https://horizon-testnet.stellar.org",
-      soroban: "https://soroban-testnet.stellar.org"));
+| Type | Format |
+|---|---|
+| Account | `G…` (Ed25519) |
+| Muxed account | `M…` (base account + 64-bit ID) |
+| Contract | `C…` (Soroban contract hash / asset contract) |
+| Muxed contract | `W…` (CAP-84: contract + 64-bit ID) |
 
-  /// Create a StellarPrivateKey instance from a hexadecimal string.
-  final privateKey = StellarPrivateKey.fromHex(
-      "7dea550a78dd0f6afa98342a0e288e1d0b6bddd38d7a6fe17d9501a0524c3f23");
+All address types inherit `IAddress` from `blockchain_utils`, so they plug
+into the shared coin/address APIs.
 
-  /// Convert the private key to a public key and then to an address.
-  final source = privateKey.toPublicKey().toAddress();
+### Providers
 
-  /// Request the account details for the source address from the Stellar network.
-  final account = await rpc.request(HorizonRequestAccount(source.baseAddress));
+| API | Source |
+|---|---|
+| Horizon (accounts, txs, offers, claimable balances, liquidity pools) | Regenerated from `tool/specs/horizon-bundled.yml` (OpenAPI) |
+| Soroban RPC (simulate, send, get transaction/ledger) | Regenerated from `tool/specs/stellar-rpc.openrpc.json` (OpenRPC) |
+| Metadata | SEP-1 TOML parsing, fee stats |
 
-  /// Create a StellarAddress instance from a base32 encoded address for the destination.
-  final destination = StellarAddress.fromBase32Addr(
-      "GCMQXZLBPVE76N2B6GVP6VWUWVD3P622EJPG3644PGO25AKYNK3H5IAM");
+Request/response types follow the canonical specs and are validated against
+live testnet (`tool/live_quick_test.dart`).
 
-  /// Set the maximum time for the transaction to 30 seconds from now.
-  final maxTime =
-      DateTime.now().add(const Duration(seconds: 30)).millisecondsSinceEpoch ~/
-          1000;
+## What's new vs the old `mrtnetwork/stellar_dart` release
 
-  /// Create a PaymentOperation for the transaction.
-  final operation = PaymentOperation(
-      asset: StellarAssetCreditAlphanum4(
-          issuer: StellarAddress.fromBase32Addr(
-                  "GB726ND2YG4TR772WY4767M56RNSN3PHP4MV2ITQVCDM2LSMMVT7CD6O")
-              .toPublicKey(),
-          code: "MRT"),
-      amount: StellarHelper.toStroop("12"),
-      destination: destination.toMuxedAccount());
+- **Contract addresses:** `StellarContractAddress` (`C…`) and
+  `StellarMuxedContractAddress` (`W…`, CAP-84).
+- **Stellar XDR v30.0:** auth V2 / `CreateContractArgsV2`, credentials with
+  delegates, `ContractExecutable` externalRef, CAP-88 value arms, CAP-87
+  ML-DSA key classes (client side).
+- **`IAddress` inheritance** for all Stellar address types (shared validation
+  and coin-config integration).
+- **Regenerated providers:** Horizon types from OpenAPI, Soroban RPC types
+  from OpenRPC, with live-node test coverage.
+- **Dual-backend tests:** `test_backend.dart` / `backend_identity_test.dart`
+  exercise both the pure-Dart and Rust/WASM backends.
+- **New examples:** fee bump, contract initialize, WASM-hash upload, local
+  testnet flows.
 
-  /// Create a StellarTransactionV1 instance with the specified parameters.
-  StellarTransactionV1 transaction = StellarTransactionV1(
-      sourceAccount: source.toMuxedAccount(),
-      fee: StellarHelper.toStroop("0.001").toInt(),
-      seqNum: account.sequence + BigInt.one,
-      cond: PrecondTime(
-          TimeBounds(minTime: BigInt.zero, maxTime: BigInt.from(maxTime))),
-      operations: [Operation(body: operation)]);
+## Breaking changes
 
-  /// Create a TransactionSignaturePayload using the network ID and transaction.
-  TransactionSignaturePayload payload = TransactionSignaturePayload(
-      networkId: StellarNetwork.testnet.passphraseHash,
-      taggedTransaction: transaction);
+- Address types now inherit `IAddress` — `is` checks against the old concrete
+  hierarchy and custom subclasses may need updating.
+- Horizon / Soroban RPC request and response models were regenerated from the
+  canonical OpenAPI / OpenRPC specs; field names, optionality, and defaults
+  may differ from the previous hand-written models.
 
-  /// Sign the transaction using the private key.
-  final signature = privateKey.sign(payload.txHash());
+## Examples
 
-  /// Create a TransactionV1Envelope to encapsulate the transaction and its signature.
-  TransactionV1Envelope envelope =
-      TransactionV1Envelope(tx: transaction, signatures: [signature]);
+Explore all examples in [`example/lib/examples/`](https://github.com/mrtnetwork/stellar_dart/tree/main/example/lib/examples):
 
-  /// Submit the transaction to the Stellar network.
-  await rpc
-      .request(HorizonRequestSubmitTransaction(envelope.toVariantXDRBase64()));
+## Testing
+
+```sh
+dart test            # unit + backend-parity suites
 ```
 
-### Horizon and soroban provider
+Live suites hit testnet and need network access:
 
-```dart
-class StellarHTTPProvider implements StellarServiceProvider {
-  @override
-  Future<HorizonServiceResponse> get(StellarRequestDetails params,
-      [Duration? timeout]) async {
-        /// see example file
-      }
-
-  @override
-  Future<HorizonServiceResponse> post(StellarRequestDetails params,
-      [Duration? timeout]) async {
-        /// see example file
-      }
-}
-
-  final providr = StellarProvider(StellarHTTPProvider(
-      url: "https://horizon-testnet.stellar.org",
-      soroban: "https://soroban-testnet.stellar.org"));
-
-  final account = await providr.request(const HorizonRequestAccount(
-      "GCMQXZLBPVE76N2B6GVP6VWUWVD3P622EJPG3644PGO25AKYNK3H5IAM"));
-  final fee = await providr.request(const HorizonRequestFeeStats());
-
-  /// ...
-
-  /// soroban request
-  final simulateTx =
-      await providr.request(const SorobanRequestSimulateTransaction(tx: tx));
-  //// ....
-
-
+```sh
+STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org \
+STELLAR_RPC_URL=https://soroban-testnet.stellar.org \
+dart tool/live_quick_test.dart
 ```
-
-### Addresses and KeyManagment
-
-```dart
-  /// Define the passphrase for generating the seed.
-  const String passphrase = "MRTNETWORK";
-
-  /// Generate a 12-word mnemonic using the Bip39MnemonicGenerator.
-  final mnemonic =
-      Bip39MnemonicGenerator().fromWordsNumber(Bip39WordsNum.wordsNum12);
-
-  /// Generate a seed using the mnemonic and passphrase with the Bip39SeedGenerator.
-  final seed = Bip39SeedGenerator(mnemonic).generate(passphrase);
-
-  /// Derive the master wallet using Bip44 from the generated seed for the Stellar coin type.
-  final masterWallet =
-      Bip44.fromSeed(seed, Bip44Coins.stellar).deriveDefaultPath;
-
-  /// Extract the private key from the master wallet.
-  final privateKey = StellarPrivateKey.fromBytes(masterWallet.privateKey.raw);
-
-  /// Derive the public key from the private key.
-  final publicKey = privateKey.toPublicKey();
-
-  /// Convert the public key to a Stellar address.
-  final address = publicKey.toAddress();
-
-  /// Convert the address to a muxed address with an ID of 10.
-  final muxedAddress = address.toMuxedAddress(BigInt.from(10));
-
-```
-
-## Resources
-
-- Comprehensive Testing: All functionalities have been thoroughly tested, ensuring reliability and accuracy.
 
 ## Contributing
 

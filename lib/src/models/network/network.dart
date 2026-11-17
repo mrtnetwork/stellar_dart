@@ -1,36 +1,37 @@
-import 'package:stellar_dart/stellar_dart.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
+/// A Stellar network (public, testnet, futurenet) and its passphrase.
 class StellarNetwork {
-  final List<int> passphraseHash;
+  final BuBytes passphraseHash;
   final String name;
   final String passphrase;
-  const StellarNetwork._({
+  StellarNetwork._({
     required this.passphrase,
-    required this.passphraseHash,
+    required List<int> passphraseHash,
     required this.name,
-  });
-  static const StellarNetwork mainnet = StellarNetwork._(
+  }) : passphraseHash = passphraseHash.asImmutableBytes;
+  static final StellarNetwork mainnet = StellarNetwork._(
     passphrase: _StellarNetworkConst.mainnet,
     passphraseHash: _StellarNetworkConst.mainnetHash,
     name: 'Mainnet',
   );
-  static const StellarNetwork testnet = StellarNetwork._(
+  static final StellarNetwork testnet = StellarNetwork._(
     passphrase: _StellarNetworkConst.testnet,
     passphraseHash: _StellarNetworkConst.testnetHash,
     name: 'Testnet',
   );
-  static const StellarNetwork futurenet = StellarNetwork._(
+  static final StellarNetwork futurenet = StellarNetwork._(
     passphrase: _StellarNetworkConst.future,
     passphraseHash: _StellarNetworkConst.futureHash,
     name: 'Futurenet',
   );
-  static const List<StellarNetwork> values = [mainnet, testnet, futurenet];
+  static final List<StellarNetwork> values = [mainnet, testnet, futurenet];
   static StellarNetwork fromPassphrase(String? passphrase) {
     return values.firstWhere(
       (e) => e.passphrase == passphrase,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Network not found with the provided passphrase.',
                 details: {'passphrase': passphrase},
               ),
@@ -38,6 +39,7 @@ class StellarNetwork {
   }
 }
 
+/// Network passphrases for the known Stellar networks.
 class _StellarNetworkConst {
   static const mainnet = 'Public Global Stellar Network ; September 2015';
   static const testnet = 'Test SDF Network ; September 2015';

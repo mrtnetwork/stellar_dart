@@ -1,6 +1,7 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 
+/// A Stellar address (account, contract, muxed, or signed payload).
 abstract class StellarAddress
     with Equality, CborTagSerializable
     implements IAddress {
@@ -14,13 +15,15 @@ abstract class StellarAddress
     switch (decode.type) {
       case XlmAddrTypes.muxed:
         return StellarMuxedAddress(address);
+      case XlmAddrTypes.muxedContract:
+        return StellarMuxedContractAddress(address);
       case XlmAddrTypes.pubKey:
         return StellarAccountAddress(address);
       case XlmAddrTypes.contract:
         return StellarContractAddress(address);
       case XlmAddrTypes.privKey:
-        throw const DartStellarPlugingException(
-          'Invalid address type. for secret key please use `StellarPrivateKey.fromBase32`',
+        throw const BuError(StellarErrorType.address, 
+          'Invalid address type. For secret key, please use `StellarPrivateKey.fromBase32`.',
         );
     }
   }
@@ -41,20 +44,25 @@ abstract class StellarAddress
           publicKey: values.rawValueAt(1),
           accountId: values.rawValueAt(2),
         );
+      case XlmAddrTypes.muxedContract:
+        return StellarMuxedContractAddress.fromContractId(
+          contractId: values.rawValueAt(1),
+          id: values.rawValueAt(2),
+        );
       case XlmAddrTypes.pubKey:
         return StellarAccountAddress.fromPublicKey(values.rawValueAt(1));
       case XlmAddrTypes.contract:
         return StellarContractAddress.fromBytes(values.rawValueAt(1));
       case XlmAddrTypes.privKey:
-        throw const DartStellarPlugingException(
-          'Invalid address type. for secret key please use `StellarPrivateKey.fromBase32`',
+        throw const BuError(StellarErrorType.address, 
+          'Invalid address type. For secret key, please use `StellarPrivateKey.fromBase32`.',
         );
     }
   }
 
-  List<int> keyBytes() {
+  BuBytes keyBytes() {
     final decode = XlmAddrDecoder().decode(baseAddress);
-    return decode.pubKeyBytes;
+    return decode.pubKeyBytes.asImmutableBytes;
   }
 
   @override
@@ -74,7 +82,7 @@ abstract class StellarAddress
 
   T cast<T extends StellarAddress>() {
     if (this is! T) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.castFailed, 
         'Address casting failed.',
         details: {'expected': '$T', 'address': runtimeType.toString()},
       );
@@ -86,7 +94,7 @@ abstract class StellarAddress
   BlockchainNetwork get blockchainNetwork => BlockchainNetwork.stellar;
 
   @override
-  List<int> encodeAsIAddress() {
+  BuBytes encodeAsIAddress() {
     return toCbor().encode();
   }
 

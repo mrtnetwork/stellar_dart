@@ -1,6 +1,10 @@
+/// Dart mirrors of the Stellar XDR transaction-result definitions: per-operation
+/// result codes and their success/failure payloads. Names follow the XDR
+/// unions they mirror.
+library;
+
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/keypair/crypto/public_key.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/models/operations/operation.dart';
@@ -37,7 +41,7 @@ class ClaimAtomType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClaimAtom type not found.',
                 details: {
                   'name': name,
@@ -62,7 +66,7 @@ abstract class ClaimAtom extends XDRVariantSerialization {
       case ClaimAtomType.claimAtomTypeLiquidityPool:
         return ClaimLiquidityAtom.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid ClaimAtom type.',
           details: {'type': type.name},
         );
@@ -98,7 +102,7 @@ abstract class ClaimAtom extends XDRVariantSerialization {
 }
 
 class ClaimOfferAtomV0 extends ClaimAtom {
-  final List<int> sellerEd25519;
+  final BuBytes sellerEd25519;
   final BigInt offerID;
   final StellarAsset assetSold;
   final BigInt amountSold;
@@ -111,12 +115,12 @@ class ClaimOfferAtomV0 extends ClaimAtom {
     required BigInt amountSold,
     required this.assetBought,
     required BigInt amountBought,
-  }) : sellerEd25519 = sellerEd25519.asImmutableBytes.exc(
+  }) : sellerEd25519 = sellerEd25519.exc(
          length: StellarConst.ed25519PubKeyLength,
          name: 'sellerEd25519',
          operation: "ClaimOfferAtomV0",
          reason: "Invalid sellerEd25519 bytes length.",
-       ),
+       ).asImmutableBytes,
        offerID = offerID.asI64,
        amountSold = amountSold.asI64,
        amountBought = amountBought.asI64,
@@ -233,7 +237,7 @@ class ClaimOfferAtom extends ClaimAtom {
 }
 
 class ClaimLiquidityAtom extends ClaimAtom {
-  final List<int> liquidityPoolID;
+  final BuBytes liquidityPoolID;
   final StellarAsset assetSold;
   final BigInt amountSold;
   final StellarAsset assetBought;
@@ -244,12 +248,12 @@ class ClaimLiquidityAtom extends ClaimAtom {
     required BigInt amountSold,
     required this.assetBought,
     required BigInt amountBought,
-  }) : liquidityPoolID = liquidityPoolID.asImmutableBytes.exc(
+  }) : liquidityPoolID = liquidityPoolID.exc(
          length: StellarConst.ed25519PubKeyLength,
          name: 'liquidityPoolID',
          operation: "ClaimLiquidityAtom",
          reason: "Invalid liquidityPoolID bytes length.",
-       ),
+       ).asImmutableBytes,
        amountSold = amountSold.asI64,
        amountBought = amountBought.asI64,
        super(ClaimAtomType.claimAtomTypeLiquidityPool);
@@ -335,7 +339,7 @@ class CreateAccountResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'CreateAccountResultCode not found.',
                 details: {
                   'name': name,
@@ -473,7 +477,7 @@ class PaymentResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'PaymentResultCode not found.',
                 details: {
                   'name': name,
@@ -643,7 +647,7 @@ class PathPaymentStrictReceiveResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -665,7 +669,7 @@ abstract class PathPaymentStrictReceiveResult extends OperationInner {
     );
     switch (code) {
       case PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveSuccess:
-        return PathPaymentStrictReceiveResultSuccesss.fromStruct(decode.value);
+        return PathPaymentStrictReceiveResultSuccess.fromStruct(decode.value);
       case PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveNoIssuer:
         return PathPaymentStrictReceiveResultNoIssuer.fromStruct(decode.value);
       default:
@@ -680,7 +684,7 @@ abstract class PathPaymentStrictReceiveResult extends OperationInner {
           case PathPaymentStrictReceiveResultCode
               .pathPaymentStrictReceiveSuccess:
             return LazyVariantModel(
-              layout: PathPaymentStrictReceiveResultSuccesss.layout,
+              layout: PathPaymentStrictReceiveResultSuccess.layout,
               property: type.name,
               index: type.value,
             );
@@ -756,21 +760,21 @@ class SimplePaymentResult extends XDRSerialization {
   }
 }
 
-class PathPaymentStrictReceiveResultSuccesss
+class PathPaymentStrictReceiveResultSuccess
     extends PathPaymentStrictReceiveResult {
   final List<ClaimAtom> offers;
   final SimplePaymentResult last;
-  PathPaymentStrictReceiveResultSuccesss({
+  PathPaymentStrictReceiveResultSuccess({
     required List<ClaimAtom> offers,
     required this.last,
   }) : offers = offers.immutable,
        super(
          PathPaymentStrictReceiveResultCode.pathPaymentStrictReceiveSuccess,
        );
-  factory PathPaymentStrictReceiveResultSuccesss.fromStruct(
+  factory PathPaymentStrictReceiveResultSuccess.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return PathPaymentStrictReceiveResultSuccesss(
+    return PathPaymentStrictReceiveResultSuccess(
       offers:
           json
               .valueEnsureAsList<Map<String, dynamic>>('offers')
@@ -949,7 +953,7 @@ class ManageOfferEffectType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ManageOfferEffect type not found.',
                 details: {
                   'name': name,
@@ -974,7 +978,7 @@ abstract class ManageOfferEffect extends XDRVariantSerialization {
       case ManageOfferEffectType.manageOfferUpdated:
         return ManageOfferEffectUpdated.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid ManageOfferEffect type.',
           details: {'type': type.name},
         );
@@ -1142,7 +1146,7 @@ class ManageSellOfferResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1439,7 +1443,7 @@ class SetOptionsResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1553,7 +1557,7 @@ class ChangeTrustResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1661,7 +1665,7 @@ class AllowTrustResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1771,7 +1775,7 @@ class AccountMergeResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AccountMergeResultCode not found.',
                 details: {
                   'name': name,
@@ -1894,7 +1898,7 @@ class InflationResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'InflationResultCode not found.',
                 details: {
                   'name': name,
@@ -2063,7 +2067,7 @@ class ManageDataResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'BumpSequenceResultCode not found.',
                 details: {
                   'name': name,
@@ -2149,7 +2153,7 @@ class BumpSequenceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'BumpSequenceResultCode not found.',
                 details: {
                   'name': name,
@@ -2279,7 +2283,7 @@ class ManageBuyOfferResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ManageBuyOfferResultCode not found.',
                 details: {
                   'name': name,
@@ -2481,7 +2485,7 @@ class PathPaymentStrictSendResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'CreateClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2594,7 +2598,7 @@ class CreateClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'CreateClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2742,7 +2746,7 @@ class ClaimClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClaimClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2835,7 +2839,7 @@ class EndSponsoringFutureReservesResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'EndSponsoringFutureReservesResultCode not found.',
                 details: {
                   'name': name,
@@ -2942,7 +2946,7 @@ class RevokeSponsorshipResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'RevokeSponsorshipResultCode not found.',
                 details: {
                   'name': name,
@@ -3045,7 +3049,7 @@ class ClawbackResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClawbackResultCode not found.',
                 details: {
                   'name': name,
@@ -3149,7 +3153,7 @@ class ClawbackClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClawbackClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -3250,7 +3254,7 @@ class SetTrustLineFlagsResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'SetTrustLineFlagsResultCode not found.',
                 details: {
                   'name': name,
@@ -3360,7 +3364,7 @@ class LiquidityPoolDepositResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'LiquidityPoolDepositResultCode not found.',
                 details: {
                   'name': name,
@@ -3470,7 +3474,7 @@ class LiquidityPoolWithdrawResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'LiquidityPoolWithdrawResultCode not found.',
                 details: {
                   'name': name,
@@ -3574,7 +3578,7 @@ class InvokeHostFunctionResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'InvokeHostFunctionResultCode not found.',
                 details: {
                   'name': name,
@@ -3649,14 +3653,14 @@ class InvokeHostFunctionResultVoid extends InvokeHostFunctionResult {
 }
 
 class InvokeHostFunctionResultSuccess extends InvokeHostFunctionResult {
-  final List<int> success;
+  final BuBytes success;
   InvokeHostFunctionResultSuccess(List<int> success)
-    : success = success.asImmutableBytes.exc(
+    : success = success.exc(
         length: StellarConst.hash256Length,
         name: 'success',
         operation: "InvokeHostFunctionResultSuccess",
         reason: "Invalid success bytes length.",
-      ),
+      ).asImmutableBytes,
       super(InvokeHostFunctionResultCode.invokeHostFunctionSuccess);
   factory InvokeHostFunctionResultSuccess.fromStruct(
     Map<String, dynamic> json,
@@ -3712,7 +3716,7 @@ class ExtendFootprintTTLResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -3810,7 +3814,7 @@ class RestoreFootprintResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -3918,7 +3922,7 @@ class BeginSponsoringFutureReservesResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'BeginSponsoringFutureReservesResultCode not found.',
                 details: {
                   'name': name,
@@ -4086,7 +4090,7 @@ class TransactionResultType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'TransactionResultType not found.',
                 details: {
                   'name': name,
@@ -4151,7 +4155,7 @@ class OperationResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -4381,7 +4385,7 @@ class OperationResultOpInner extends OperationResult {
               property: type.name,
             );
           default:
-            throw const DartStellarPlugingException('Invalid Operation type.');
+            throw const BuError(DefaultErrorType.invalidArgument, 'Invalid Operation type.');
         }
       }),
       property: property,
@@ -4475,7 +4479,7 @@ class OperationResultOpInner extends OperationResult {
         inner = RestoreFootprintResult.fromStruct(decode.value);
         break;
       default:
-        throw const DartStellarPlugingException('Invalid Operation type.');
+        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid Operation type.');
     }
     return OperationResultOpInner(inner);
   }
@@ -4509,17 +4513,17 @@ class OperationResultVoid extends OperationResult {
 }
 
 class InnerTransactionResultPair extends TransactionResultCode {
-  final List<int> transactionHash;
+  final BuBytes transactionHash;
   final TransactionResult result;
   InnerTransactionResultPair({
     required this.result,
     required List<int> transactionHash,
-  }) : transactionHash = transactionHash.asImmutableBytes.exc(
+  }) : transactionHash = transactionHash.exc(
          length: StellarConst.hash256Length,
          name: 'transactionHash',
          operation: "InnerTransactionResultPair",
          reason: "Invalid transactionHash bytes length.",
-       ),
+       ).asImmutableBytes,
        super(code: TransactionResultType.txFeeBumpInnerFailed);
   factory InnerTransactionResultPair.fromStruct(Map<String, dynamic> json) {
     return InnerTransactionResultPair(

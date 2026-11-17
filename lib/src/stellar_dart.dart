@@ -1,6 +1,7 @@
 export 'address/address.dart';
-export 'exception/exception.dart';
+export 'error/stellar_error.dart';
 export 'helper/helper.dart';
+export 'helper/mldsa_helper.dart';
 export 'models/models.dart';
 export 'provider/provider.dart';
 export 'serialization/serialization.dart';

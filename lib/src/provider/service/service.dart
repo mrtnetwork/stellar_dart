@@ -1,9 +1,9 @@
-import 'package:blockchain_utils/service/models/params.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/core/core.dart';
 
 typedef StellarServiceResponse = BaseServiceResponse;
 
-/// A mixin defining the service provider contract for interacting with the Ton network.
+/// A mixin defining the service provider contract for interacting with the Stellar network.
 mixin StellarServiceProvider
     implements
         IServiceProvider<StellarRequestDetails, BaseGRPCServiceRequestParams> {
@@ -25,8 +25,8 @@ mixin StellarServiceProvider
     request,
     Duration? timeout,
   }) {
-    throw UnsupportedError(
-      "Subscribtion requests are not supported by this service.",
+    throw const BuError(DefaultErrorType.unsupported, 
+      "Subscription requests are not supported by this service.",
     );
   }
 
@@ -35,7 +35,9 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw const BuError(DefaultErrorType.unsupported, 
+      "gRPC requests are not supported by this service.",
+    );
   }
 
   @override
@@ -43,7 +45,9 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw const BuError(DefaultErrorType.unsupported, 
+      "gRPC requests are not supported by this service.",
+    );
   }
 
   @override
@@ -51,6 +55,8 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw const BuError(DefaultErrorType.unsupported, 
+      "gRPC requests are not supported by this service.",
+    );
   }
 }

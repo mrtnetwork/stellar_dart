@@ -1,9 +1,6 @@
-import 'package:blockchain_utils/bip/address/encoders.dart';
-import 'package:blockchain_utils/cbor/cbor.dart';
-import 'package:blockchain_utils/helper/extensions/extensions.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/address/address/account_address.dart';
 import 'package:stellar_dart/src/address/core/address.dart';
-import 'package:stellar_dart/src/address/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
 /// Represents a Stellar muxed address, which is a multiplexed account with an account ID.
@@ -43,7 +40,7 @@ class StellarMuxedAddress extends StellarAddress {
   ///
   /// The `publicKey` and `accountId` are used to encode the muxed address.
   ///
-  /// Throws a `StellarAddressException` if the public key is invalid.
+  /// Throws a `BuError` if the public key is invalid.
   factory StellarMuxedAddress.fromPublicKey({
     required List<int> publicKey,
     required BigInt accountId,
@@ -65,7 +62,7 @@ class StellarMuxedAddress extends StellarAddress {
         muxedAddress: muxedAddress,
       );
     } catch (e) {
-      throw StellarAddressException(
+      throw BuError(DefaultErrorType.badPublicKey, 
         'Invalid public key.',
         details: {'stack': e.toString()},
       );
@@ -76,16 +73,16 @@ class StellarMuxedAddress extends StellarAddress {
   ///
   /// The address must be of type `XlmAddrTypes.muxed`, and it will be decoded accordingly.
   ///
-  /// Throws a `StellarAddressException` if the address is of the wrong type or invalid.
+  /// Throws a `BuError` if the address is of the wrong type or invalid.
   factory StellarMuxedAddress(String address) {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.muxed) {
-        throw StellarAddressException(
+        throw BuError(DefaultErrorType.invalidAddress, 
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.muxed.name,
-            'type': decode.type.toString(),
+            'type': decode.type.name,
           },
         );
       }
@@ -95,10 +92,10 @@ class StellarMuxedAddress extends StellarAddress {
         accountId: decode.accountId!,
         muxedAddress: address,
       );
-    } on StellarAddressException {
+    } on BuError {
       rethrow;
     } catch (e, s) {
-      throw StellarAddressException(
+      throw BuError(DefaultErrorType.invalidAddress, 
         'Invalid Muxed address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );
@@ -113,7 +110,7 @@ class StellarMuxedAddress extends StellarAddress {
   /// Converts this muxed address into an `ScAddress` for use in Soroban smart contracts.
   @override
   ScAddress toScAddress() {
-    return ScAddressAccountId(toPublicKey());
+    return ScAddressMuxedAccount.fromAddress(this);
   }
 
   /// Returns the muxed address as a string.

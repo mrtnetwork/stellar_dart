@@ -1,18 +1,19 @@
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
+/// Internal argument validation helpers.
 class StellarValidator {
   static String validateAssetCode(String code, {int? length}) {
     if (!StellarConst.assetCodeRegEx.hasMatch(code)) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Incorrect asset code.',
         details: {'code': code},
       );
     }
     length ??= StellarConst.assetMaximumCodeLength;
     if (code.length > length) {
-      throw DartStellarPlugingException(
-        'Invalid  assets code length.',
+      throw BuError(DefaultErrorType.invalidLength, 
+        'Invalid asset code length.',
         details: {
           'maximum': length.toString(),
           'length': code.length.toString(),
@@ -29,7 +30,7 @@ class StellarValidator {
     String? name,
   }) {
     if (value.length > max) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidLength, 
         "Incorrect ${name == null ? '' : '$name '}String length.",
         details: {'maximum': max.toString(), 'length': value.length.toString()},
       );

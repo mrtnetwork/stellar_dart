@@ -1,10 +1,10 @@
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 
+/// Conversion helpers for Stellar amounts, times and assets.
 class StellarHelper {
-  /// /// Converts a string representation of Lumen to Stroop (as BigInt).
+  /// Converts a string representation of Lumen to Stroop (as BigInt).
   static BigInt toStroop(String lumen) {
     return AmountConverter.stellar.toUnit(lumen);
   }
@@ -65,7 +65,7 @@ class StellarHelper {
     final BigInt finalDenominator = denominators[1].toBigInt();
 
     if (finalNumerator == BigInt.zero || finalDenominator == BigInt.zero) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.notFound, 
         "Couldn't find approximation",
         details: {'price': price},
       );
@@ -83,7 +83,7 @@ class StellarHelper {
   }) {
     final codeBytes = StringUtils.encode(code);
     if (code.length > length) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidLength, 
         'Invalid asset code length.',
         details: {
           'expected': length.toString(),
@@ -123,7 +123,11 @@ class StellarHelper {
     required String code,
     required AssetType type,
   }) {
-    assert(type != AssetType.native);
+    if (type == AssetType.native) {
+      throw const BuError(DefaultErrorType.invalidArgument, 
+        "Invalid asset type for issued asset: must not be native.",
+      );
+    }
     switch (type) {
       case AssetType.creditAlphanum12:
         final RegExp regExp = RegExp(r'^[a-zA-Z0-9]{5,12}$');

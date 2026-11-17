@@ -1,11 +1,11 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/keypair/keypair.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/serialization/serialization.dart';
 import 'package:stellar_dart/src/utils/validator.dart';
 
+/// Threshold level required to authorize an operation.
 class OperationLevel {
   final String name;
   const OperationLevel._(this.name);
@@ -19,6 +19,7 @@ class OperationLevel {
   }
 }
 
+/// The Stellar operation types.
 class OperationType {
   final String name;
   final int value;
@@ -138,7 +139,8 @@ class OperationType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Operation type not found.',
                 details: {
                   'name': name,
@@ -149,6 +151,7 @@ class OperationType {
   }
 }
 
+/// A transaction operation: an optional source account plus its body.
 class Operation<T extends OperationBody> extends XDRSerialization {
   final MuxedAccount? sourceAccount;
   final T body;
@@ -165,7 +168,11 @@ class Operation<T extends OperationBody> extends XDRSerialization {
       json.valueEnsureAsMap<String, dynamic>('body'),
     );
     if (body is! T) {
-      throw const DartStellarPlugingException('Incorrect operation casting.');
+      throw BuError(
+        DefaultErrorType.castFailed,
+        'Incorrect operation casting.',
+        details: {'expected': '$T', 'body': body.runtimeType.toString()},
+      );
     }
     return Operation(
       body: body,
@@ -205,6 +212,7 @@ class Operation<T extends OperationBody> extends XDRSerialization {
   }
 }
 
+/// Base for the per-type payload of an [Operation].
 abstract class OperationBody extends XDRVariantSerialization {
   final OperationType operationType;
   OperationLevel get level => OperationLevel.medium;
@@ -271,7 +279,10 @@ abstract class OperationBody extends XDRVariantSerialization {
       case OperationType.restoreFootprint:
         return RestoreFootprintOperation.fromStruct(decode.value);
       default:
-        throw const DartStellarPlugingException('Invalid Operation type.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid Operation type.',
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) =>
@@ -445,7 +456,8 @@ abstract class OperationBody extends XDRVariantSerialization {
                 property: type.name,
               );
             default:
-              throw const DartStellarPlugingException(
+              throw const BuError(
+                DefaultErrorType.invalidArgument,
                 'Invalid Operation type.',
               );
           }
@@ -463,7 +475,8 @@ abstract class OperationBody extends XDRVariantSerialization {
 
   T cast<T extends OperationBody>() {
     if (this is! T) {
-      throw DartStellarPlugingException(
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Operation body casting failed.',
         details: {'expected': '$T', 'body': runtimeType.toString()},
       );
@@ -528,8 +541,9 @@ class PaymentOperation extends OperationBody {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'destination': destination.address.toString(),
+      'destination': destination.address,
       'asset': asset.toJson(),
+
       'amount': amount,
     };
   }
@@ -587,7 +601,7 @@ class CreateAccountOperation extends OperationBody {
   }
 }
 
-/// send an amount to a destination account through a path.
+/// Send an amount to a destination account through a path.
 /// Threshold: med
 /// Result: PathPaymentStrictReceiveResult
 class PathPaymentStrictReceiveOperation extends OperationBody {
@@ -600,7 +614,7 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
   /// recipient of the payment
   final MuxedAccount destination;
 
-  /// recipient of the payment
+  /// asset the recipient ends up with
   final StellarAsset destAsset;
 
   /// amount they end up with
@@ -680,7 +694,7 @@ class PathPaymentStrictReceiveOperation extends OperationBody {
     return {
       'sendAsset': sendAsset.toJson(),
       'sendMax': sendMax,
-      'destination': destination.address.toString(),
+      'destination': destination.address,
       'destAsset': destAsset.toJson(),
       'destAmount': destAmount,
       'path': path.map((e) => e.toJson()).toList(),
@@ -701,7 +715,7 @@ class ManageSellOfferOperation extends OperationBody {
   /// price of thing being sold in terms of what you are buying
   final StellarPrice price;
 
-  /// // 0=create a new offer, otherwise edit an existing offer
+  /// 0 = create a new offer, otherwise edit an existing offer
   final BigInt offerId;
   ManageSellOfferOperation({
     required this.selling,
@@ -769,16 +783,16 @@ class ManageSellOfferOperation extends OperationBody {
 /// Threshold: med
 /// Result: CreatePassiveSellOfferResult
 class CreatePassiveSellOfferOperation extends OperationBody {
-  /// A
+  /// asset being sold (A)
   final StellarAsset selling;
 
-  /// B
+  /// asset being bought (B)
   final StellarAsset buying;
 
   /// amount taker gets
   final BigInt amount;
 
-  /// cost of A in terms of B
+  /// price of the sold asset in terms of the bought asset
   final StellarPrice price;
 
   CreatePassiveSellOfferOperation({
@@ -845,7 +859,7 @@ class CreatePassiveSellOfferOperation extends OperationBody {
 /// Threshold: med or high
 /// Result: SetOptionsResult
 class SetOptionsOperation extends OperationBody {
-  /// sets the inflation destinationf
+  /// sets the inflation destination
   final StellarPublicKey? inflationDest;
 
   /// which flags to clear
@@ -1150,14 +1164,17 @@ class ManageDataOperation extends OperationBody {
   final String dataName;
 
   /// set to null to clear
-  final List<int>? dataValue;
+  final BuBytes? dataValue;
   ManageDataOperation({required String dataName, List<int>? dataValue})
-    : dataValue = dataValue?.asImmutableBytes.max(
-        length: StellarConst.dataValueLength,
-        name: 'dataValue',
-        operation: "ManageDataOperation",
-        reason: "Invalid dataValue bytes length.",
-      ),
+    : dataValue =
+          dataValue
+              ?.max(
+                length: StellarConst.dataValueLength,
+                name: 'dataValue',
+                operation: "ManageDataOperation",
+                reason: "Invalid dataValue bytes length.",
+              )
+              .asImmutableBytes,
       dataName = StellarValidator.validateString(
         value: dataName,
         max: StellarConst.str64,
@@ -1315,7 +1332,7 @@ class ManageBuyOfferOperation extends OperationBody {
   }
 }
 
-/// send an amount to a destination account through a path.
+/// Send an amount to a destination account through a path.
 /// Threshold: med
 /// Result: PathPaymentStrictSendResult
 class PathPaymentStrictSendOperation extends OperationBody {
@@ -1402,7 +1419,7 @@ class PathPaymentStrictSendOperation extends OperationBody {
     return {
       'sendAsset': sendAsset.toJson(),
       'sendAmount': sendAmount.toString(),
-      'destination': destination.address.toString(),
+      'destination': destination.address,
       'destAsset': destAsset.toJson(),
       'destMin': destMin.toString(),
       'path': path.map((e) => e.toJson()).toList(),
@@ -1563,6 +1580,7 @@ class BeginSponsoringFutureReservesOperation extends OperationBody {
   }
 }
 
+/// Ends a sponsorship started by BeginSponsoringFutureReserves.
 class EndSponsoringFutureReservesOperation extends OperationBody {
   const EndSponsoringFutureReservesOperation()
     : super(OperationType.endSponsoringFutureReserves);
@@ -1675,7 +1693,7 @@ class ClawbackOperation extends OperationBody {
   Map<String, dynamic> toJson() {
     return {
       'asset': asset.toJson(),
-      'from': from.address.toString(),
+      'from': from.address,
       'amount': amount.toString(),
     };
   }
@@ -1790,7 +1808,7 @@ class SetTrustLineFlagsOperation extends OperationBody {
 /// Threshold: med
 /// Result: LiquidityPoolDepositResult
 class LiquidityPoolDepositOperation extends OperationBody {
-  final List<int> liquidityPoolId;
+  final BuBytes liquidityPoolId;
   final BigInt maxAmountA;
   final BigInt maxAmountB;
   final StellarPrice minPrice;
@@ -1802,12 +1820,15 @@ class LiquidityPoolDepositOperation extends OperationBody {
     required BigInt maxAmountB,
     required this.minPrice,
     required this.maxPrice,
-  }) : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
-         length: StellarConst.hash256Length,
-         name: 'liquidityPoolId',
-         operation: "LiquidityPoolDepositOperation",
-         reason: "Invalid liquidityPoolId bytes length.",
-       ),
+  }) : liquidityPoolId =
+           liquidityPoolId
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'liquidityPoolId',
+                 operation: "LiquidityPoolDepositOperation",
+                 reason: "Invalid liquidityPoolId bytes length.",
+               )
+               .asImmutableBytes,
        maxAmountA = maxAmountA.asI64,
        maxAmountB = maxAmountB.asI64,
        super(OperationType.liquidityPoolDeposit);
@@ -1869,7 +1890,7 @@ class LiquidityPoolDepositOperation extends OperationBody {
 /// Threshold: med
 /// Result: LiquidityPoolWithdrawResult
 class LiquidityPoolWithdrawOperation extends OperationBody {
-  final List<int> liquidityPoolId;
+  final BuBytes liquidityPoolId;
   final BigInt amount;
   final BigInt minAmountA;
   final BigInt minAmountB;
@@ -1879,12 +1900,15 @@ class LiquidityPoolWithdrawOperation extends OperationBody {
     required BigInt amount,
     required BigInt minAmountA,
     required BigInt minAmountB,
-  }) : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
-         length: StellarConst.hash256Length,
-         name: 'liquidityPoolId',
-         operation: "LiquidityPoolWithdrawOperation",
-         reason: "Invalid liquidityPoolId bytes length.",
-       ),
+  }) : liquidityPoolId =
+           liquidityPoolId
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'liquidityPoolId',
+                 operation: "LiquidityPoolWithdrawOperation",
+                 reason: "Invalid liquidityPoolId bytes length.",
+               )
+               .asImmutableBytes,
        amount = amount.asI64,
        minAmountA = minAmountA.asI64,
        minAmountB = minAmountB.asI64,

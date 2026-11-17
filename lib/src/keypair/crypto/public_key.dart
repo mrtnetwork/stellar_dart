@@ -1,24 +1,23 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/address/address.dart';
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:stellar_dart/src/serialization/serialization.dart';
 
 /// Represents a Stellar public key using the Ed25519 cryptographic system.
 /// Extends `XDRSerialization` for XDR serialization/deserialization support.
-class StellarPublicKey extends XDRSerialization {
+class StellarPublicKey extends XDRSerialization with Equality {
   /// The underlying Ed25519 public key.
-  final Ed25519PublicKey _publicKey;
+  final ED25519PublicKey publicKey;
 
   /// Private constructor that accepts an `Ed25519PublicKey`.
-  const StellarPublicKey._(this._publicKey);
+  const StellarPublicKey(this.publicKey);
 
   /// Creates a `StellarPublicKey` from a raw byte array.
   ///
   /// The byte array must represent a valid Ed25519 public key.
   factory StellarPublicKey.fromPublicBytes(List<int> bytes) {
-    return StellarPublicKey._(Ed25519PublicKey.fromBytes(bytes));
+    return StellarPublicKey(ED25519PublicKey.fromBytes(bytes));
   }
 
   /// Creates a `StellarPublicKey` from a `StellarAddress`.
@@ -28,7 +27,7 @@ class StellarPublicKey extends XDRSerialization {
   factory StellarPublicKey.fromAddress(StellarAddress address) {
     if (address.type != XlmAddrTypes.pubKey &&
         address.type != XlmAddrTypes.muxed) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.unsupported, 
         'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to `StellarPublicKey`.',
         details: {'type': address.type.name},
       );
@@ -53,7 +52,7 @@ class StellarPublicKey extends XDRSerialization {
   factory StellarPublicKey.fromStruct(Map<String, dynamic> json) {
     final int type = json.valueAs('type');
     if (type != 0) {
-      throw const DartStellarPlugingException(
+      throw const BuError(DefaultErrorType.invalidArgument, 
         'Invalid StellarPublicKey XDR bytes.',
       );
     }
@@ -84,17 +83,22 @@ class StellarPublicKey extends XDRSerialization {
   /// Converts the public key into a structured map for serialization.
   @override
   Map<String, dynamic> toLayoutStruct() {
-    return {'type': 0, 'ed25519': _publicKey.compressed.sublist(1)};
+    return {'type': 0, 'ed25519': publicKey.toBytes()};
   }
 
   /// Returns the public key as a byte array.
-  List<int> toBytes() {
-    return _publicKey.compressed.sublist(1);
+  BuBytes toBytes() {
+    return publicKey.toBytes();
   }
 
   /// Returns the key hint, which is the last few bytes of the public key.
-  List<int> hint() {
+  BuBytes hint() {
     final bytes = toBytes();
+    if (bytes.length < StellarConst.pubkeyHintBytesLength) {
+      throw BuError(DefaultErrorType.invalidLength, 
+        'Invalid public key: expected at least ${StellarConst.pubkeyHintBytesLength} bytes, received ${bytes.length}.',
+      );
+    }
     return bytes.sublist(bytes.length - StellarConst.pubkeyHintBytesLength);
   }
 
@@ -107,18 +111,10 @@ class StellarPublicKey extends XDRSerialization {
   ///
   /// Requires a `digest` (the hashed data) and the `signature` to verify.
   bool verify({required List<int> digest, required List<int> signature}) {
-    final verifier = Ed25519Verifier.fromKeyBytes(toBytes());
-    return verifier.verify(digest, signature);
+    final verifier = ED25519Verifier(publicKey);
+    return verifier.verify(digest, ED25519Signature.fromBytes(signature));
   }
 
-  /// Equality operator that checks if two `StellarPublicKey` objects are equal.
   @override
-  bool operator ==(other) {
-    if (other is! StellarPublicKey) return false;
-    return _publicKey == other._publicKey;
-  }
-
-  /// Returns a hash code for the `StellarPublicKey`.
-  @override
-  int get hashCode => _publicKey.hashCode;
+  List<dynamic> get variables => [publicKey];
 }

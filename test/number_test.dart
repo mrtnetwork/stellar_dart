@@ -1,8 +1,10 @@
-import 'package:stellar_dart/src/exception/exception.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:test/test.dart';
+import 'suite_setup.dart';
 
 void main() {
+  setUpAll(initSuiteBackend);
   _price();
   _int256Parts();
 }
@@ -151,16 +153,10 @@ void _int256Parts() {
     final number = BigInt.parse(
       '-23123123123123112312312312312312312312312323',
     );
-    expect(
-      () => UInt256Parts.fromNumber(number),
-      throwsA(isA<DartStellarPlugingException>()),
-    );
+    expect(() => UInt256Parts.fromNumber(number), throwsA(isA<BuError>()));
   });
   test('UInt128Parts', () {
     final number = BigInt.one << 129;
-    expect(
-      () => UInt128Parts.fromNumber(number),
-      throwsA(isA<DartStellarPlugingException>()),
-    );
+    expect(() => UInt128Parts.fromNumber(number), throwsA(isA<BuError>()));
   });
 }

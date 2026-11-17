@@ -1,7 +1,7 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
 import 'package:stellar_dart/src/helper/helper.dart';
 
+/// Base for a type that can be encoded to / decoded from Stellar XDR.
 abstract class XDRSerialization {
   static Map<String, dynamic> deserialize({
     required List<int> bytes,
@@ -15,7 +15,7 @@ abstract class XDRSerialization {
 
   Layout<Map<String, dynamic>> createLayout({String? property});
   Map<String, dynamic> toLayoutStruct();
-  List<int> toXDR({String? property}) {
+  BuBytes toXDR({String? property}) {
     final layout = createLayout(property: property);
     return layout.serialize(toLayoutStruct());
   }
@@ -34,6 +34,7 @@ abstract class XDRSerialization {
   }
 }
 
+/// A decoded XDR union: the selected variant's name and its payload.
 class XDRVariantDecodeResult {
   final Map<String, dynamic> result;
   String get variantName => result['key'];
@@ -47,14 +48,15 @@ class XDRVariantDecodeResult {
   }
 }
 
+/// Base for an XDR union (discriminated variant) type.
 abstract class XDRVariantSerialization extends XDRSerialization {
   const XDRVariantSerialization();
   static XDRVariantDecodeResult toVariantDecodeResult(
     Map<String, dynamic> json,
   ) {
     if (json['key'] is! String || !json.containsKey('value')) {
-      throw const DartStellarPlugingException(
-        'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.',
+      throw const BuError(DefaultErrorType.invalidArgument, 
+        'Invalid variant layout. Only enum layouts can be deserialized with `XDRVariantSerialization.deserialize`.',
       );
     }
     return XDRVariantDecodeResult(json);
@@ -66,8 +68,8 @@ abstract class XDRVariantSerialization extends XDRSerialization {
   }) {
     final json = layout.deserialize(bytes).value;
     if (json['key'] is! String || !json.containsKey('value')) {
-      throw const DartStellarPlugingException(
-        'Invalid variant layout. only use enum layout to deserialize with `XDRVariantSerialization.deserialize` method.',
+      throw const BuError(DefaultErrorType.invalidArgument, 
+        'Invalid variant layout. Only enum layouts can be deserialized with `XDRVariantSerialization.deserialize`.',
       );
     }
     return json;
@@ -79,7 +81,7 @@ abstract class XDRVariantSerialization extends XDRSerialization {
     return {variantName: toLayoutStruct()};
   }
 
-  List<int> toVariantXDR({String? property}) {
+  BuBytes toVariantXDR({String? property}) {
     final layout = createVariantLayout(property: property);
     return layout.serialize(toVariantLayoutStruct());
   }

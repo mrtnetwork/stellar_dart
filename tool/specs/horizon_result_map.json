@@ -1,0 +1,7 @@
+{
+  "//": "OperationId -> concrete RESULT model. Single-item Horizon GETs return the flat record, not the list envelope the schema hints at (verified live on testnet).",
+  "RetrieveAnAccount": "HorizonAccountEmbeddedRecordsItem",
+  "RetrieveALedger": "HorizonLedgerEmbeddedRecordsItem",
+  "GetOfferByOfferId": "HorizonOfferEmbeddedRecordsItem",
+  "SubmitATransaction": "HorizonTransaction2"
+}

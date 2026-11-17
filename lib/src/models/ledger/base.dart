@@ -1,7 +1,13 @@
+/// Dart mirrors of the Stellar XDR ledger definitions (Stellar-ledger-entries.x,
+/// Stellar-transaction.x and friends). Each class corresponds to an XDR struct
+/// or union of the same name and carries its `layout()` (wire format) plus
+/// `fromStruct`/`toLayoutStruct` (de)serialization.
+library;
+
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/address/address.dart';
 import 'package:stellar_dart/src/constants/constant.dart';
-import 'package:stellar_dart/src/exception/exception.dart';
+import 'package:stellar_dart/src/error/stellar_error.dart';
 import 'package:stellar_dart/src/helper/helper.dart';
 import 'package:stellar_dart/src/keypair/keypair.dart';
 import 'package:stellar_dart/src/models/models.dart';
@@ -56,7 +62,7 @@ class LedgerEntryType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'LedgerEntry type not found.',
                 details: {
                   'name': name,
@@ -102,9 +108,9 @@ abstract class LedgerEntryData extends XDRVariantSerialization {
       case LedgerEntryType.configSetting:
         return ConfigSettingEntry.fromStruct(decode.value);
       case LedgerEntryType.ttl:
-        return TTLEntery.fromStruct(decode.value);
+        return TTLEntry.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid LedgerEntry type.',
           details: {'type': type.name},
         );
@@ -171,12 +177,12 @@ abstract class LedgerEntryData extends XDRVariantSerialization {
             );
           case LedgerEntryType.ttl:
             return LazyVariantModel(
-              layout: TTLEntery.layout,
+              layout: TTLEntry.layout,
               property: type.name,
               index: type.value,
             );
           default:
-            throw DartStellarPlugingException(
+            throw BuError(DefaultErrorType.invalidArgument, 
               'Invalid LedgerEntry type.',
               details: {'type': type.name},
             );
@@ -239,7 +245,7 @@ class AccountEntry extends LedgerEntryData {
 
   /// fields used for signatures
   /// thresholds stores unsigned bytes: [weight of master|low|medium|high]
-  final List<int> thresholds;
+  final BuBytes thresholds;
   final List<Signer> signers;
   final AccountEntryExt ext;
   AccountEntry({
@@ -254,12 +260,15 @@ class AccountEntry extends LedgerEntryData {
     required List<Signer> signers,
     required this.ext,
   }) : homeDomain = StellarValidator.validateString(value: homeDomain, max: 32),
-       thresholds = thresholds.asImmutableBytes.max(
-         length: 4,
-         operation: "AccountEntry",
-         reason: "Invalid thresholds bytes length.",
-         name: 'thresholds',
-       ),
+       thresholds =
+           thresholds
+               .max(
+                 length: 4,
+                 operation: "AccountEntry",
+                 reason: "Invalid thresholds bytes length.",
+                 name: 'thresholds',
+               )
+               .asImmutableBytes,
        signers = signers.immutable,
        balance = balance.asI64,
        seqNum = seqNum.asI64,
@@ -442,7 +451,7 @@ class AccountEntryExtensionV3Ext extends XDRVariantSerialization {
           v3: AccountEntryExtensionV3.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid AccountEntryExtensionV3Ext extension.',
         );
     }
@@ -516,7 +525,7 @@ class AccountEntryExtensionV2 extends XDRSerialization {
               final data = Map<String, dynamic>.from(e);
               return StellarPublicKey.fromStruct(data);
             } catch (e, s) {
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.invalidArgument, 
                 'Incorrect value.',
                 details: {
                   'key': 'signerSponsoringIDs',
@@ -580,12 +589,12 @@ class AccountEntryExtensionV2Ext extends XDRVariantSerialization {
     switch (type) {
       case ExtensionPointType.extVoid:
         return const AccountEntryExtensionV2Ext();
-      case ExtensionPointType.extArgs3:
+      case ExtensionPointType.extArgs2:
         return AccountEntryExtensionV2Ext(
           v2: AccountEntryExtensionV2.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid AccountEntryExtensionV2 extension.',
         );
     }
@@ -686,7 +695,7 @@ class AccountEntryExt extends XDRVariantSerialization {
           v1: AccountEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid AccountEntry extension.',
         );
     }
@@ -781,7 +790,7 @@ class TrustLineEntryV2Ext extends XDRVariantSerialization {
           v2: TrustLineEntryExtensionV2.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid TrustLineEntryExtensionV2 extension.',
         );
     }
@@ -873,7 +882,7 @@ class TrustLineEntryExt extends XDRVariantSerialization {
       case ExtensionPointType.extArgs1:
         return TrustLineEntryExt(v1: TrustLineEntryV1.fromStruct(decode.value));
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid TrustLineEntryV1 extension.',
         );
     }
@@ -1129,7 +1138,7 @@ class OfferEntry extends LedgerEntryData {
 class DataEntry extends LedgerEntryData {
   final StellarPublicKey accountId;
   final String dataName;
-  final List<int> dataValue;
+  final BuBytes dataValue;
   final ExtentionPointVoid ext;
   DataEntry({
     required this.accountId,
@@ -1140,12 +1149,15 @@ class DataEntry extends LedgerEntryData {
          value: dataName,
          max: StellarConst.str64,
        ),
-       dataValue = dataValue.asImmutableBytes.max(
-         name: 'dataValue',
-         length: StellarConst.dataValueLength,
-         operation: "DataEntry",
-         reason: "Invalid dataValue length.",
-       ),
+       dataValue =
+           dataValue
+               .max(
+                 name: 'dataValue',
+                 length: StellarConst.dataValueLength,
+                 operation: "DataEntry",
+                 reason: "Invalid dataValue length.",
+               )
+               .asImmutableBytes,
        super(LedgerEntryType.data);
   factory DataEntry.fromStruct(Map<String, dynamic> json) {
     return DataEntry(
@@ -1233,7 +1245,7 @@ class ClaimableBalanceEntryExt extends XDRVariantSerialization {
           v1: ClaimableBalanceEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid TrustLineEntryV1 extension.',
         );
     }
@@ -1292,7 +1304,7 @@ class ClaimableBalanceIdType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClaimableBalanceId not found.',
                 details: {
                   'name': name,
@@ -1319,7 +1331,7 @@ abstract class ClaimableBalanceId extends XDRVariantSerialization {
       case ClaimableBalanceIdType.v0:
         return ClaimableBalanceIdV0.fromStruct(decode.value);
       default:
-        throw StellarAddressException(
+        throw BuError(StellarErrorType.address, 
           'Invalid ClaimableBalanceId type.',
           details: {'type': type.name},
         );
@@ -1342,14 +1354,17 @@ abstract class ClaimableBalanceId extends XDRVariantSerialization {
 }
 
 class ClaimableBalanceIdV0 extends ClaimableBalanceId {
-  final List<int> hash;
+  final BuBytes hash;
   ClaimableBalanceIdV0(List<int> hash)
-    : hash = hash.asImmutableBytes.exc(
-        name: 'hash',
-        length: StellarConst.hash256Length,
-        operation: "ClaimableBalanceIdV0",
-        reason: "Invalid hash bytes length.",
-      ),
+    : hash =
+          hash
+              .exc(
+                name: 'hash',
+                length: StellarConst.hash256Length,
+                operation: "ClaimableBalanceIdV0",
+                reason: "Invalid hash bytes length.",
+              )
+              .asImmutableBytes,
       super(ClaimableBalanceIdType.v0);
   factory ClaimableBalanceIdV0.fromStruct(Map<String, dynamic> json) {
     return ClaimableBalanceIdV0(json.valueAs('hash'));
@@ -1383,7 +1398,7 @@ class ClaimantType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Claimant type not found.',
                 details: {
                   'name': name,
@@ -1415,7 +1430,10 @@ abstract class Claimant extends XDRVariantSerialization {
       case ClaimantType.v0:
         return ClaimantV0.fromStruct(decode.value);
       default:
-        throw const DartStellarPlugingException('Invalid Claimant type.');
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid Claimant type.',
+          details: {'type': type.name},
+        );
     }
   }
 
@@ -1510,7 +1528,7 @@ class ClaimPredicateType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ClaimPredicate type not found.',
                 details: {
                   'name': name,
@@ -1545,9 +1563,11 @@ abstract class ClaimPredicate extends XDRVariantSerialization {
         return ClaimPredicateBeforeAbsoluteTime.fromStruct(decode.value);
       case ClaimPredicateType.beforeRelativeTime:
         return ClaimPredicateBeforeRelativeTime.fromStruct(decode.value);
-
       default:
-        throw const DartStellarPlugingException('Invalid ClaimPredicate type.');
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid ClaimPredicate type.',
+          details: {'type': type.name},
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1593,8 +1613,9 @@ abstract class ClaimPredicate extends XDRVariantSerialization {
             );
 
           default:
-            throw const DartStellarPlugingException(
+            throw BuError(DefaultErrorType.invalidArgument, 
               'Invalid ClaimPredicate type.',
+              details: {'type': type.name},
             );
         }
       }),
@@ -1872,7 +1893,7 @@ class LiquidityPoolType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'LiquidityPool type not found.',
                 details: {
                   'name': name,
@@ -1898,7 +1919,7 @@ abstract class LiquidityPoolEntryBody extends XDRVariantSerialization {
       case LiquidityPoolType.liquidityPoolConstantProduct:
         return LiquidityPoolEntryConstantProduct.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid LiquidityPool type.',
           details: {'type': type.name},
         );
@@ -2036,15 +2057,18 @@ class LiquidityPoolEntryConstantProduct extends LiquidityPoolEntryBody {
 }
 
 class LiquidityPoolEntry extends LedgerEntryData {
-  final List<int> liquidityPoolId;
+  final BuBytes liquidityPoolId;
   final LiquidityPoolEntryBody body;
   LiquidityPoolEntry({required List<int> liquidityPoolId, required this.body})
-    : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
-        name: 'liquidityPoolId',
-        length: StellarConst.hash256Length,
-        operation: "LiquidityPoolEntry",
-        reason: "Invalid liquidityPoolId bytes length.",
-      ),
+    : liquidityPoolId =
+          liquidityPoolId
+              .exc(
+                name: 'liquidityPoolId',
+                length: StellarConst.hash256Length,
+                operation: "LiquidityPoolEntry",
+                reason: "Invalid liquidityPoolId bytes length.",
+              )
+              .asImmutableBytes,
       super(LedgerEntryType.liquidityPool);
   factory LiquidityPoolEntry.fromStruct(Map<String, dynamic> json) {
     return LiquidityPoolEntry(
@@ -2090,13 +2114,36 @@ class ScAddressType {
     name: 'contract',
     value: 1,
   );
-  static const List<ScAddressType> values = [account, contract];
+  static const ScAddressType muxedAccount = ScAddressType._(
+    name: 'muxedAccount',
+    value: 2,
+  );
+  static const ScAddressType claimableBalance = ScAddressType._(
+    name: 'claimableBalance',
+    value: 3,
+  );
+  static const ScAddressType liquidityPool = ScAddressType._(
+    name: 'liquidityPool',
+    value: 4,
+  );
+  static const ScAddressType muxedContract = ScAddressType._(
+    name: 'muxedContract',
+    value: 5,
+  );
+  static const List<ScAddressType> values = [
+    account,
+    contract,
+    muxedAccount,
+    claimableBalance,
+    liquidityPool,
+    muxedContract,
+  ];
   static ScAddressType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ScAddress type not found.',
                 details: {
                   'name': name,
@@ -2121,10 +2168,13 @@ abstract class ScAddress extends XDRVariantSerialization {
       case XlmAddrTypes.contract:
         return ScAddressContract(address.cast());
       case XlmAddrTypes.pubKey:
-      case XlmAddrTypes.muxed:
         return ScAddressAccountId(address.toPublicKey());
+      case XlmAddrTypes.muxed:
+        return ScAddressMuxedAccount.fromAddress(address.cast());
+      case XlmAddrTypes.muxedContract:
+        return ScAddressMuxedContract.fromAddress(address.cast());
       default:
-        throw DartStellarPlugingException(
+        throw BuError(StellarErrorType.address, 
           'Invalid address type.',
           details: {'type': address.type.name},
         );
@@ -2137,6 +2187,12 @@ abstract class ScAddress extends XDRVariantSerialization {
     return LayoutConst.enum32Be([
       ScAddressAccountId.layout(property: ScAddressType.account.name),
       ScAddressContract.layout(property: ScAddressType.contract.name),
+      ScAddressMuxedAccount.layout(property: ScAddressType.muxedAccount.name),
+      ScAddressClaimableBalance.layout(
+        property: ScAddressType.claimableBalance.name,
+      ),
+      ScAddressLiquidityPool.layout(property: ScAddressType.liquidityPool.name),
+      ScAddressMuxedContract.layout(property: ScAddressType.muxedContract.name),
     ], property: property);
   }
 
@@ -2148,8 +2204,16 @@ abstract class ScAddress extends XDRVariantSerialization {
         return ScAddressAccountId.fromStruct(decode.value);
       case ScAddressType.contract:
         return ScAddressContract.fromStruct(decode.value);
+      case ScAddressType.muxedAccount:
+        return ScAddressMuxedAccount.fromStruct(decode.value);
+      case ScAddressType.claimableBalance:
+        return ScAddressClaimableBalance.fromStruct(decode.value);
+      case ScAddressType.liquidityPool:
+        return ScAddressLiquidityPool.fromStruct(decode.value);
+      case ScAddressType.muxedContract:
+        return ScAddressMuxedContract.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(StellarErrorType.address, 
           'Invalid ScAddress type.',
           details: {'type': type.name},
         );
@@ -2245,6 +2309,229 @@ class ScAddressContract extends ScAddress {
   }
 }
 
+/// XDR `MuxedEd25519Account`: an account key plus a 64-bit multiplexing id.
+class MuxedEd25519Account extends XDRSerialization {
+  final BigInt id;
+  final StellarPublicKey ed25519;
+  MuxedEd25519Account({required BigInt id, required this.ed25519})
+    : id = id.asU64;
+  factory MuxedEd25519Account.fromStruct(Map<String, dynamic> json) {
+    return MuxedEd25519Account(
+      id: json.valueAs('id'),
+      ed25519: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('ed25519'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.u64be(property: 'id'),
+      StellarPublicKey.layout(property: 'ed25519'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'id': id, 'ed25519': ed25519.toLayoutStruct()};
+  }
+}
+
+class ScAddressMuxedAccount extends ScAddress {
+  final MuxedEd25519Account muxedAccount;
+  ScAddressMuxedAccount(this.muxedAccount) : super(ScAddressType.muxedAccount);
+  factory ScAddressMuxedAccount.fromAddress(StellarMuxedAddress address) {
+    return ScAddressMuxedAccount(
+      MuxedEd25519Account(
+        id: address.accountId,
+        ed25519: address.toAccountAddress().toPublicKey(),
+      ),
+    );
+  }
+  factory ScAddressMuxedAccount.fromStruct(Map<String, dynamic> json) {
+    return ScAddressMuxedAccount(
+      MuxedEd25519Account.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('muxedAccount'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      MuxedEd25519Account.layout(property: 'muxedAccount'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'muxedAccount': muxedAccount.toLayoutStruct()};
+  }
+
+  @override
+  StellarAddress get address => StellarMuxedAddress.fromPublicKey(
+    publicKey: muxedAccount.ed25519.toBytes(),
+    accountId: muxedAccount.id,
+  );
+}
+
+class ScAddressClaimableBalance extends ScAddress {
+  final ClaimableBalanceId balanceId;
+  ScAddressClaimableBalance(this.balanceId)
+    : super(ScAddressType.claimableBalance);
+  factory ScAddressClaimableBalance.fromStruct(Map<String, dynamic> json) {
+    return ScAddressClaimableBalance(
+      ClaimableBalanceId.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('balanceId'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      ClaimableBalanceId.layout(property: 'balanceId'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'balanceId': balanceId.toVariantLayoutStruct()};
+  }
+
+  @override
+  StellarAddress get address {
+    throw const BuError(DefaultErrorType.notFound, 
+      'Claimable balance ScAddress has no classic address mapping.',
+    );
+  }
+}
+
+class ScAddressLiquidityPool extends ScAddress {
+  final BuBytes liquidityPoolId;
+  ScAddressLiquidityPool(List<int> liquidityPoolId)
+    : liquidityPoolId =
+          liquidityPoolId
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'liquidityPoolId',
+                operation: 'ScAddressLiquidityPool',
+                reason: 'Invalid liquidityPoolId bytes length.',
+              )
+              .asImmutableBytes,
+      super(ScAddressType.liquidityPool);
+  factory ScAddressLiquidityPool.fromStruct(Map<String, dynamic> json) {
+    return ScAddressLiquidityPool(json.valueAs('liquidityPoolId'));
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'liquidityPoolId',
+      ),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'liquidityPoolId': liquidityPoolId};
+  }
+
+  @override
+  StellarAddress get address {
+    throw const BuError(DefaultErrorType.notFound, 
+      'Liquidity pool ScAddress has no classic address mapping.',
+    );
+  }
+}
+
+/// XDR `MuxedContract` (CAP-84): a contract id plus a 64-bit multiplexing id.
+/// Field order is `id`, then `contractId`.
+class ScAddressMuxedContract extends ScAddress {
+  final BigInt id;
+  final StellarContractAddress contractId;
+  ScAddressMuxedContract({required BigInt id, required this.contractId})
+    : id = id.asU64,
+      super(ScAddressType.muxedContract);
+  factory ScAddressMuxedContract.fromAddress(
+    StellarMuxedContractAddress address,
+  ) {
+    return ScAddressMuxedContract(
+      id: address.id,
+      contractId: address.toContractAddress(),
+    );
+  }
+  factory ScAddressMuxedContract.fromContractId({
+    required List<int> contractId,
+    required BigInt id,
+  }) {
+    return ScAddressMuxedContract(
+      id: id,
+      contractId: StellarContractAddress.fromBytes(contractId),
+    );
+  }
+  factory ScAddressMuxedContract.fromBase32Address(String address) {
+    return ScAddressMuxedContract.fromAddress(
+      StellarMuxedContractAddress(address),
+    );
+  }
+  factory ScAddressMuxedContract.fromStruct(Map<String, dynamic> json) {
+    return ScAddressMuxedContract(
+      id: json.valueAs('id'),
+      contractId: StellarContractAddress.fromBytes(json.valueAs('contractId')),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.u64be(property: 'id'),
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'contractId',
+      ),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'id': id, 'contractId': contractId.keyBytes()};
+  }
+
+  @override
+  StellarAddress get address => StellarMuxedContractAddress.fromContractId(
+    contractId: contractId.keyBytes(),
+    id: id,
+  );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id.toString(),
+      'contractId': contractId.address,
+      'muxedAddress': address.baseAddress,
+    };
+  }
+}
+
 class ScValueType {
   final String name;
   final int value;
@@ -2310,7 +2597,7 @@ class ScValueType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ScValue type not found.',
                 details: {
                   'name': name,
@@ -2409,12 +2696,14 @@ abstract class ScVal<T> extends XDRVariantSerialization {
         val = ScValNonceKey.fromStruct(decode.value);
         break;
       default:
-        throw const DartStellarPlugingException('Invalid ScVal type.');
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid ScVal type.',
+          details: {'type': type.name},
+        );
     }
-
     if (val is! ScVal<T>) {
-      throw DartStellarPlugingException(
-        'Incorrect SCval type casting.',
+      throw BuError(DefaultErrorType.castFailed, 
+        'Incorrect ScVal type casting.',
         details: {'expected': '$T', 'ScVal': val.runtimeType.toString()},
       );
     }
@@ -2559,7 +2848,10 @@ abstract class ScVal<T> extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw const DartStellarPlugingException('Invalid ScVal type.');
+            throw BuError(DefaultErrorType.invalidArgument, 
+              'Invalid ScVal type.',
+              details: {'type': type.name},
+            );
         }
       }),
       property: property,
@@ -2576,9 +2868,9 @@ abstract class ScVal<T> extends XDRVariantSerialization {
 
   E cast<E extends ScVal>() {
     if (this is! E) {
-      throw DartStellarPlugingException(
-        'ScVal Casting failed.',
-        details: {'expected': '$T', 'type': '$runtimeType'},
+      throw BuError(DefaultErrorType.castFailed, 
+        'ScVal casting failed.',
+        details: {'expected': '$E', 'type': '$runtimeType'},
       );
     }
     return this as E;
@@ -2618,7 +2910,7 @@ class ScErrorType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ScError type not found.',
                 details: {
                   'name': name,
@@ -2707,7 +2999,7 @@ class ScErrorCode extends ScError {
   ScErrorCode._(super.code);
   factory ScErrorCode(ScErrorType code) {
     if (code == ScErrorType.contract) {
-      throw const DartStellarPlugingException(
+      throw const BuError(DefaultErrorType.invalidArgument, 
         'Use `ScErrorContract` instead `ScErrorCode` for user-defined error code.',
       );
     }
@@ -2903,12 +3195,12 @@ class UInt128Parts extends XDRSerialization {
   factory UInt128Parts.fromNumber(BigInt number) {
     if (number.isNegative || number.bitLength > 128) {
       if (number.isNegative) {
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid Unsigned int.',
           details: {'number': number.toString()},
         );
       }
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -2954,7 +3246,7 @@ class Int128Parts extends XDRSerialization {
       lo = lo.asU64;
   factory Int128Parts.fromNumber(BigInt number) {
     if (number.bitLength > 128) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -3020,12 +3312,12 @@ class UInt256Parts extends XDRSerialization {
   factory UInt256Parts.fromNumber(BigInt number) {
     if (number.isNegative || number.bitLength > 256) {
       if (number.isNegative) {
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid Unsigned int.',
           details: {'number': number.toString()},
         );
       }
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -3095,7 +3387,7 @@ class Int256Parts extends XDRSerialization {
   }
   factory Int256Parts.fromNumber(BigInt number) {
     if (number.bitLength > 256) {
-      throw const DartStellarPlugingException(
+      throw const BuError(DefaultErrorType.invalidArgument, 
         'Number is to large for `Int256Parts`',
       );
     }
@@ -3271,7 +3563,7 @@ class ScValI256 extends ScVal<Int256Parts> {
   }
 }
 
-class ScValBytes extends ScVal<List<int>> {
+class ScValBytes extends ScVal<BuBytes> {
   ScValBytes(List<int> bytes)
     : super(type: ScValueType.bytes, value: bytes.asImmutableBytes);
   factory ScValBytes.fromHex(String hexBytes) {
@@ -3607,16 +3899,19 @@ class ContractExecutableType {
   );
   static const ContractExecutableType executableStellarAsset =
       ContractExecutableType._(name: 'ExecutableStellarAsset', value: 1);
+  static const ContractExecutableType executableExternalRef =
+      ContractExecutableType._(name: 'ExecutableExternalRef', value: 2);
   static const List<ContractExecutableType> values = [
     executableWasm,
     executableStellarAsset,
+    executableExternalRef,
   ];
   static ContractExecutableType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ContractExecutable type not found.',
                 details: {
                   'name': name,
@@ -3643,8 +3938,10 @@ abstract class ContractExecutable extends XDRVariantSerialization {
         return ContractExecutableStellarAsset.fromStruct(decode.value);
       case ContractExecutableType.executableWasm:
         return ContractExecutableWasmHash.fromStruct(decode.value);
+      case ContractExecutableType.executableExternalRef:
+        return ContractExecutableExternalRef.fromStruct(decode.value);
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid ContractExecutable type.',
         );
     }
@@ -3656,6 +3953,9 @@ abstract class ContractExecutable extends XDRVariantSerialization {
       ),
       ContractExecutableStellarAsset.layout(
         property: ContractExecutableType.executableStellarAsset.name,
+      ),
+      ContractExecutableExternalRef.layout(
+        property: ContractExecutableType.executableExternalRef.name,
       ),
     ], property: property);
   }
@@ -3670,14 +3970,17 @@ abstract class ContractExecutable extends XDRVariantSerialization {
 }
 
 class ContractExecutableWasmHash extends ContractExecutable {
-  final List<int> hash;
+  final BuBytes hash;
   ContractExecutableWasmHash(List<int> hash)
-    : hash = hash.asImmutableBytes.exc(
-        name: 'hash',
-        length: StellarConst.hash256Length,
-        operation: "ContractExecutableWasmHash",
-        reason: "Invalid hash bytes length.",
-      ),
+    : hash =
+          hash
+              .exc(
+                name: 'hash',
+                length: StellarConst.hash256Length,
+                operation: "ContractExecutableWasmHash",
+                reason: "Invalid hash bytes length.",
+              )
+              .asImmutableBytes,
       super(ContractExecutableType.executableWasm);
   factory ContractExecutableWasmHash.fromStruct(Map<String, dynamic> json) {
     return ContractExecutableWasmHash(json.valueAs('hash'));
@@ -3722,6 +4025,49 @@ class ContractExecutableStellarAsset extends ContractExecutable {
   @override
   Map<String, dynamic> toLayoutStruct() {
     return {};
+  }
+}
+
+/// XDR `ContractExecutableExternalRef` (CAP-85): an executable managed by
+/// another contract (`executableOwner`) and referenced by a `tag`.
+class ContractExecutableExternalRef extends ContractExecutable {
+  final ScAddress executableOwner;
+  final String tag;
+  ContractExecutableExternalRef({
+    required this.executableOwner,
+    required this.tag,
+  }) : super(ContractExecutableType.executableExternalRef);
+  factory ContractExecutableExternalRef.fromStruct(Map<String, dynamic> json) {
+    return ContractExecutableExternalRef(
+      executableOwner: ScAddress.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('executableOwner'),
+      ),
+      tag: json.valueAs('tag'),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      ScAddress.layout(property: 'executableOwner'),
+      LayoutConst.xdrString(property: 'tag'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'executableOwner': executableOwner.toVariantLayoutStruct(),
+      'tag': tag,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {'executableOwner': executableOwner.address, 'tag': tag};
   }
 }
 
@@ -3792,7 +4138,7 @@ class ContractDataDurability {
       (e) => e.value == value,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ContractDataDurability not found.',
                 details: {
                   'value': value?.toString(),
@@ -3969,7 +4315,10 @@ class ContractCodeEntryV1 extends XDRSerialization {
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
-    return LayoutConst.struct([], property: property);
+    return LayoutConst.struct([
+      ExtentionPointVoid.layout(property: 'ext'),
+      ContractCodeCostInputs.layout(property: 'costInputs'),
+    ], property: property);
   }
 
   @override
@@ -4000,7 +4349,7 @@ class ContractCodeEntryExt extends XDRVariantSerialization {
           v1: ContractCodeEntryV1.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid ContractCodeEntry extension.',
         );
     }
@@ -4047,19 +4396,22 @@ class ContractCodeEntryExt extends XDRVariantSerialization {
 
 class ContractCodeEntry extends LedgerEntryData {
   final ContractCodeEntryExt ext;
-  final List<int> hash;
-  final List<int> code;
+  final BuBytes hash;
+  final BuBytes code;
   ContractCodeEntry({
     required this.ext,
     required List<int> hash,
     required List<int> code,
   }) : code = code.asImmutableBytes,
-       hash = hash.asImmutableBytes.exc(
-         name: 'hash',
-         length: StellarConst.hash256Length,
-         operation: "ContractCodeEntry",
-         reason: "Invalid hash bytes length.",
-       ),
+       hash =
+           hash
+               .exc(
+                 name: 'hash',
+                 length: StellarConst.hash256Length,
+                 operation: "ContractCodeEntry",
+                 reason: "Invalid hash bytes length.",
+               )
+               .asImmutableBytes,
        super(LedgerEntryType.contractCode);
   factory ContractCodeEntry.fromStruct(Map<String, dynamic> json) {
     return ContractCodeEntry(
@@ -4172,7 +4524,7 @@ class ConfigSettingId {
       (e) => e.value == value,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ConfigSettingId not found.',
                 details: {
                   'value': value?.toString(),
@@ -4187,7 +4539,7 @@ class ConfigSettingId {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ConfigSettingId not found.',
                 details: {
                   'name': name,
@@ -4239,7 +4591,7 @@ abstract class ConfigSetting extends XDRVariantSerialization {
     final type = ConfigSettingId.fromName(decode.variantName);
     switch (type) {
       case ConfigSettingId.contractMaxSizeBytes:
-        return ConfingSettingContractMaxSizeBytes.fromStruct(decode.value);
+        return ConfigSettingContractMaxSizeBytes.fromStruct(decode.value);
       case ConfigSettingId.contractComputeV0:
         return ConfigSettingContractComputeV0.fromStruct(decode.value);
       case ConfigSettingId.contractLedgerCostV0:
@@ -4253,21 +4605,19 @@ abstract class ConfigSetting extends XDRVariantSerialization {
         return ConfigSettingContractBandwidthV0.fromStruct(decode.value);
 
       case ConfigSettingId.contractCostParamsCpuInstructions:
-        return ConfingSettingContractCostParamsCpuInstructions.fromStruct(
+        return ConfigSettingContractCostParamsCpuInstructions.fromStruct(
           decode.value,
         );
 
       case ConfigSettingId.contractCostParamsMemoryBytes:
-        return ConfingSettingContractCostParamsMemoryBytes.fromStruct(
+        return ConfigSettingContractCostParamsMemoryBytes.fromStruct(
           decode.value,
         );
 
       case ConfigSettingId.contractDataKeySizeBytes:
-        return ConfingSettingContractDataKeySizeBytes.fromStruct(decode.value);
+        return ConfigSettingContractDataKeySizeBytes.fromStruct(decode.value);
       case ConfigSettingId.contractDataEntrySizeBytes:
-        return ConfingSettingContractDataEnterySizeBytes.fromStruct(
-          decode.value,
-        );
+        return ConfigSettingContractDataEntrySizeBytes.fromStruct(decode.value);
       case ConfigSettingId.stateArchival:
         return ConfigSettingContractStateArchivalSettings.fromStruct(
           decode.value,
@@ -4282,7 +4632,7 @@ abstract class ConfigSetting extends XDRVariantSerialization {
         return ConfigSettingEvictionIterator.fromStruct(decode.value);
 
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid ConfigSettingId.',
           details: {'ConfigSettingId': type.name},
         );
@@ -4295,7 +4645,7 @@ abstract class ConfigSetting extends XDRVariantSerialization {
         switch (type) {
           case ConfigSettingId.contractMaxSizeBytes:
             return LazyVariantModel(
-              layout: ConfingSettingContractMaxSizeBytes.layout,
+              layout: ConfigSettingContractMaxSizeBytes.layout,
               property: type.name,
               index: type.value,
             );
@@ -4332,25 +4682,25 @@ abstract class ConfigSetting extends XDRVariantSerialization {
             );
           case ConfigSettingId.contractCostParamsCpuInstructions:
             return LazyVariantModel(
-              layout: ConfingSettingContractCostParamsCpuInstructions.layout,
+              layout: ConfigSettingContractCostParamsCpuInstructions.layout,
               property: type.name,
               index: type.value,
             );
           case ConfigSettingId.contractCostParamsMemoryBytes:
             return LazyVariantModel(
-              layout: ConfingSettingContractCostParamsMemoryBytes.layout,
+              layout: ConfigSettingContractCostParamsMemoryBytes.layout,
               property: type.name,
               index: type.value,
             );
           case ConfigSettingId.contractDataKeySizeBytes:
             return LazyVariantModel(
-              layout: ConfingSettingContractDataKeySizeBytes.layout,
+              layout: ConfigSettingContractDataKeySizeBytes.layout,
               property: type.name,
               index: type.value,
             );
           case ConfigSettingId.contractDataEntrySizeBytes:
             return LazyVariantModel(
-              layout: ConfingSettingContractDataEnterySizeBytes.layout,
+              layout: ConfigSettingContractDataEntrySizeBytes.layout,
               property: type.name,
               index: type.value,
             );
@@ -4380,7 +4730,7 @@ abstract class ConfigSetting extends XDRVariantSerialization {
               index: type.value,
             );
           default:
-            throw DartStellarPlugingException(
+            throw BuError(DefaultErrorType.invalidArgument, 
               'Invalid ConfigSettingId.',
               details: {'ConfigSettingId': type.name},
             );
@@ -4399,15 +4749,15 @@ abstract class ConfigSetting extends XDRVariantSerialization {
   String get variantName => settingId.name;
 }
 
-class ConfingSettingContractMaxSizeBytes extends ConfigSetting {
+class ConfigSettingContractMaxSizeBytes extends ConfigSetting {
   final int contractMaxSizeBytes;
-  ConfingSettingContractMaxSizeBytes(int contractMaxSizeBytes)
+  ConfigSettingContractMaxSizeBytes(int contractMaxSizeBytes)
     : contractMaxSizeBytes = contractMaxSizeBytes.asU32,
       super(ConfigSettingId.contractMaxSizeBytes);
-  factory ConfingSettingContractMaxSizeBytes.fromStruct(
+  factory ConfigSettingContractMaxSizeBytes.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return ConfingSettingContractMaxSizeBytes(
+    return ConfigSettingContractMaxSizeBytes(
       json.valueAs('contractMaxSizeBytes'),
     );
   }
@@ -4760,6 +5110,476 @@ class ConfigSettingContractBandwidthV0 extends ConfigSetting {
   }
 }
 
+/// XDR `ContractCostType` (stellar-xdr v30.0, 95 entries).
+/// Indexes the per-cost-type calibration rows in
+/// `ConfigSettingContractCostParams*` entries.
+class ContractCostType {
+  final String name;
+  final int value;
+  const ContractCostType._({required this.name, required this.value});
+
+  static const wasmInsnExec = ContractCostType._(
+    name: 'WasmInsnExec',
+    value: 0,
+  );
+  static const memAlloc = ContractCostType._(name: 'MemAlloc', value: 1);
+  static const memCpy = ContractCostType._(name: 'MemCpy', value: 2);
+  static const memCmp = ContractCostType._(name: 'MemCmp', value: 3);
+  static const dispatchHostFunction = ContractCostType._(
+    name: 'DispatchHostFunction',
+    value: 4,
+  );
+  static const visitObject = ContractCostType._(name: 'VisitObject', value: 5);
+  static const valSer = ContractCostType._(name: 'ValSer', value: 6);
+  static const valDeser = ContractCostType._(name: 'ValDeser', value: 7);
+  static const computeSha256Hash = ContractCostType._(
+    name: 'ComputeSha256Hash',
+    value: 8,
+  );
+  static const computeEd25519PubKey = ContractCostType._(
+    name: 'ComputeEd25519PubKey',
+    value: 9,
+  );
+  static const verifyEd25519Sig = ContractCostType._(
+    name: 'VerifyEd25519Sig',
+    value: 10,
+  );
+  static const vmInstantiation = ContractCostType._(
+    name: 'VmInstantiation',
+    value: 11,
+  );
+  static const vmCachedInstantiation = ContractCostType._(
+    name: 'VmCachedInstantiation',
+    value: 12,
+  );
+  static const invokeVmFunction = ContractCostType._(
+    name: 'InvokeVmFunction',
+    value: 13,
+  );
+  static const computeKeccak256Hash = ContractCostType._(
+    name: 'ComputeKeccak256Hash',
+    value: 14,
+  );
+  static const decodeEcdsaCurve256Sig = ContractCostType._(
+    name: 'DecodeEcdsaCurve256Sig',
+    value: 15,
+  );
+  static const recoverEcdsaSecp256k1Key = ContractCostType._(
+    name: 'RecoverEcdsaSecp256k1Key',
+    value: 16,
+  );
+  static const int256AddSub = ContractCostType._(
+    name: 'Int256AddSub',
+    value: 17,
+  );
+  static const int256Mul = ContractCostType._(name: 'Int256Mul', value: 18);
+  static const int256Div = ContractCostType._(name: 'Int256Div', value: 19);
+  static const int256Pow = ContractCostType._(name: 'Int256Pow', value: 20);
+  static const int256Shift = ContractCostType._(name: 'Int256Shift', value: 21);
+  static const chaCha20DrawBytes = ContractCostType._(
+    name: 'ChaCha20DrawBytes',
+    value: 22,
+  );
+  static const parseWasmInstructions = ContractCostType._(
+    name: 'ParseWasmInstructions',
+    value: 23,
+  );
+  static const parseWasmFunctions = ContractCostType._(
+    name: 'ParseWasmFunctions',
+    value: 24,
+  );
+  static const parseWasmGlobals = ContractCostType._(
+    name: 'ParseWasmGlobals',
+    value: 25,
+  );
+  static const parseWasmTableEntries = ContractCostType._(
+    name: 'ParseWasmTableEntries',
+    value: 26,
+  );
+  static const parseWasmTypes = ContractCostType._(
+    name: 'ParseWasmTypes',
+    value: 27,
+  );
+  static const parseWasmDataSegments = ContractCostType._(
+    name: 'ParseWasmDataSegments',
+    value: 28,
+  );
+  static const parseWasmElemSegments = ContractCostType._(
+    name: 'ParseWasmElemSegments',
+    value: 29,
+  );
+  static const parseWasmImports = ContractCostType._(
+    name: 'ParseWasmImports',
+    value: 30,
+  );
+  static const parseWasmExports = ContractCostType._(
+    name: 'ParseWasmExports',
+    value: 31,
+  );
+  static const parseWasmDataSegmentBytes = ContractCostType._(
+    name: 'ParseWasmDataSegmentBytes',
+    value: 32,
+  );
+  static const instantiateWasmInstructions = ContractCostType._(
+    name: 'InstantiateWasmInstructions',
+    value: 33,
+  );
+  static const instantiateWasmFunctions = ContractCostType._(
+    name: 'InstantiateWasmFunctions',
+    value: 34,
+  );
+  static const instantiateWasmGlobals = ContractCostType._(
+    name: 'InstantiateWasmGlobals',
+    value: 35,
+  );
+  static const instantiateWasmTableEntries = ContractCostType._(
+    name: 'InstantiateWasmTableEntries',
+    value: 36,
+  );
+  static const instantiateWasmTypes = ContractCostType._(
+    name: 'InstantiateWasmTypes',
+    value: 37,
+  );
+  static const instantiateWasmDataSegments = ContractCostType._(
+    name: 'InstantiateWasmDataSegments',
+    value: 38,
+  );
+  static const instantiateWasmElemSegments = ContractCostType._(
+    name: 'InstantiateWasmElemSegments',
+    value: 39,
+  );
+  static const instantiateWasmImports = ContractCostType._(
+    name: 'InstantiateWasmImports',
+    value: 40,
+  );
+  static const instantiateWasmExports = ContractCostType._(
+    name: 'InstantiateWasmExports',
+    value: 41,
+  );
+  static const instantiateWasmDataSegmentBytes = ContractCostType._(
+    name: 'InstantiateWasmDataSegmentBytes',
+    value: 42,
+  );
+  static const sec1DecodePointUncompressed = ContractCostType._(
+    name: 'Sec1DecodePointUncompressed',
+    value: 43,
+  );
+  static const verifyEcdsaSecp256r1Sig = ContractCostType._(
+    name: 'VerifyEcdsaSecp256r1Sig',
+    value: 44,
+  );
+  static const bls12381EncodeFp = ContractCostType._(
+    name: 'Bls12381EncodeFp',
+    value: 45,
+  );
+  static const bls12381DecodeFp = ContractCostType._(
+    name: 'Bls12381DecodeFp',
+    value: 46,
+  );
+  static const bls12381G1CheckPointOnCurve = ContractCostType._(
+    name: 'Bls12381G1CheckPointOnCurve',
+    value: 47,
+  );
+  static const bls12381G1CheckPointInSubgroup = ContractCostType._(
+    name: 'Bls12381G1CheckPointInSubgroup',
+    value: 48,
+  );
+  static const bls12381G2CheckPointOnCurve = ContractCostType._(
+    name: 'Bls12381G2CheckPointOnCurve',
+    value: 49,
+  );
+  static const bls12381G2CheckPointInSubgroup = ContractCostType._(
+    name: 'Bls12381G2CheckPointInSubgroup',
+    value: 50,
+  );
+  static const bls12381G1ProjectiveToAffine = ContractCostType._(
+    name: 'Bls12381G1ProjectiveToAffine',
+    value: 51,
+  );
+  static const bls12381G2ProjectiveToAffine = ContractCostType._(
+    name: 'Bls12381G2ProjectiveToAffine',
+    value: 52,
+  );
+  static const bls12381G1Add = ContractCostType._(
+    name: 'Bls12381G1Add',
+    value: 53,
+  );
+  static const bls12381G1Mul = ContractCostType._(
+    name: 'Bls12381G1Mul',
+    value: 54,
+  );
+  static const bls12381G1Msm = ContractCostType._(
+    name: 'Bls12381G1Msm',
+    value: 55,
+  );
+  static const bls12381MapFpToG1 = ContractCostType._(
+    name: 'Bls12381MapFpToG1',
+    value: 56,
+  );
+  static const bls12381HashToG1 = ContractCostType._(
+    name: 'Bls12381HashToG1',
+    value: 57,
+  );
+  static const bls12381G2Add = ContractCostType._(
+    name: 'Bls12381G2Add',
+    value: 58,
+  );
+  static const bls12381G2Mul = ContractCostType._(
+    name: 'Bls12381G2Mul',
+    value: 59,
+  );
+  static const bls12381G2Msm = ContractCostType._(
+    name: 'Bls12381G2Msm',
+    value: 60,
+  );
+  static const bls12381MapFp2ToG2 = ContractCostType._(
+    name: 'Bls12381MapFp2ToG2',
+    value: 61,
+  );
+  static const bls12381HashToG2 = ContractCostType._(
+    name: 'Bls12381HashToG2',
+    value: 62,
+  );
+  static const bls12381Pairing = ContractCostType._(
+    name: 'Bls12381Pairing',
+    value: 63,
+  );
+  static const bls12381FrFromU256 = ContractCostType._(
+    name: 'Bls12381FrFromU256',
+    value: 64,
+  );
+  static const bls12381FrToU256 = ContractCostType._(
+    name: 'Bls12381FrToU256',
+    value: 65,
+  );
+  static const bls12381FrAddSub = ContractCostType._(
+    name: 'Bls12381FrAddSub',
+    value: 66,
+  );
+  static const bls12381FrMul = ContractCostType._(
+    name: 'Bls12381FrMul',
+    value: 67,
+  );
+  static const bls12381FrPow = ContractCostType._(
+    name: 'Bls12381FrPow',
+    value: 68,
+  );
+  static const bls12381FrInv = ContractCostType._(
+    name: 'Bls12381FrInv',
+    value: 69,
+  );
+  static const bn254EncodeFp = ContractCostType._(
+    name: 'Bn254EncodeFp',
+    value: 70,
+  );
+  static const bn254DecodeFp = ContractCostType._(
+    name: 'Bn254DecodeFp',
+    value: 71,
+  );
+  static const bn254G1CheckPointOnCurve = ContractCostType._(
+    name: 'Bn254G1CheckPointOnCurve',
+    value: 72,
+  );
+  static const bn254G2CheckPointOnCurve = ContractCostType._(
+    name: 'Bn254G2CheckPointOnCurve',
+    value: 73,
+  );
+  static const bn254G2CheckPointInSubgroup = ContractCostType._(
+    name: 'Bn254G2CheckPointInSubgroup',
+    value: 74,
+  );
+  static const bn254G1ProjectiveToAffine = ContractCostType._(
+    name: 'Bn254G1ProjectiveToAffine',
+    value: 75,
+  );
+  static const bn254G1Add = ContractCostType._(name: 'Bn254G1Add', value: 76);
+  static const bn254G1Mul = ContractCostType._(name: 'Bn254G1Mul', value: 77);
+  static const bn254Pairing = ContractCostType._(
+    name: 'Bn254Pairing',
+    value: 78,
+  );
+  static const bn254FrFromU256 = ContractCostType._(
+    name: 'Bn254FrFromU256',
+    value: 79,
+  );
+  static const bn254FrToU256 = ContractCostType._(
+    name: 'Bn254FrToU256',
+    value: 80,
+  );
+  static const bn254FrAddSub = ContractCostType._(
+    name: 'Bn254FrAddSub',
+    value: 81,
+  );
+  static const bn254FrMul = ContractCostType._(name: 'Bn254FrMul', value: 82);
+  static const bn254FrPow = ContractCostType._(name: 'Bn254FrPow', value: 83);
+  static const bn254FrInv = ContractCostType._(name: 'Bn254FrInv', value: 84);
+  static const bn254G1Msm = ContractCostType._(name: 'Bn254G1Msm', value: 85);
+  static const mlDsa44DecodeVerifyingKey = ContractCostType._(
+    name: 'MlDsa44DecodeVerifyingKey',
+    value: 86,
+  );
+  static const mlDsa65DecodeVerifyingKey = ContractCostType._(
+    name: 'MlDsa65DecodeVerifyingKey',
+    value: 87,
+  );
+  static const mlDsa87DecodeVerifyingKey = ContractCostType._(
+    name: 'MlDsa87DecodeVerifyingKey',
+    value: 88,
+  );
+  static const mlDsa44DecodeSignature = ContractCostType._(
+    name: 'MlDsa44DecodeSignature',
+    value: 89,
+  );
+  static const mlDsa65DecodeSignature = ContractCostType._(
+    name: 'MlDsa65DecodeSignature',
+    value: 90,
+  );
+  static const mlDsa87DecodeSignature = ContractCostType._(
+    name: 'MlDsa87DecodeSignature',
+    value: 91,
+  );
+  static const verifyMlDsa44Sig = ContractCostType._(
+    name: 'VerifyMlDsa44Sig',
+    value: 92,
+  );
+  static const verifyMlDsa65Sig = ContractCostType._(
+    name: 'VerifyMlDsa65Sig',
+    value: 93,
+  );
+  static const verifyMlDsa87Sig = ContractCostType._(
+    name: 'VerifyMlDsa87Sig',
+    value: 94,
+  );
+  static const List<ContractCostType> values = [
+    wasmInsnExec,
+    memAlloc,
+    memCpy,
+    memCmp,
+    dispatchHostFunction,
+    visitObject,
+    valSer,
+    valDeser,
+    computeSha256Hash,
+    computeEd25519PubKey,
+    verifyEd25519Sig,
+    vmInstantiation,
+    vmCachedInstantiation,
+    invokeVmFunction,
+    computeKeccak256Hash,
+    decodeEcdsaCurve256Sig,
+    recoverEcdsaSecp256k1Key,
+    int256AddSub,
+    int256Mul,
+    int256Div,
+    int256Pow,
+    int256Shift,
+    chaCha20DrawBytes,
+    parseWasmInstructions,
+    parseWasmFunctions,
+    parseWasmGlobals,
+    parseWasmTableEntries,
+    parseWasmTypes,
+    parseWasmDataSegments,
+    parseWasmElemSegments,
+    parseWasmImports,
+    parseWasmExports,
+    parseWasmDataSegmentBytes,
+    instantiateWasmInstructions,
+    instantiateWasmFunctions,
+    instantiateWasmGlobals,
+    instantiateWasmTableEntries,
+    instantiateWasmTypes,
+    instantiateWasmDataSegments,
+    instantiateWasmElemSegments,
+    instantiateWasmImports,
+    instantiateWasmExports,
+    instantiateWasmDataSegmentBytes,
+    sec1DecodePointUncompressed,
+    verifyEcdsaSecp256r1Sig,
+    bls12381EncodeFp,
+    bls12381DecodeFp,
+    bls12381G1CheckPointOnCurve,
+    bls12381G1CheckPointInSubgroup,
+    bls12381G2CheckPointOnCurve,
+    bls12381G2CheckPointInSubgroup,
+    bls12381G1ProjectiveToAffine,
+    bls12381G2ProjectiveToAffine,
+    bls12381G1Add,
+    bls12381G1Mul,
+    bls12381G1Msm,
+    bls12381MapFpToG1,
+    bls12381HashToG1,
+    bls12381G2Add,
+    bls12381G2Mul,
+    bls12381G2Msm,
+    bls12381MapFp2ToG2,
+    bls12381HashToG2,
+    bls12381Pairing,
+    bls12381FrFromU256,
+    bls12381FrToU256,
+    bls12381FrAddSub,
+    bls12381FrMul,
+    bls12381FrPow,
+    bls12381FrInv,
+    bn254EncodeFp,
+    bn254DecodeFp,
+    bn254G1CheckPointOnCurve,
+    bn254G2CheckPointOnCurve,
+    bn254G2CheckPointInSubgroup,
+    bn254G1ProjectiveToAffine,
+    bn254G1Add,
+    bn254G1Mul,
+    bn254Pairing,
+    bn254FrFromU256,
+    bn254FrToU256,
+    bn254FrAddSub,
+    bn254FrMul,
+    bn254FrPow,
+    bn254FrInv,
+    bn254G1Msm,
+    mlDsa44DecodeVerifyingKey,
+    mlDsa65DecodeVerifyingKey,
+    mlDsa87DecodeVerifyingKey,
+    mlDsa44DecodeSignature,
+    mlDsa65DecodeSignature,
+    mlDsa87DecodeSignature,
+    verifyMlDsa44Sig,
+    verifyMlDsa65Sig,
+    verifyMlDsa87Sig,
+  ];
+  static ContractCostType fromName(String? name) {
+    return values.firstWhere(
+      (e) => e.name == name,
+      orElse:
+          () =>
+              throw BuError(DefaultErrorType.notFound, 
+                'ContractCostType not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
+    );
+  }
+
+  static ContractCostType fromValue(int? value) {
+    return values.firstWhere(
+      (e) => e.value == value,
+      orElse:
+          () =>
+              throw BuError(DefaultErrorType.notFound, 
+                'ContractCostType not found.',
+                details: {'value': value?.toString()},
+              ),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ContractCostType.$name';
+  }
+}
+
 class ContractCostParamEntry extends XDRSerialization {
   /// use [ext] to add more terms (e.g. higher order polynomials) in the future
   final ExtentionPointVoid ext;
@@ -4803,16 +5623,16 @@ class ContractCostParamEntry extends XDRSerialization {
   }
 }
 
-class ConfingSettingContractCostParamsCpuInstructions extends ConfigSetting {
+class ConfigSettingContractCostParamsCpuInstructions extends ConfigSetting {
   final List<ContractCostParamEntry> params;
-  ConfingSettingContractCostParamsCpuInstructions(
+  ConfigSettingContractCostParamsCpuInstructions(
     List<ContractCostParamEntry> params,
   ) : params = params.immutable,
       super(ConfigSettingId.contractCostParamsCpuInstructions);
-  factory ConfingSettingContractCostParamsCpuInstructions.fromStruct(
+  factory ConfigSettingContractCostParamsCpuInstructions.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return ConfingSettingContractCostParamsCpuInstructions(
+    return ConfigSettingContractCostParamsCpuInstructions(
       json
           .valueEnsureAsList<Map<String, dynamic>>('params')
           .map((e) => ContractCostParamEntry.fromStruct(e))
@@ -4836,21 +5656,21 @@ class ConfingSettingContractCostParamsCpuInstructions extends ConfigSetting {
   }
 }
 
-class ConfingSettingContractCostParamsMemoryBytes extends ConfigSetting {
+class ConfigSettingContractCostParamsMemoryBytes extends ConfigSetting {
   final List<ContractCostParamEntry> params;
-  ConfingSettingContractCostParamsMemoryBytes(
+  ConfigSettingContractCostParamsMemoryBytes(
     List<ContractCostParamEntry> params,
   ) : params = params.immutable.max(
         name: 'params',
         length: 1024,
-        operation: "ConfingSettingContractCostParamsMemoryBytes",
+        operation: "ConfigSettingContractCostParamsMemoryBytes",
         reason: "Invalid params length.",
       ),
       super(ConfigSettingId.contractCostParamsMemoryBytes);
-  factory ConfingSettingContractCostParamsMemoryBytes.fromStruct(
+  factory ConfigSettingContractCostParamsMemoryBytes.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return ConfingSettingContractCostParamsMemoryBytes(
+    return ConfigSettingContractCostParamsMemoryBytes(
       json
           .valueEnsureAsList<Map<String, dynamic>>('params')
           .map((e) => ContractCostParamEntry.fromStruct(e))
@@ -4874,15 +5694,15 @@ class ConfingSettingContractCostParamsMemoryBytes extends ConfigSetting {
   }
 }
 
-class ConfingSettingContractDataKeySizeBytes extends ConfigSetting {
+class ConfigSettingContractDataKeySizeBytes extends ConfigSetting {
   final int contractDataKeySizeBytes;
-  ConfingSettingContractDataKeySizeBytes(int contractDataKeySizeBytes)
+  ConfigSettingContractDataKeySizeBytes(int contractDataKeySizeBytes)
     : contractDataKeySizeBytes = contractDataKeySizeBytes.asU32,
       super(ConfigSettingId.contractDataKeySizeBytes);
-  factory ConfingSettingContractDataKeySizeBytes.fromStruct(
+  factory ConfigSettingContractDataKeySizeBytes.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return ConfingSettingContractDataKeySizeBytes(
+    return ConfigSettingContractDataKeySizeBytes(
       json.valueAs('contractDataKeySizeBytes'),
     );
   }
@@ -4903,21 +5723,21 @@ class ConfingSettingContractDataKeySizeBytes extends ConfigSetting {
   }
 }
 
-class ConfingSettingContractDataEnterySizeBytes extends ConfigSetting {
-  final int contractDataEnterySizeBytes;
-  ConfingSettingContractDataEnterySizeBytes(int contractDataEnterySizeBytes)
-    : contractDataEnterySizeBytes = contractDataEnterySizeBytes.asU32,
+class ConfigSettingContractDataEntrySizeBytes extends ConfigSetting {
+  final int contractDataEntrySizeBytes;
+  ConfigSettingContractDataEntrySizeBytes(int contractDataEntrySizeBytes)
+    : contractDataEntrySizeBytes = contractDataEntrySizeBytes.asU32,
       super(ConfigSettingId.contractDataEntrySizeBytes);
-  factory ConfingSettingContractDataEnterySizeBytes.fromStruct(
+  factory ConfigSettingContractDataEntrySizeBytes.fromStruct(
     Map<String, dynamic> json,
   ) {
-    return ConfingSettingContractDataEnterySizeBytes(
-      json.valueAs('contractDataEnterySizeBytes'),
+    return ConfigSettingContractDataEntrySizeBytes(
+      json.valueAs('contractDataEntrySizeBytes'),
     );
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
-      LayoutConst.u32be(property: 'contractDataEnterySizeBytes'),
+      LayoutConst.u32be(property: 'contractDataEntrySizeBytes'),
     ], property: property);
   }
 
@@ -4928,7 +5748,7 @@ class ConfingSettingContractDataEnterySizeBytes extends ConfigSetting {
 
   @override
   Map<String, dynamic> toLayoutStruct() {
-    return {'contractDataEnterySizeBytes': contractDataEnterySizeBytes};
+    return {'contractDataEntrySizeBytes': contractDataEntrySizeBytes};
   }
 }
 
@@ -5107,7 +5927,7 @@ class ConfigSettingBucketlistSizeWindow extends ConfigSetting {
     return ConfigSettingBucketlistSizeWindow(
       json.valueAs<List>('ledgerMaxTxCount').map((e) {
         if (e is! BigInt) {
-          throw DartStellarPlugingException(
+          throw BuError(DefaultErrorType.invalidArgument, 
             'Incorrect value.',
             details: {
               'key': 'ledgerMaxTxCount',
@@ -5206,21 +6026,24 @@ class ConfigSettingEvictionIterator extends ConfigSetting {
   }
 }
 
-class TTLEntery extends LedgerEntryData {
-  /// Hash of the LedgerKey that is associated with this TTLEntery
-  final List<int> keyHash;
+class TTLEntry extends LedgerEntryData {
+  /// Hash of the LedgerKey that is associated with this TTLEntry
+  final BuBytes keyHash;
   final int liveUntilLedgerSeq;
-  TTLEntery({required List<int> keyHash, required int liveUntilLedgerSeq})
+  TTLEntry({required List<int> keyHash, required int liveUntilLedgerSeq})
     : liveUntilLedgerSeq = liveUntilLedgerSeq.asU32,
-      keyHash = keyHash.asImmutableBytes.exc(
-        name: 'keyHash',
-        length: StellarConst.hash256Length,
-        operation: "TTLEntery",
-        reason: "Invalid keyHash bytes length.",
-      ),
+      keyHash =
+          keyHash
+              .exc(
+                name: 'keyHash',
+                length: StellarConst.hash256Length,
+                operation: "TTLEntry",
+                reason: "Invalid keyHash bytes length.",
+              )
+              .asImmutableBytes,
       super(LedgerEntryType.ttl);
-  factory TTLEntery.fromStruct(Map<String, dynamic> json) {
-    return TTLEntery(
+  factory TTLEntry.fromStruct(Map<String, dynamic> json) {
+    return TTLEntry(
       keyHash: json.valueAs('keyHash'),
       liveUntilLedgerSeq: json.valueAs('liveUntilLedgerSeq'),
     );
@@ -5307,7 +6130,7 @@ class LedgerEntryExt extends XDRVariantSerialization {
           v1: LedgerEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid LedgerEntry extension.',
         );
     }
@@ -5435,7 +6258,10 @@ abstract class LedgerKey extends XDRVariantSerialization {
       case LedgerEntryType.ttl:
         return LedgerKeyTTL.fromStruct(decode.value);
       default:
-        throw const DartStellarPlugingException('Invalid LedgerEntry type.');
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid LedgerEntry type.',
+          details: {'type': type.name},
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -5504,8 +6330,9 @@ abstract class LedgerKey extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw const DartStellarPlugingException(
+            throw BuError(DefaultErrorType.invalidArgument, 
               'Invalid LedgerEntry type.',
+              details: {'type': type.name},
             );
         }
       }),
@@ -5712,14 +6539,17 @@ class LedgerKeyClaimableBalance extends LedgerKey {
 }
 
 class LedgerKeyLiquidityPool extends LedgerKey {
-  final List<int> liquidityPoolId;
+  final BuBytes liquidityPoolId;
   LedgerKeyLiquidityPool(List<int> liquidityPoolId)
-    : liquidityPoolId = liquidityPoolId.asImmutableBytes.exc(
-        name: 'liquidityPoolId',
-        length: StellarConst.hash256Length,
-        operation: "LedgerKeyLiquidityPool",
-        reason: "Invalid liquidityPoolId bytes length.",
-      ),
+    : liquidityPoolId =
+          liquidityPoolId
+              .exc(
+                name: 'liquidityPoolId',
+                length: StellarConst.hash256Length,
+                operation: "LedgerKeyLiquidityPool",
+                reason: "Invalid liquidityPoolId bytes length.",
+              )
+              .asImmutableBytes,
       super(LedgerEntryType.liquidityPool);
   factory LedgerKeyLiquidityPool.fromStruct(Map<String, dynamic> json) {
     return LedgerKeyLiquidityPool(json.valueAs('liquidityPoolId'));
@@ -5802,14 +6632,17 @@ class LedgerKeyContractData extends LedgerKey {
 }
 
 class LedgerKeyContractCode extends LedgerKey {
-  final List<int> hash;
+  final BuBytes hash;
   LedgerKeyContractCode(List<int> hash)
-    : hash = hash.asImmutableBytes.exc(
-        name: 'hash',
-        length: StellarConst.hash256Length,
-        operation: "LedgerKeyContractCode",
-        reason: "Invalid hash bytes length.",
-      ),
+    : hash =
+          hash
+              .exc(
+                name: 'hash',
+                length: StellarConst.hash256Length,
+                operation: "LedgerKeyContractCode",
+                reason: "Invalid hash bytes length.",
+              )
+              .asImmutableBytes,
       super(LedgerEntryType.contractCode);
   factory LedgerKeyContractCode.fromStruct(Map<String, dynamic> json) {
     return LedgerKeyContractCode(json.valueAs('hash'));
@@ -5868,14 +6701,17 @@ class LedgerKeyConfigSetting extends LedgerKey {
 }
 
 class LedgerKeyTTL extends LedgerKey {
-  final List<int> keyHash;
+  final BuBytes keyHash;
   LedgerKeyTTL(List<int> keyHash)
-    : keyHash = keyHash.asImmutableBytes.exc(
-        name: 'keyHash',
-        length: StellarConst.hash256Length,
-        operation: "LedgerKeyTTL",
-        reason: "Invalid keyHash bytes length.",
-      ),
+    : keyHash =
+          keyHash
+              .exc(
+                name: 'keyHash',
+                length: StellarConst.hash256Length,
+                operation: "LedgerKeyTTL",
+                reason: "Invalid keyHash bytes length.",
+              )
+              .asImmutableBytes,
       super(LedgerEntryType.ttl);
   factory LedgerKeyTTL.fromStruct(Map<String, dynamic> json) {
     return LedgerKeyTTL(json.valueAs('keyHash'));
@@ -6068,33 +6904,36 @@ class SorobanTransactionData extends XDRSerialization {
   }
 }
 
-class CryptoKeyType {
+class StellarCryptoKeyType {
   final String name;
   final int value;
 
-  const CryptoKeyType._({required this.name, required this.value});
+  const StellarCryptoKeyType._({required this.name, required this.value});
 
-  static const ed25519 = CryptoKeyType._(name: 'Ed25519', value: 0);
-  static const preAuthTx = CryptoKeyType._(name: 'PreAuthTx', value: 1);
-  static const hashX = CryptoKeyType._(name: 'HashX', value: 2);
-  static const ed25519SignedPayload = CryptoKeyType._(
+  static const ed25519 = StellarCryptoKeyType._(name: 'Ed25519', value: 0);
+  static const preAuthTx = StellarCryptoKeyType._(name: 'PreAuthTx', value: 1);
+  static const hashX = StellarCryptoKeyType._(name: 'HashX', value: 2);
+  static const ed25519SignedPayload = StellarCryptoKeyType._(
     name: 'Ed25519SignedPayload',
     value: 3,
   );
-  static const muxedEd25519 = CryptoKeyType._(name: 'MuxedEd25519', value: 256);
-  static const List<CryptoKeyType> values = [
+  static const muxedEd25519 = StellarCryptoKeyType._(
+    name: 'MuxedEd25519',
+    value: 256,
+  );
+  static const List<StellarCryptoKeyType> values = [
     ed25519,
     preAuthTx,
     hashX,
     ed25519SignedPayload,
     muxedEd25519,
   ];
-  static CryptoKeyType fromName(String? name) {
+  static StellarCryptoKeyType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -6106,12 +6945,12 @@ class CryptoKeyType {
 
   @override
   String toString() {
-    return 'CryptoKeyType.$name';
+    return 'StellarCryptoKeyType.$name';
   }
 }
 
 abstract class MuxedAccount extends XDRVariantSerialization {
-  final CryptoKeyType type;
+  final StellarCryptoKeyType type;
   const MuxedAccount._(this.type);
   StellarAddress get address;
   factory MuxedAccount(StellarAddress address) {
@@ -6122,7 +6961,7 @@ abstract class MuxedAccount extends XDRVariantSerialization {
         ed25519: address.keyBytes(),
       );
     } else if (address.type != XlmAddrTypes.pubKey) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.unsupported, 
         'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to muxed account.',
         details: {'type': address.type.name},
       );
@@ -6138,14 +6977,14 @@ abstract class MuxedAccount extends XDRVariantSerialization {
   }
   factory MuxedAccount.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
-    final type = CryptoKeyType.fromName(decode.variantName);
+    final type = StellarCryptoKeyType.fromName(decode.variantName);
     switch (type) {
-      case CryptoKeyType.ed25519:
+      case StellarCryptoKeyType.ed25519:
         return MuxedAccountEd25519.fromStruct(decode.value);
-      case CryptoKeyType.muxedEd25519:
+      case StellarCryptoKeyType.muxedEd25519:
         return MuxedAccountMed25519.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid MuxedAccount type.',
           details: {'type': type.name},
         );
@@ -6154,14 +6993,14 @@ abstract class MuxedAccount extends XDRVariantSerialization {
   static Layout<Map<String, dynamic>> layout({String? property}) =>
       LayoutConst.lazyEnumU32Be([
         LazyVariantModel(
-          index: CryptoKeyType.ed25519.value,
+          index: StellarCryptoKeyType.ed25519.value,
           layout: MuxedAccountEd25519.layout,
-          property: CryptoKeyType.ed25519.name,
+          property: StellarCryptoKeyType.ed25519.name,
         ),
         LazyVariantModel(
-          index: CryptoKeyType.muxedEd25519.value,
+          index: StellarCryptoKeyType.muxedEd25519.value,
           layout: MuxedAccountMed25519.layout,
-          property: CryptoKeyType.muxedEd25519.name,
+          property: StellarCryptoKeyType.muxedEd25519.name,
         ),
       ], property: property);
 
@@ -6176,11 +7015,11 @@ abstract class MuxedAccount extends XDRVariantSerialization {
 
 class MuxedAccountMed25519 extends MuxedAccount {
   final BigInt id;
-  final List<int> ed25519;
+  final BuBytes ed25519;
   MuxedAccountMed25519({required BigInt id, required List<int> ed25519})
     : id = id.asU64,
       ed25519 = ed25519.asImmutableBytes,
-      super._(CryptoKeyType.muxedEd25519);
+      super._(StellarCryptoKeyType.muxedEd25519);
 
   factory MuxedAccountMed25519.fromStruct(Map<String, dynamic> json) {
     return MuxedAccountMed25519(
@@ -6211,10 +7050,10 @@ class MuxedAccountMed25519 extends MuxedAccount {
 }
 
 class MuxedAccountEd25519 extends MuxedAccount {
-  final List<int> ed25519;
+  final BuBytes ed25519;
   MuxedAccountEd25519(List<int> ed25519)
     : ed25519 = ed25519.asImmutableBytes,
-      super._(CryptoKeyType.ed25519);
+      super._(StellarCryptoKeyType.ed25519);
   factory MuxedAccountEd25519.fromStruct(Map<String, dynamic> json) {
     return MuxedAccountEd25519(json.valueAs('ed25519'));
   }
@@ -6253,7 +7092,7 @@ class PreconditionType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Precondition type not found.',
                 details: {
                   'name': name,
@@ -6424,7 +7263,7 @@ abstract class Preconditions extends XDRVariantSerialization {
       case PreconditionType.v2:
         return PrecondV2.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid Precondition type.',
           details: {'type': type.name},
         );
@@ -6543,7 +7382,7 @@ class PrecondV2 extends Preconditions {
 
 abstract class AssetCode extends XDRVariantSerialization {
   final AssetType type;
-  final List<int> code;
+  final BuBytes code;
   const AssetCode({required this.type, required this.code});
   factory AssetCode.fromStruct(Map<String, dynamic> json) {
     final decode = XDRVariantSerialization.toVariantDecodeResult(json);
@@ -6554,7 +7393,7 @@ abstract class AssetCode extends XDRVariantSerialization {
       case AssetType.creditAlphanum4:
         return AssetCode4.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid AssetCode type',
           details: {'type': type.name},
         );
@@ -6563,10 +7402,10 @@ abstract class AssetCode extends XDRVariantSerialization {
 
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.enum32Be([
-      LayoutConst.none(),
+      LayoutConst.none(property: AssetType.native.name),
       AssetCode4.layout(property: AssetType.creditAlphanum4.name),
       AssetCode12.layout(property: AssetType.creditAlphanum12.name),
-      LayoutConst.none(),
+      LayoutConst.none(property: AssetType.poolShare.name),
     ], property: property);
   }
 
@@ -6584,12 +7423,15 @@ class AssetCode4 extends AssetCode {
   AssetCode4(List<int> code)
     : super(
         type: AssetType.creditAlphanum4,
-        code: code.asImmutableBytes.exc(
-          name: 'code',
-          length: codeLength,
-          operation: "AssetCode4",
-          reason: "Invalid code bytes length.",
-        ),
+        code:
+            code
+                .exc(
+                  name: 'code',
+                  length: codeLength,
+                  operation: "AssetCode4",
+                  reason: "Invalid code bytes length.",
+                )
+                .asImmutableBytes,
       );
   factory AssetCode4.fromString(String code) {
     return AssetCode4(
@@ -6626,12 +7468,15 @@ class AssetCode12 extends AssetCode {
   AssetCode12(List<int> code)
     : super(
         type: AssetType.creditAlphanum12,
-        code: code.asImmutableBytes.exc(
-          name: 'code',
-          length: codeLength,
-          operation: "AssetCode12",
-          reason: "Invalid code bytes length.",
-        ),
+        code:
+            code
+                .exc(
+                  name: 'code',
+                  length: codeLength,
+                  operation: "AssetCode12",
+                  reason: "Invalid code bytes length.",
+                )
+                .asImmutableBytes,
       );
   factory AssetCode12.fromString(String code) {
     return AssetCode12(
@@ -6683,7 +7528,7 @@ class RevokeSponsorshipType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'RevokeSponsorship type not found.',
                 details: {
                   'name': name,
@@ -6711,7 +7556,7 @@ abstract class RevokeSponsorship extends XDRVariantSerialization {
       case RevokeSponsorshipType.signer:
         return RevokeSponsorshipSigner.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid RevokeSponsorship type.',
           details: {'type': type.name},
         );
@@ -6836,17 +7681,22 @@ class HostFunctionType {
     name: 'UploadContractWasm',
     value: 2,
   );
+  static const createContractV2 = HostFunctionType._(
+    name: 'CreateContractV2',
+    value: 3,
+  );
   static const List<HostFunctionType> values = [
     invokeContract,
     createContract,
     uploadContractWasm,
+    createContractV2,
   ];
   static HostFunctionType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'HostFunction type not found.',
                 details: {
                   'name': name,
@@ -6875,8 +7725,10 @@ abstract class HostFunction extends XDRVariantSerialization {
         return HostFunctionTypeCreateContract.fromStruct(decode.value);
       case HostFunctionType.uploadContractWasm:
         return HostFunctionTypeUploadContractWasm.fromStruct(decode.value);
+      case HostFunctionType.createContractV2:
+        return HostFunctionTypeCreateContractV2.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid HostFunction type.',
           details: {'type': type.name},
         );
@@ -6899,6 +7751,11 @@ abstract class HostFunction extends XDRVariantSerialization {
         index: HostFunctionType.uploadContractWasm.value,
         layout: HostFunctionTypeUploadContractWasm.layout,
         property: HostFunctionType.uploadContractWasm.name,
+      ),
+      LazyVariantModel(
+        index: HostFunctionType.createContractV2.value,
+        layout: HostFunctionTypeCreateContractV2.layout,
+        property: HostFunctionType.createContractV2.name,
       ),
     ], property: property);
   }
@@ -6966,7 +7823,7 @@ class ContractIdPreimageType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'ContractIdPreimage type not found.',
                 details: {
                   'name': name,
@@ -6994,7 +7851,7 @@ abstract class ContractIdPreimage extends XDRVariantSerialization {
       case ContractIdPreimageType.fromAsset:
         return ContractIdPreimageFromAsset.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid ContractIdPreimage type.',
           details: {'type': type.name},
         );
@@ -7026,16 +7883,19 @@ abstract class ContractIdPreimage extends XDRVariantSerialization {
 
 class ContractIdPreimageFromAddress extends ContractIdPreimage {
   final ScAddress address;
-  final List<int> salt;
+  final BuBytes salt;
   ContractIdPreimageFromAddress({
     required this.address,
     required List<int> salt,
-  }) : salt = salt.immutable.exc(
-         name: 'salt',
-         length: StellarConst.hash256Length,
-         operation: "ContractIdPreimageFromAddress",
-         reason: "Invalid salt bytes length.",
-       ),
+  }) : salt =
+           salt
+               .exc(
+                 name: 'salt',
+                 length: StellarConst.hash256Length,
+                 operation: "ContractIdPreimageFromAddress",
+                 reason: "Invalid salt bytes length.",
+               )
+               .asImmutableBytes,
        super(ContractIdPreimageType.fromAddress);
   factory ContractIdPreimageFromAddress.fromStruct(Map<String, dynamic> json) {
     return ContractIdPreimageFromAddress(
@@ -7065,7 +7925,7 @@ class ContractIdPreimageFromAddress extends ContractIdPreimage {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'address': address.address.toString(),
+      'address': address.address,
       'salt': BytesUtils.toHexString(salt, prefix: '0x'),
     };
   }
@@ -7146,6 +8006,63 @@ class CreateContractArgs extends XDRSerialization {
   }
 }
 
+/// XDR `CreateContractArgsV2`: create-contract args plus the constructor
+/// arguments (protocol 22+).
+class CreateContractArgsV2 extends XDRSerialization {
+  final ContractIdPreimage contractIdPreimage;
+  final ContractExecutable executable;
+  final List<ScVal> constructorArgs;
+  CreateContractArgsV2({
+    required this.contractIdPreimage,
+    required this.executable,
+    required List<ScVal> constructorArgs,
+  }) : constructorArgs = constructorArgs.immutable;
+  factory CreateContractArgsV2.fromStruct(Map<String, dynamic> json) {
+    return CreateContractArgsV2(
+      contractIdPreimage: ContractIdPreimage.fromStruct(
+        json.valueAs('contractIdPreimage'),
+      ),
+      executable: ContractExecutable.fromStruct(json.valueAs('executable')),
+      constructorArgs:
+          json
+              .valueEnsureAsList<Map<String, dynamic>>('constructorArgs')
+              .map((e) => ScVal.fromStruct(e))
+              .toList(),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      ContractIdPreimage.layout(property: 'contractIdPreimage'),
+      ContractExecutable.layout(property: 'executable'),
+      LayoutConst.xdrVec(ScVal.layout(), property: 'constructorArgs'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'contractIdPreimage': contractIdPreimage.toVariantLayoutStruct(),
+      'executable': executable.toVariantLayoutStruct(),
+      'constructorArgs':
+          constructorArgs.map((e) => e.toVariantLayoutStruct()).toList(),
+    };
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'contractIdPreimage': contractIdPreimage.toJson(),
+      'executable': executable.toJson(),
+      'constructorArgs': constructorArgs.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
 class HostFunctionTypeCreateContract extends HostFunction {
   final CreateContractArgs args;
   const HostFunctionTypeCreateContract(this.args)
@@ -7174,8 +8091,38 @@ class HostFunctionTypeCreateContract extends HostFunction {
   }
 }
 
+class HostFunctionTypeCreateContractV2 extends HostFunction {
+  final CreateContractArgsV2 args;
+  const HostFunctionTypeCreateContractV2(this.args)
+    : super(HostFunctionType.createContractV2);
+  factory HostFunctionTypeCreateContractV2.fromStruct(
+    Map<String, dynamic> json,
+  ) {
+    return HostFunctionTypeCreateContractV2(
+      CreateContractArgsV2.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('args'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      CreateContractArgsV2.layout(property: 'args'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'args': args.toLayoutStruct()};
+  }
+}
+
 class HostFunctionTypeUploadContractWasm extends HostFunction {
-  final List<int> wasm;
+  final BuBytes wasm;
   HostFunctionTypeUploadContractWasm(List<int> wasm)
     : wasm = wasm.asImmutableBytes,
       super(HostFunctionType.uploadContractWasm);
@@ -7217,13 +8164,26 @@ class SorobanCredentialsType {
     value: 0,
   );
   static const address = SorobanCredentialsType._(name: 'Address', value: 1);
-  static const List<SorobanCredentialsType> values = [sourceAccount, address];
+  static const addressV2 = SorobanCredentialsType._(
+    name: 'AddressV2',
+    value: 2,
+  );
+  static const addressWithDelegates = SorobanCredentialsType._(
+    name: 'AddressWithDelegates',
+    value: 3,
+  );
+  static const List<SorobanCredentialsType> values = [
+    sourceAccount,
+    address,
+    addressV2,
+    addressWithDelegates,
+  ];
   static SorobanCredentialsType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'SorobanCredentials type not found.',
                 details: {
                   'name': name,
@@ -7248,10 +8208,14 @@ abstract class SorobanCredentials extends XDRVariantSerialization {
     switch (type) {
       case SorobanCredentialsType.address:
         return SorobanAddressCredentials.fromStruct(decode.value);
+      case SorobanCredentialsType.addressV2:
+        return SorobanAddressCredentialsV2.fromStruct(decode.value);
+      case SorobanCredentialsType.addressWithDelegates:
+        return SorobanAddressCredentialsWithDelegates.fromStruct(decode.value);
       case SorobanCredentialsType.sourceAccount:
         return SorobanCredentialsSourceAccount.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid SorobanCredentials type.',
           details: {'type': type.name},
         );
@@ -7268,6 +8232,16 @@ abstract class SorobanCredentials extends XDRVariantSerialization {
         index: SorobanCredentialsType.address.value,
         layout: SorobanAddressCredentials.layout,
         property: SorobanCredentialsType.address.name,
+      ),
+      LazyVariantModel(
+        index: SorobanCredentialsType.addressV2.value,
+        layout: SorobanAddressCredentialsV2.layout,
+        property: SorobanCredentialsType.addressV2.name,
+      ),
+      LazyVariantModel(
+        index: SorobanCredentialsType.addressWithDelegates.value,
+        layout: SorobanAddressCredentialsWithDelegates.layout,
+        property: SorobanCredentialsType.addressWithDelegates.name,
       ),
     ], property: property);
   }
@@ -7333,10 +8307,186 @@ class SorobanAddressCredentials extends SorobanCredentials {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'address': address.address.toString(),
+      'address': address.address,
       'nonce': nonce.toString(),
       'signatureExpirationLedger': signatureExpirationLedger,
       'signature': signature.toJson(),
+    };
+  }
+}
+
+/// XDR `SorobanAddressCredentials` under the `ADDRESS_V2` arm (protocol 27+,
+/// CAP-71-02): same wire shape as [SorobanAddressCredentials], different
+/// authorization semantics on the network side.
+class SorobanAddressCredentialsV2 extends SorobanCredentials {
+  final ScAddress address;
+  final BigInt nonce;
+  final int signatureExpirationLedger;
+  final ScVal signature;
+  SorobanAddressCredentialsV2({
+    required this.address,
+    required BigInt nonce,
+    required int signatureExpirationLedger,
+    required this.signature,
+  }) : nonce = nonce.asI64,
+       signatureExpirationLedger = signatureExpirationLedger.asU32,
+       super(SorobanCredentialsType.addressV2);
+  factory SorobanAddressCredentialsV2.fromStruct(Map<String, dynamic> json) {
+    return SorobanAddressCredentialsV2(
+      address: ScAddress.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('address'),
+      ),
+      nonce: json.valueAs('nonce'),
+      signatureExpirationLedger: json.valueAs('signatureExpirationLedger'),
+      signature: ScVal.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('signature'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      ScAddress.layout(property: 'address'),
+      LayoutConst.s64be(property: 'nonce'),
+      LayoutConst.u32be(property: 'signatureExpirationLedger'),
+      ScVal.layout(property: 'signature'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'address': address.toVariantLayoutStruct(),
+      'nonce': nonce,
+      'signatureExpirationLedger': signatureExpirationLedger,
+      'signature': signature.toVariantLayoutStruct(),
+    };
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'address': address.address,
+      'nonce': nonce.toString(),
+      'signatureExpirationLedger': signatureExpirationLedger,
+      'signature': signature.toJson(),
+    };
+  }
+}
+
+/// XDR `SorobanDelegateSignature`: one delegation link in the
+/// `ADDRESS_WITH_DELEGATES` credential chain.
+class SorobanDelegateSignature extends XDRSerialization {
+  final ScAddress address;
+  final ScVal signature;
+  final List<SorobanDelegateSignature> nestedDelegates;
+  SorobanDelegateSignature({
+    required this.address,
+    required this.signature,
+    required List<SorobanDelegateSignature> nestedDelegates,
+  }) : nestedDelegates = nestedDelegates.immutable;
+  factory SorobanDelegateSignature.fromStruct(Map<String, dynamic> json) {
+    return SorobanDelegateSignature(
+      address: ScAddress.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('address'),
+      ),
+      signature: ScVal.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('signature'),
+      ),
+      nestedDelegates:
+          json
+              .valueEnsureAsList<Map<String, dynamic>>('nestedDelegates')
+              .map((e) => SorobanDelegateSignature.fromStruct(e))
+              .toList(),
+    );
+  }
+  static Layout _selfVector({String? property}) {
+    return LayoutConst.xdrVec(
+      SorobanDelegateSignature.layout(),
+      property: property,
+    );
+  }
+
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.lazyStruct([
+      LazyStructLayoutBuilder(
+        layout: (property, params) => ScAddress.layout(property: property),
+        property: 'address',
+      ),
+      LazyStructLayoutBuilder(
+        layout: (property, params) => ScVal.layout(property: property),
+        property: 'signature',
+      ),
+      LazyStructLayoutBuilder(
+        layout: (property, params) => _selfVector(property: property),
+        property: 'nestedDelegates',
+      ),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'address': address.toVariantLayoutStruct(),
+      'signature': signature.toVariantLayoutStruct(),
+      'nestedDelegates':
+          nestedDelegates.map((e) => e.toLayoutStruct()).toList(),
+    };
+  }
+}
+
+/// XDR `SorobanAddressCredentialsWithDelegates`.
+class SorobanAddressCredentialsWithDelegates extends SorobanCredentials {
+  final SorobanAddressCredentials addressCredentials;
+  final List<SorobanDelegateSignature> delegates;
+  SorobanAddressCredentialsWithDelegates({
+    required this.addressCredentials,
+    required List<SorobanDelegateSignature> delegates,
+  }) : delegates = delegates.immutable,
+       super(SorobanCredentialsType.addressWithDelegates);
+  factory SorobanAddressCredentialsWithDelegates.fromStruct(
+    Map<String, dynamic> json,
+  ) {
+    return SorobanAddressCredentialsWithDelegates(
+      addressCredentials: SorobanAddressCredentials.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('addressCredentials'),
+      ),
+      delegates:
+          json
+              .valueEnsureAsList<Map<String, dynamic>>('delegates')
+              .map((e) => SorobanDelegateSignature.fromStruct(e))
+              .toList(),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      SorobanAddressCredentials.layout(property: 'addressCredentials'),
+      LayoutConst.xdrVec(
+        SorobanDelegateSignature.layout(),
+        property: 'delegates',
+      ),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'addressCredentials': addressCredentials.toLayoutStruct(),
+      'delegates': delegates.map((e) => e.toLayoutStruct()).toList(),
     };
   }
 }
@@ -7381,16 +8531,21 @@ class SorobanAuthorizedFunctionType {
     name: 'CreateContractHostFn',
     value: 1,
   );
+  static const createContractV2HostFn = SorobanAuthorizedFunctionType._(
+    name: 'CreateContractV2HostFn',
+    value: 2,
+  );
   static const List<SorobanAuthorizedFunctionType> values = [
     contractFn,
     createContractHostFn,
+    createContractV2HostFn,
   ];
   static SorobanAuthorizedFunctionType fromName(String? name) {
     return values.firstWhere(
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'SorobanAuthorizedFunction type not found.',
                 details: {
                   'name': name,
@@ -7422,8 +8577,12 @@ abstract class SorobanAuthorizedFunction extends XDRVariantSerialization {
         return SorobanAuthorizedFunctionTypeCreateContractHostFunction.fromStruct(
           decode.value,
         );
+      case SorobanAuthorizedFunctionType.createContractV2HostFn:
+        return SorobanAuthorizedFunctionTypeCreateContractV2HostFunction.fromStruct(
+          decode.value,
+        );
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid SorobanAuthorizedFunction type.',
           details: {'type': type.name},
         );
@@ -7440,6 +8599,12 @@ abstract class SorobanAuthorizedFunction extends XDRVariantSerialization {
         index: SorobanAuthorizedFunctionType.createContractHostFn.value,
         layout: SorobanAuthorizedFunctionTypeCreateContractHostFunction.layout,
         property: SorobanAuthorizedFunctionType.createContractHostFn.name,
+      ),
+      LazyVariantModel(
+        index: SorobanAuthorizedFunctionType.createContractV2HostFn.value,
+        layout:
+            SorobanAuthorizedFunctionTypeCreateContractV2HostFunction.layout,
+        property: SorobanAuthorizedFunctionType.createContractV2HostFn.name,
       ),
     ], property: property);
   }
@@ -7493,7 +8658,7 @@ class InvokeContractArgs extends XDRSerialization {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'contractAddress': contractAddress.address.toString(),
+      'contractAddress': contractAddress.address,
       'functionName': functionName.value,
       'args': args.map((e) => e.toJson()).toList(),
     };
@@ -7564,6 +8729,43 @@ class SorobanAuthorizedFunctionTypeCreateContractHostFunction
   static Layout<Map<String, dynamic>> layout({String? property}) {
     return LayoutConst.struct([
       CreateContractArgs.layout(property: 'args'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'args': args.toLayoutStruct()};
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {'args': args.toJson()};
+  }
+}
+
+class SorobanAuthorizedFunctionTypeCreateContractV2HostFunction
+    extends SorobanAuthorizedFunction {
+  final CreateContractArgsV2 args;
+  const SorobanAuthorizedFunctionTypeCreateContractV2HostFunction(this.args)
+    : super(SorobanAuthorizedFunctionType.createContractV2HostFn);
+
+  factory SorobanAuthorizedFunctionTypeCreateContractV2HostFunction.fromStruct(
+    Map<String, dynamic> json,
+  ) {
+    return SorobanAuthorizedFunctionTypeCreateContractV2HostFunction(
+      CreateContractArgsV2.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('args'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      CreateContractArgsV2.layout(property: 'args'),
     ], property: property);
   }
 
@@ -7734,7 +8936,7 @@ class TrustLineFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'TrustLineFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -7778,7 +8980,7 @@ class TrustAuthFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'TrustAuthFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -7818,7 +9020,7 @@ class AuthFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'AuthFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -7855,7 +9057,7 @@ class SorobanTransactionDataExt extends XDRVariantSerialization {
           ),
         );
       default:
-        throw const DartStellarPlugingException(
+        throw const BuError(DefaultErrorType.invalidArgument, 
           'Invalid SorobanTransactionData extension.',
         );
     }
@@ -7923,7 +9125,7 @@ class ExtensionPointType {
   );
   static const ExtensionPointType extArgs3 = ExtensionPointType._(
     name: 'extArgs3',
-    value: 2,
+    value: 3,
   );
   static const List<ExtensionPointType> values = [
     extVoid,
@@ -7936,7 +9138,7 @@ class ExtensionPointType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -8148,21 +9350,27 @@ class StellarTransactionV0 extends StellarTransaction {
 }
 
 class DecoratedSignature extends XDRSerialization {
-  final List<int> hint;
-  final List<int> signature;
+  final BuBytes hint;
+  final BuBytes signature;
   DecoratedSignature({required List<int> hint, required List<int> signature})
-    : hint = hint.asImmutableBytes.exc(
-        length: StellarConst.pubkeyHintBytesLength,
-        name: 'hint',
-        operation: "DecoratedSignature",
-        reason: "Invalid hint bytes length.",
-      ),
-      signature = signature.asImmutableBytes.max(
-        length: StellarConst.ed25519SignatureLength,
-        name: 'signature',
-        operation: "DecoratedSignature",
-        reason: "Invalid signature bytes length.",
-      );
+    : hint =
+          hint
+              .exc(
+                length: StellarConst.pubkeyHintBytesLength,
+                name: 'hint',
+                operation: "DecoratedSignature",
+                reason: "Invalid hint bytes length.",
+              )
+              .asImmutableBytes,
+      signature =
+          signature
+              .max(
+                length: StellarConst.ed25519SignatureLength,
+                name: 'signature',
+                operation: "DecoratedSignature",
+                reason: "Invalid signature bytes length.",
+              )
+              .asImmutableBytes;
 
   factory DecoratedSignature.fromStruct(Map<String, dynamic> json) {
     return DecoratedSignature(
@@ -8189,6 +9397,428 @@ class DecoratedSignature extends XDRSerialization {
   Map<String, dynamic> toLayoutStruct() {
     return {'hint': hint, 'signature': signature};
   }
+}
+
+/// XDR `StellarValueType` (stellar-xdr v30.0). The `signedMs` /
+/// `emptyTxSetMs` arms (CAP-88) carry millisecond close times; every ledger
+/// produced after the Protocol 30 upgrade uses one of them.
+class StellarValueType {
+  final String name;
+  final int value;
+  const StellarValueType._({required this.name, required this.value});
+
+  static const basic = StellarValueType._(name: 'Basic', value: 0);
+  static const signed = StellarValueType._(name: 'Signed', value: 1);
+  static const emptyTxSet = StellarValueType._(name: 'EmptyTxSet', value: 2);
+  static const signedMs = StellarValueType._(name: 'SignedMs', value: 3);
+  static const emptyTxSetMs = StellarValueType._(
+    name: 'EmptyTxSetMs',
+    value: 4,
+  );
+
+  static const List<StellarValueType> values = [
+    basic,
+    signed,
+    emptyTxSet,
+    signedMs,
+    emptyTxSetMs,
+  ];
+  static StellarValueType fromName(String? name) {
+    return values.firstWhere(
+      (e) => e.name == name,
+      orElse:
+          () =>
+              throw BuError(DefaultErrorType.notFound, 
+                'StellarValue type not found.',
+                details: {
+                  'name': name,
+                  'values': values.map((e) => e.name).join(', '),
+                },
+              ),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'StellarValueType.$name';
+  }
+}
+
+/// XDR `LedgerCloseValueSignature`: node id plus its signature.
+class LedgerCloseValueSignature extends XDRSerialization {
+  final StellarPublicKey nodeId;
+  final BuBytes signature;
+  LedgerCloseValueSignature({
+    required this.nodeId,
+    required List<int> signature,
+  }) : signature = signature.asImmutableBytes;
+  factory LedgerCloseValueSignature.fromStruct(Map<String, dynamic> json) {
+    return LedgerCloseValueSignature(
+      nodeId: StellarPublicKey.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('nodeId'),
+      ),
+      signature: json.valueAs('signature'),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      StellarPublicKey.layout(property: 'nodeId'),
+      LayoutConst.xdrVecBytes(property: 'signature'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'nodeId': nodeId.toLayoutStruct(), 'signature': signature};
+  }
+}
+
+/// XDR `signedMsValue` (CAP-88): `closeTimeMs` is the full close time in
+/// milliseconds; `closeTime` equals `closeTimeMs ~/ 1000`.
+class StellarValueSignedMs extends XDRSerialization {
+  final BigInt closeTimeMs;
+  final LedgerCloseValueSignature lcValueSignature;
+  StellarValueSignedMs({
+    required BigInt closeTimeMs,
+    required this.lcValueSignature,
+  }) : closeTimeMs = closeTimeMs.asU64;
+  factory StellarValueSignedMs.fromStruct(Map<String, dynamic> json) {
+    return StellarValueSignedMs(
+      closeTimeMs: json.valueAs('closeTimeMs'),
+      lcValueSignature: LedgerCloseValueSignature.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('lcValueSignature'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.u64be(property: 'closeTimeMs'),
+      LedgerCloseValueSignature.layout(property: 'lcValueSignature'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'closeTimeMs': closeTimeMs,
+      'lcValueSignature': lcValueSignature.toLayoutStruct(),
+    };
+  }
+}
+
+/// XDR `StellarValue` empty-tx-set body (shared by the `emptyTxSet` and
+/// `emptyTxSetMs` arms; the latter additionally carries `closeTimeMs`).
+class StellarValueEmptyTxSetBody extends XDRSerialization {
+  final BuBytes txSetHash;
+  final BuBytes previousLedgerHash;
+  final int previousLedgerVersion;
+  final LedgerCloseValueSignature lcValueSignature;
+  StellarValueEmptyTxSetBody({
+    required List<int> txSetHash,
+    required List<int> previousLedgerHash,
+    required int previousLedgerVersion,
+    required this.lcValueSignature,
+  }) : txSetHash =
+           txSetHash
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'txSetHash',
+                 operation: 'StellarValueEmptyTxSetBody',
+                 reason: 'Invalid txSetHash bytes length.',
+               )
+               .asImmutableBytes,
+       previousLedgerHash =
+           previousLedgerHash
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'previousLedgerHash',
+                 operation: 'StellarValueEmptyTxSetBody',
+                 reason: 'Invalid previousLedgerHash bytes length.',
+               )
+               .asImmutableBytes,
+       previousLedgerVersion = previousLedgerVersion.asU32;
+  factory StellarValueEmptyTxSetBody.fromStruct(Map<String, dynamic> json) {
+    return StellarValueEmptyTxSetBody(
+      txSetHash: json.valueAs('txSetHash'),
+      previousLedgerHash: json.valueAs('previousLedgerHash'),
+      previousLedgerVersion: json.valueAs('previousLedgerVersion'),
+      lcValueSignature: LedgerCloseValueSignature.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('lcValueSignature'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.fixedBlobN(StellarConst.hash256Length, property: 'txSetHash'),
+      LayoutConst.fixedBlobN(
+        StellarConst.hash256Length,
+        property: 'previousLedgerHash',
+      ),
+      LayoutConst.u32be(property: 'previousLedgerVersion'),
+      LedgerCloseValueSignature.layout(property: 'lcValueSignature'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'txSetHash': txSetHash,
+      'previousLedgerHash': previousLedgerHash,
+      'previousLedgerVersion': previousLedgerVersion,
+      'lcValueSignature': lcValueSignature.toLayoutStruct(),
+    };
+  }
+}
+
+/// XDR `proposedMsValue` (CAP-88).
+class StellarValueEmptyTxSetMs extends XDRSerialization {
+  final BigInt closeTimeMs;
+  final StellarValueEmptyTxSetBody body;
+  StellarValueEmptyTxSetMs({required BigInt closeTimeMs, required this.body})
+    : closeTimeMs = closeTimeMs.asU64;
+  factory StellarValueEmptyTxSetMs.fromStruct(Map<String, dynamic> json) {
+    return StellarValueEmptyTxSetMs(
+      closeTimeMs: json.valueAs('closeTimeMs'),
+      body: StellarValueEmptyTxSetBody.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('body'),
+      ),
+    );
+  }
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.u64be(property: 'closeTimeMs'),
+      StellarValueEmptyTxSetBody.layout(property: 'body'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {'closeTimeMs': closeTimeMs, 'body': body.toLayoutStruct()};
+  }
+}
+
+/// XDR `StellarValue`: the value SCP agrees on per ledger. Decoders built
+/// against older XDR fail on Protocol 30 ledgers because every ledger after
+/// the upgrade uses the `signedMs` / `emptyTxSetMs` arms (CAP-88).
+class StellarValue extends XDRSerialization {
+  /// Transaction set hash of the ledger.
+  final BuBytes txSetHash;
+
+  /// Whole-second close time (`closeTimeMs ~/ 1000` for ms arms).
+  final BigInt closeTime;
+
+  /// Upgrade entries (at most 6 opaque values of at most 128 bytes each).
+  final List<BuBytes> upgrades;
+
+  /// Consensus extension arm.
+  final StellarValueExt ext;
+
+  StellarValue({
+    required List<int> txSetHash,
+    required BigInt closeTime,
+    required List<List<int>> upgrades,
+    required this.ext,
+  }) : txSetHash =
+           txSetHash
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'txSetHash',
+                 operation: 'StellarValue',
+                 reason: 'Invalid txSetHash bytes length.',
+               )
+               .asImmutableBytes,
+       closeTime = closeTime.asU64,
+       upgrades =
+           upgrades.immutable
+               .max(
+                 length: 6,
+                 name: 'upgrades',
+                 operation: 'StellarValue',
+                 reason: 'Invalid upgrades length.',
+               )
+               .map(
+                 (e) =>
+                     e
+                         .max(
+                           length: 128,
+                           name: 'upgrade',
+                           operation: 'StellarValue',
+                           reason: 'Invalid upgrade bytes length.',
+                         )
+                         .asImmutableBytes,
+               )
+               .toList();
+
+  /// The [StellarValueType] of [ext].
+  StellarValueType get type => ext.type;
+
+  factory StellarValue.fromStruct(Map<String, dynamic> json) {
+    return StellarValue(
+      txSetHash: (json.valueAs<List>('txSetHash')).cast<int>(),
+      closeTime: json.valueAs('closeTime'),
+      upgrades:
+          (json.valueAs<List>(
+            'upgrades',
+          )).map((e) => (e as List).cast<int>()).toList(),
+      ext: StellarValueExt.fromStruct(
+        json.valueEnsureAsMap<String, dynamic>('ext'),
+      ),
+    );
+  }
+
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.struct([
+      LayoutConst.fixedBlobN(StellarConst.hash256Length, property: 'txSetHash'),
+      LayoutConst.u64be(property: 'closeTime'),
+      LayoutConst.xdrVec(LayoutConst.xdrVecBytes(), property: 'upgrades'),
+      StellarValueExt.layout(property: 'ext'),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    return {
+      'txSetHash': txSetHash,
+      'closeTime': closeTime,
+      'upgrades': upgrades,
+      'ext': ext.toVariantLayoutStruct(),
+    };
+  }
+}
+
+/// XDR `StellarValue.ext` union. Kept as a separate type so the arm index
+/// follows the XDR discriminant while [StellarValue] carries the shared body.
+class StellarValueExt extends XDRVariantSerialization {
+  final StellarValueType type;
+  final XDRSerialization? value;
+  const StellarValueExt._({required this.type, this.value});
+
+  factory StellarValueExt.basic() =>
+      const StellarValueExt._(type: StellarValueType.basic);
+
+  factory StellarValueExt.signed(LedgerCloseValueSignature signature) =>
+      StellarValueExt._(type: StellarValueType.signed, value: signature);
+
+  factory StellarValueExt.emptyTxSet(StellarValueEmptyTxSetBody body) =>
+      StellarValueExt._(type: StellarValueType.emptyTxSet, value: body);
+
+  factory StellarValueExt.signedMs(StellarValueSignedMs body) =>
+      StellarValueExt._(type: StellarValueType.signedMs, value: body);
+
+  factory StellarValueExt.emptyTxSetMs(StellarValueEmptyTxSetMs body) =>
+      StellarValueExt._(type: StellarValueType.emptyTxSetMs, value: body);
+
+  factory StellarValueExt.fromStruct(Map<String, dynamic> json) {
+    final decode = XDRVariantSerialization.toVariantDecodeResult(json);
+    final type = StellarValueType.fromName(decode.variantName);
+    switch (type) {
+      case StellarValueType.basic:
+        return StellarValueExt.basic();
+      case StellarValueType.signed:
+        return StellarValueExt._(
+          type: type,
+          value: LedgerCloseValueSignature.fromStruct(decode.value),
+        );
+      case StellarValueType.emptyTxSet:
+        return StellarValueExt._(
+          type: type,
+          value: StellarValueEmptyTxSetBody.fromStruct(decode.value),
+        );
+      case StellarValueType.signedMs:
+        return StellarValueExt._(
+          type: type,
+          value: StellarValueSignedMs.fromStruct(decode.value),
+        );
+      case StellarValueType.emptyTxSetMs:
+        return StellarValueExt._(
+          type: type,
+          value: StellarValueEmptyTxSetMs.fromStruct(decode.value),
+        );
+      default:
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid StellarValue type.',
+          details: {'type': type.name},
+        );
+    }
+  }
+
+  static Layout<Map<String, dynamic>> layout({String? property}) {
+    return LayoutConst.lazyEnumU32Be([
+      LazyVariantModel(
+        index: StellarValueType.basic.value,
+        layout: LayoutConst.noArgs,
+        property: StellarValueType.basic.name,
+      ),
+      LazyVariantModel(
+        index: StellarValueType.signed.value,
+        layout: LedgerCloseValueSignature.layout,
+        property: StellarValueType.signed.name,
+      ),
+      LazyVariantModel(
+        index: StellarValueType.emptyTxSet.value,
+        layout: StellarValueEmptyTxSetBody.layout,
+        property: StellarValueType.emptyTxSet.name,
+      ),
+      LazyVariantModel(
+        index: StellarValueType.signedMs.value,
+        layout: StellarValueSignedMs.layout,
+        property: StellarValueType.signedMs.name,
+      ),
+      LazyVariantModel(
+        index: StellarValueType.emptyTxSetMs.value,
+        layout: StellarValueEmptyTxSetMs.layout,
+        property: StellarValueType.emptyTxSetMs.name,
+      ),
+    ], property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createVariantLayout({String? property}) {
+    return layout(property: property);
+  }
+
+  @override
+  Layout<Map<String, dynamic>> createLayout({String? property}) {
+    final v = value;
+    if (v == null) return LayoutConst.noArgs(property: property);
+    return v.createLayout(property: property);
+  }
+
+  @override
+  Map<String, dynamic> toLayoutStruct() {
+    final v = value;
+    if (v == null) return {};
+    if (v is XDRVariantSerialization) return v.toVariantLayoutStruct();
+    return v.toLayoutStruct();
+  }
+
+  @override
+  String get variantName => type.name;
 }
 
 class EnvelopeType {
@@ -8230,7 +9860,7 @@ class EnvelopeType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Envelope type not found.',
                 details: {
                   'name': name,
@@ -8282,8 +9912,8 @@ abstract class Envelope<T extends StellarTransaction>
               index: type.value,
               layout:
                   ({property}) =>
-                      throw DartStellarPlugingException(
-                        'Envlop type does not supported.',
+                      throw BuError(DefaultErrorType.unsupported, 
+                        'Envelope type is not supported.',
                         details: {'type': type.name, 'property': property},
                       ),
               property: type.name,
@@ -8309,13 +9939,13 @@ abstract class Envelope<T extends StellarTransaction>
         envlope = FeeBumpTransactionEnvelope.fromStruct(decode.value);
         break;
       default:
-        throw DartStellarPlugingException(
-          'Envelope does not supported.',
+        throw BuError(DefaultErrorType.unsupported, 
+          'Envelope type is not supported.',
           details: {'type': type.name},
         );
     }
     if (envlope is! Envelope<T>) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.castFailed, 
         'Envelope casting failed.',
         details: {
           'expected': 'Envelope<$T>',
@@ -8342,9 +9972,9 @@ abstract class Envelope<T extends StellarTransaction>
 
   E cast<E extends Envelope<T>>() {
     if (this is! E) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.castFailed, 
         'Incorrect Envelope casting.',
-        details: {'expected': '$T', 'type': '$runtimeType'},
+        details: {'expected': '$E', 'type': '$runtimeType'},
       );
     }
     return this as E;
@@ -8646,8 +10276,8 @@ abstract class StellarTransaction extends XDRVariantSerialization {
               index: type.value,
               layout:
                   ({property}) =>
-                      throw DartStellarPlugingException(
-                        'Transaction type does not supported.',
+                      throw BuError(DefaultErrorType.unsupported, 
+                        'Transaction type is not supported.',
                         details: {'type': type.name, 'property': property},
                       ),
               property: type.name,
@@ -8669,8 +10299,8 @@ abstract class StellarTransaction extends XDRVariantSerialization {
       case EnvelopeType.txFeeBump:
         return StellarFeeBumpTransaction.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
-          'Transaction type does not supported.',
+        throw BuError(DefaultErrorType.unsupported, 
+          'Transaction type is not supported.',
           details: {'type': type.name},
         );
     }
@@ -8686,7 +10316,7 @@ abstract class StellarTransaction extends XDRVariantSerialization {
 
   T cast<T extends StellarTransaction>() {
     if (this is! T) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.castFailed, 
         'Incorrect StellarTransaction casting.',
         details: {'expected': '$T', 'type': '$runtimeType'},
       );
@@ -8696,17 +10326,20 @@ abstract class StellarTransaction extends XDRVariantSerialization {
 }
 
 class TransactionSignaturePayload extends XDRSerialization {
-  final List<int> networkId;
+  final BuBytes networkId;
   final StellarTransaction taggedTransaction;
   TransactionSignaturePayload({
     required List<int> networkId,
     required this.taggedTransaction,
-  }) : networkId = networkId.asImmutableBytes.exc(
-         length: StellarConst.hash256Length,
-         name: 'networkId',
-         operation: "TransactionSignaturePayload",
-         reason: "Invalid networkId bytes length.",
-       );
+  }) : networkId =
+           networkId
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'networkId',
+                 operation: "TransactionSignaturePayload",
+                 reason: "Invalid networkId bytes length.",
+               )
+               .asImmutableBytes;
   factory TransactionSignaturePayload.fromXdr(
     List<int> bytes, {
     String? property,
@@ -8745,7 +10378,7 @@ class TransactionSignaturePayload extends XDRSerialization {
     };
   }
 
-  List<int> txHash() {
+  BuBytes txHash() {
     return QuickCrypto.sha256Hash(toXDR());
   }
 
@@ -8771,7 +10404,7 @@ class MemoType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -8805,7 +10438,7 @@ abstract class StellarMemo extends XDRVariantSerialization {
       case MemoType.text:
         return StellarMemoText.fromStruct(decode.value);
       default:
-        throw DartStellarPlugingException(
+        throw BuError(DefaultErrorType.invalidArgument, 
           'Invalid Memo type.',
           details: {'type': type.name},
         );
@@ -8852,8 +10485,8 @@ abstract class StellarMemo extends XDRVariantSerialization {
 
   T cast<T extends StellarMemo>() {
     if (this is! T) {
-      throw DartStellarPlugingException(
-        'Stellar Memo Casting failed.',
+      throw BuError(DefaultErrorType.castFailed, 
+        'Stellar memo casting failed.',
         details: {'expected': '$T', 'type': runtimeType.toString()},
       );
     }
@@ -8862,14 +10495,17 @@ abstract class StellarMemo extends XDRVariantSerialization {
 }
 
 class StellarMemoReturnHash extends StellarMemo {
-  final List<int> hash;
+  final BuBytes hash;
   StellarMemoReturnHash(List<int> hash)
-    : hash = hash.asImmutableBytes.exc(
-        length: StellarConst.hash256Length,
-        name: 'hash',
-        operation: "StellarMemoReturnHash",
-        reason: "Invalid hash bytes length.",
-      ),
+    : hash =
+          hash
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'hash',
+                operation: "StellarMemoReturnHash",
+                reason: "Invalid hash bytes length.",
+              )
+              .asImmutableBytes,
       super(type: MemoType.returnHash);
   factory StellarMemoReturnHash.fromStruct(Map<String, dynamic> json) {
     return StellarMemoReturnHash(json.valueAs('hash'));
@@ -8892,14 +10528,17 @@ class StellarMemoReturnHash extends StellarMemo {
 }
 
 class StellarMemoHash extends StellarMemo {
-  final List<int> hash;
+  final BuBytes hash;
   StellarMemoHash(List<int> hash)
-    : hash = hash.asImmutableBytes.exc(
-        length: StellarConst.hash256Length,
-        name: 'hash',
-        operation: "StellarMemoHash",
-        reason: "Invalid hash bytes length.",
-      ),
+    : hash =
+          hash
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'hash',
+                operation: "StellarMemoHash",
+                reason: "Invalid hash bytes length.",
+              )
+              .asImmutableBytes,
       super(type: MemoType.hash);
   factory StellarMemoHash.fromStruct(Map<String, dynamic> json) {
     return StellarMemoHash(json.valueAs('hash'));
@@ -9021,7 +10660,7 @@ class SignerKeyType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'SignerKey type not found.',
                 details: {
                   'name': name,
@@ -9053,7 +10692,9 @@ abstract class SignerKey extends XDRVariantSerialization {
       case SignerKeyType.ed25519SignedPayload:
         return SignerKeyEd25519SignedPayload.fromStruct(decode.value);
       default:
-        throw UnimplementedError('Invalid SignerKeyType.');
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid SignerKeyType "${type.name}".',
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -9082,11 +10723,13 @@ abstract class SignerKey extends XDRVariantSerialization {
           case SignerKeyType.ed25519SignedPayload:
             return LazyVariantModel(
               index: type.value,
-              layout: SignerKeyEd25519.layout,
+              layout: SignerKeyEd25519SignedPayload.layout,
               property: type.name,
             );
           default:
-            throw UnimplementedError('Invalid SignerKeyType.');
+            throw BuError(DefaultErrorType.invalidArgument, 
+              'Invalid SignerKeyType "${type.name}".',
+            );
         }
       }),
       property: property,
@@ -9103,23 +10746,29 @@ abstract class SignerKey extends XDRVariantSerialization {
 }
 
 class SignerKeyEd25519SignedPayload extends SignerKey {
-  final List<int> ed25519;
-  final List<int> payload;
+  final BuBytes ed25519;
+  final BuBytes payload;
   SignerKeyEd25519SignedPayload({
     required List<int> ed25519,
     required List<int> payload,
-  }) : ed25519 = ed25519.asImmutableBytes.exc(
-         length: StellarConst.ed25519PubKeyLength,
-         name: 'ed25519',
-         operation: "SignerKeyEd25519SignedPayload",
-         reason: "Invalid ed25519 bytes length.",
-       ),
-       payload = payload.asImmutableBytes.max(
-         length: StellarConst.payloadLength,
-         name: 'payload',
-         operation: "SignerKeyEd25519SignedPayload",
-         reason: "Invalid payload bytes length.",
-       ),
+  }) : ed25519 =
+           ed25519
+               .exc(
+                 length: StellarConst.ed25519PubKeyLength,
+                 name: 'ed25519',
+                 operation: "SignerKeyEd25519SignedPayload",
+                 reason: "Invalid ed25519 bytes length.",
+               )
+               .asImmutableBytes,
+       payload =
+           payload
+               .max(
+                 length: StellarConst.payloadLength,
+                 name: 'payload',
+                 operation: "SignerKeyEd25519SignedPayload",
+                 reason: "Invalid payload bytes length.",
+               )
+               .asImmutableBytes,
        super(type: SignerKeyType.ed25519SignedPayload);
 
   factory SignerKeyEd25519SignedPayload.fromStruct(Map<String, dynamic> json) {
@@ -9150,14 +10799,17 @@ class SignerKeyEd25519SignedPayload extends SignerKey {
 }
 
 class SignerKeyEd25519 extends SignerKey {
-  final List<int> ed25519;
+  final BuBytes ed25519;
   SignerKeyEd25519(List<int> ed25519)
-    : ed25519 = ed25519.asImmutableBytes.exc(
-        length: StellarConst.ed25519PubKeyLength,
-        name: 'ed25519',
-        operation: "SignerKeyEd25519",
-        reason: "Invalid ed25519 bytes length.",
-      ),
+    : ed25519 =
+          ed25519
+              .exc(
+                length: StellarConst.ed25519PubKeyLength,
+                name: 'ed25519',
+                operation: "SignerKeyEd25519",
+                reason: "Invalid ed25519 bytes length.",
+              )
+              .asImmutableBytes,
       super(type: SignerKeyType.ed25519);
 
   factory SignerKeyEd25519.fromStruct(Map<String, dynamic> json) {
@@ -9184,14 +10836,17 @@ class SignerKeyEd25519 extends SignerKey {
 }
 
 class SignerKeyPreAuthTx extends SignerKey {
-  final List<int> preAuthTx;
+  final BuBytes preAuthTx;
   SignerKeyPreAuthTx(List<int> preAuthTx)
-    : preAuthTx = preAuthTx.asImmutableBytes.exc(
-        length: StellarConst.hash256Length,
-        name: 'preAuthTx',
-        operation: "SignerKeyPreAuthTx",
-        reason: "Invalid preAuthTx bytes length.",
-      ),
+    : preAuthTx =
+          preAuthTx
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'preAuthTx',
+                operation: "SignerKeyPreAuthTx",
+                reason: "Invalid preAuthTx bytes length.",
+              )
+              .asImmutableBytes,
       super(type: SignerKeyType.preAuthTx);
 
   factory SignerKeyPreAuthTx.fromStruct(Map<String, dynamic> json) {
@@ -9218,14 +10873,17 @@ class SignerKeyPreAuthTx extends SignerKey {
 }
 
 class SignerKeyHashX extends SignerKey {
-  final List<int> hashX;
+  final BuBytes hashX;
   SignerKeyHashX(List<int> hashX)
-    : hashX = hashX.asImmutableBytes.exc(
-        length: StellarConst.hash256Length,
-        name: 'hashX',
-        operation: "SignerKeyHashX",
-        reason: "Invalid hashX bytes length.",
-      ),
+    : hashX =
+          hashX
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'hashX',
+                operation: "SignerKeyHashX",
+                reason: "Invalid hashX bytes length.",
+              )
+              .asImmutableBytes,
       super(type: SignerKeyType.hashX);
 
   factory SignerKeyHashX.fromStruct(Map<String, dynamic> json) {
@@ -9318,7 +10976,7 @@ class AssetType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw DartStellarPlugingException(
+              throw BuError(DefaultErrorType.notFound, 
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -9345,7 +11003,7 @@ abstract class StellarAsset extends XDRVariantSerialization {
       case AssetType.poolShare:
         return StellarAssetPoolShare.fromStruct(decode.value);
       default:
-        throw const DartStellarPlugingException('Invalid AssetType.');
+        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid AssetType.');
     }
   }
   factory StellarAsset.fromXdr(List<int> bytes, {String? property}) {
@@ -9386,7 +11044,7 @@ abstract class StellarAsset extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw const DartStellarPlugingException('Invalid AssetType.');
+            throw const BuError(DefaultErrorType.invalidArgument, 'Invalid AssetType.');
         }
       }),
       property: property,
@@ -9403,7 +11061,7 @@ abstract class StellarAsset extends XDRVariantSerialization {
 
   T cast<T extends StellarAsset>() {
     if (this is! T) {
-      throw DartStellarPlugingException(
+      throw BuError(DefaultErrorType.castFailed, 
         'Stellar asset casting failed.',
         details: {'expected': '$T', 'asset': runtimeType.toString()},
       );
@@ -9584,14 +11242,17 @@ class StellarAssetNative extends StellarAsset {
 
 /// should not be used in some models
 class StellarAssetPoolShare extends StellarAsset {
-  final List<int> poolID;
+  final BuBytes poolID;
   StellarAssetPoolShare(List<int> poolID)
-    : poolID = poolID.asImmutableBytes.max(
-        length: StellarConst.hash256Length,
-        name: 'poolID',
-        operation: "StellarAssetPoolShare",
-        reason: "Invalid poolID bytes length.",
-      ),
+    : poolID =
+          poolID
+              .max(
+                length: StellarConst.hash256Length,
+                name: 'poolID',
+                operation: "StellarAssetPoolShare",
+                reason: "Invalid poolID bytes length.",
+              )
+              .asImmutableBytes,
       super(type: AssetType.poolShare);
   factory StellarAssetPoolShare.fromStruct(Map<String, dynamic> json) {
     return StellarAssetPoolShare(json.valueAs('poolId'));

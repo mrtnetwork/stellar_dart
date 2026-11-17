@@ -1,10 +1,12 @@
-import 'package:blockchain_utils/networks/types/network.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
+import 'suite_setup.dart';
 
 void main() {
+  setUpAll(initSuiteBackend);
   test('encodable provider params', () {
-    const param = HorizonRequestAccount("account!");
+    const param = HorizonRequestRetrieveAnAccount(accountId: "account!");
     final request = param.buildRequest(0);
     final deserialize = StellarRequestDetails.deserialize(
       bytes: request.toCbor().encode(),
@@ -20,7 +22,7 @@ void main() {
   });
 
   test('encodable provider params', () {
-    final param = SorobanRequestGetLatestLedger();
+    const param = StellarRpcRequestGetLatestLedger();
     final request = param.buildRequest(0);
     final deserialize = StellarRequestDetails.deserialize(
       bytes: request.toCbor().encode(),

@@ -1,24 +1,40 @@
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
-import 'package:test/test.dart' show test, expect;
+import 'package:test/test.dart' show test, expect, equals, setUpAll;
+
+import 'suite_setup.dart';
 
 void main() {
+  setUpAll(initSuiteBackend);
   test('Exception serialization', () {
+    BuErrorCodec.registerTypes(StellarErrorType.values);
     {
-      const error = DartStellarPlugingException(
+      const error = BuError(
+        StellarErrorType.plugin,
         "error",
         details: {"length": '32'},
       );
-      final decode = BaseDartStellarPlugingException.deserialize(
-        bytes: error.toCbor().encode(),
-      );
-      expect(decode, error);
+      final decode = BuErrorCodec.decode(bytes: error.toCborBytes());
+      expect(decode.type, StellarErrorType.plugin);
+      expect(decode.message, "error");
+      expect(decode.details, {"length": '32'});
     }
     {
-      const error = StellarAddressException("error", details: {"length": '32'});
-      final decode = BaseDartStellarPlugingException.deserialize(
-        bytes: error.toCbor().encode(),
+      const error = BuError(
+        StellarErrorType.address,
+        "error",
+        details: {"length": '32'},
       );
-      expect(decode, error);
+      final decode = BuErrorCodec.decode(bytes: error.toCborBytes());
+      expect(decode.type, StellarErrorType.address);
+      expect(decode.message, "error");
+    }
+    {
+      final ids = StellarErrorType.values.map((e) => e.id);
+      expect(ids.toSet().length, StellarErrorType.values.length);
+      for (final id in ids) {
+        expect(id > 258, equals(true));
+      }
     }
   });
 }
