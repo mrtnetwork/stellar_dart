@@ -1,10 +1,13 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(numberTest, 'Number');
+}
+
+void numberTest() {
   _price();
   _int256Parts();
 }

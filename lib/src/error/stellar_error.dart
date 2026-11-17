@@ -17,6 +17,6 @@ enum StellarErrorType implements BuErrorType {
 
   @override
   bool isValid(int? tag) {
-    return values.any((e) => e.id == tag);
+    return id == tag;
   }
 }

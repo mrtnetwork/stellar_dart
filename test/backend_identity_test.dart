@@ -1,8 +1,7 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
-import 'suite_setup.dart';
-import 'test_backend.dart';
+import 'utils.dart';
 
 /// Backend-identity pin: the suite must execute against the backend it
 /// claims. A run labeled `BU_BACKEND=ffi|wasm` silently falling back to
@@ -10,22 +9,21 @@ import 'test_backend.dart';
 /// backend-mislabeled green results.
 void backendIdentityTest() {
   test('backend identity matches BU_BACKEND', () {
-    // Same resolution as the harness (env/define, defaulting to Dart).
-    final requested = resolveSuiteBackend();
+    // Same resolution as the harness: explicit entry config first,
+    // then BU_BACKEND, then default (unset/empty → ffi on VM, dart on web).
+    final requested = StellarTestApi.resolvedBackend;
     final native = blockchainUtils.hasNativeBackend;
     expect(
       native,
       requested != BuTestBackend.dart,
-      reason:
-          requested == BuTestBackend.dart
-              ? 'BU_BACKEND resolves to pure Dart, but a native backend is active.'
-              : 'BU_BACKEND resolves to $requested, but no native backend is '
-                  'active. The suite would silently run on pure Dart.',
+      reason: requested == BuTestBackend.dart
+          ? 'BU_BACKEND resolves to pure Dart, but a native backend is active.'
+          : 'BU_BACKEND resolves to $requested, but no native backend is '
+              'active. The suite would silently run on pure Dart.',
     );
   });
 }
 
 void main() {
-  setUpAll(initSuiteBackend);
-  backendIdentityTest();
+  StellarTestApi.runTest(backendIdentityTest, 'BackendIdentity');
 }

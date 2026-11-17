@@ -8,7 +8,7 @@ import 'package:stellar_dart/src/provider/core/core.dart';
 import 'package:stellar_dart/src/provider/methods/horizon/methods.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/methods.dart';
 
-import '../models/api_models.dart';
+import 'package:stellar_dart/src/provider/api/models/api_models.dart';
 
 /// Quick client API: one method per top request, each mapped to the correct
 /// backend and returning a single unified result type.

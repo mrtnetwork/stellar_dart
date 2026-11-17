@@ -1,11 +1,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 /// Phase 1 / Steps 2-6: P30 XDR additions (stellar-xdr v30.0).
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(p30XdrTest, 'P30Xdr');
+}
+
+void p30XdrTest() {
 
   const contractIdHex =
       '3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a';

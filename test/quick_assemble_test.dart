@@ -1,12 +1,15 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 /// Phase 3: offline tests for transaction assembly (fake providers, no
 /// network) plus ledger-key and `ScVal` builders.
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(quickAssembleTest, 'QuickAssemble');
+}
+
+void quickAssembleTest() {
 
   const accountG = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
   const contractIdHex =

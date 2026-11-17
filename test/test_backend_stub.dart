@@ -1,5 +1,5 @@
 /// Browser-stub twin of `test_backend_io.dart` (same signatures).
-/// Imported only through the conditional import in `suite_setup.dart`.
+/// Imported only through the conditional import in `utils.dart`.
 library;
 
 bool ffiLibraryExists(String path) {

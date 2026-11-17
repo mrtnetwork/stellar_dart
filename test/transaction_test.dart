@@ -1,10 +1,13 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(transactionTest, 'Transaction');
+}
+
+void transactionTest() {
   _transaction();
 }
 

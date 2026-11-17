@@ -1,10 +1,10 @@
 name: Dart
 
-# Three backends: pure Dart (VM + browser) and Rust FFI (VM).
-# There are no WASM-backend test entries yet (no test/wasm_assets consumers),
-# so no wasm build job: `dart test -p chrome` exercises the pure-Dart suite
-# compiled to JS. The Rust crate is checked out from
-# mrtnetwork/blockchain-utils ($BU_RUST_CRATE) for the FFI job.
+# All four backends: pure Dart (VM + browser, dart2js + dart2wasm),
+# Rust FFI (VM), Rust WASM (browser). The Rust crate is checked out from
+# mrtnetwork/blockchain-utils ($BU_RUST_CRATE); the connector comes from
+# its git dependency and blockchain_utils from pub.dev (hosted ^8.0.1,
+# see pubspec.yaml) — no sibling checkout needed.
 on:
   push:
     branches: ["main"]
@@ -32,12 +32,6 @@ jobs:
         with:
           path: stellar_dart
 
-      - name: Checkout blockchain_utils (path dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: mrtnetwork/blockchain_utils
-          path: blockchain_utils
-
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
@@ -51,7 +45,7 @@ jobs:
 
       - name: Run tests (pure Dart)
         working-directory: stellar_dart
-        run: dart test test --timeout=5m
+        run: dart test test/one_shot_test.dart --timeout=5m
 
   ffi-vm:
     name: Rust FFI backend (VM)
@@ -64,12 +58,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: stellar_dart
-
-      - name: Checkout blockchain_utils (path dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: mrtnetwork/blockchain_utils
-          path: blockchain_utils
 
       - name: Checkout Rust crate
         uses: actions/checkout@v4
@@ -102,10 +90,10 @@ jobs:
 
       - name: Run tests (FFI)
         working-directory: stellar_dart
-        run: dart test test --timeout=5m
+        run: dart test test/one_shot_test.dart --timeout=5m
 
   dart-web:
-    name: Dart backend (browser)
+    name: Dart backend (browser, dart2js)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -113,12 +101,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: stellar_dart
-
-      - name: Checkout blockchain_utils (path dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: mrtnetwork/blockchain_utils
-          path: blockchain_utils
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -133,8 +115,106 @@ jobs:
             > /tmp/chrome-nosandbox.sh
           chmod +x /tmp/chrome-nosandbox.sh
 
-      - name: Run browser tests (pure Dart)
+      - name: Run browser tests (pure Dart, dart2js)
         working-directory: stellar_dart
         env:
           CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
-        run: dart test -p chrome test --timeout=20m
+        run: >
+          dart test -p chrome test/one_shot_browser_dart_test.dart
+          --timeout=20m
+
+  dart-web-wasm:
+    name: Dart backend (browser, dart2wasm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout stellar_dart
+        uses: actions/checkout@v4
+        with:
+          path: stellar_dart
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        working-directory: stellar_dart
+        run: dart pub get --no-example
+
+      - name: Chrome wrapper (no-sandbox)
+        run: |
+          printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox "$@"\n' \
+            > /tmp/chrome-nosandbox.sh
+          chmod +x /tmp/chrome-nosandbox.sh
+
+      - name: Run browser tests (pure Dart, dart2wasm)
+        working-directory: stellar_dart
+        env:
+          CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
+        run: >
+          dart test -p chrome -c dart2wasm test/one_shot_browser_dart_test.dart
+          --timeout=20m
+
+  wasm-web:
+    name: Rust WASM backend (browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout stellar_dart
+        uses: actions/checkout@v4
+        with:
+          path: stellar_dart
+
+      - name: Checkout Rust crate
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain-utils
+          path: rust-crate
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Setup Rust (wasm32)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rust-crate -> target"
+
+      - name: Install wasm-bindgen-cli (pinned to Cargo.toml)
+        run: |
+          BIN="${CARGO_HOME:-$HOME/.cargo}/bin/wasm-bindgen"
+          if [ -x "$BIN" ]; then "$BIN" --version; exit 0; fi
+          VER=$(sed -n 's/^wasm-bindgen = { version = "=\([0-9.]*\)".*/\1/p' "$BU_RUST_CRATE/Cargo.toml" | head -n 1)
+          if [ -z "$VER" ]; then
+            echo "cannot parse wasm-bindgen version from Cargo.toml"
+            exit 1
+          fi
+          cargo install wasm-bindgen-cli --version "$VER" --locked
+
+      - name: Install dependencies
+        working-directory: stellar_dart
+        run: dart pub get --no-example
+
+      - name: Build WASM assets into test/wasm_assets
+        # --force: always rebuild from the checked-out sources (never trust
+        # possibly-committed test/wasm_assets), then run the browser suites
+        # against that fresh build.
+        working-directory: stellar_dart
+        run: dart tool/build_backends.dart --wasm --force
+
+      - name: Chrome wrapper (no-sandbox)
+        run: |
+          printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox "$@"\n' \
+            > /tmp/chrome-nosandbox.sh
+          chmod +x /tmp/chrome-nosandbox.sh
+
+      - name: Run browser tests (WASM)
+        working-directory: stellar_dart
+        env:
+          CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
+        run: >
+          dart test -p chrome test/browser_wasm_test.dart
+          test/one_shot_browser_wasm_test.dart --timeout=20m

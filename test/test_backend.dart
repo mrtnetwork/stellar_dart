@@ -55,7 +55,11 @@ enum BuTestBackend {
   /// Rust backend over WASM (`setRustApi` + glue/module URLs). Browser only.
   wasm;
 
-  /// Parses `BU_BACKEND` values; unknown/empty → [ffi].
+  /// Parses `BU_BACKEND` values. Explicit `ffi`/`rust`/`native` stays [ffi]
+  /// (fails loudly on web); unset/empty defaults to [ffi] on the VM and
+  /// [dart] on web (`dart.library.io` is false there), so standalone
+  /// `dart test -p chrome test/...` files work without `BU_BACKEND`.
+  /// Unknown values → [ffi] (legacy).
   static BuTestBackend parse(String? value) {
     switch (value?.trim().toLowerCase()) {
       case 'dart':
@@ -68,9 +72,12 @@ enum BuTestBackend {
       case 'ffi':
       case 'rust':
       case 'native':
+        return BuTestBackend.ffi;
       case null:
       case '':
-        return BuTestBackend.ffi;
+        return const bool.fromEnvironment('dart.library.io')
+            ? BuTestBackend.ffi
+            : BuTestBackend.dart;
       default:
         return BuTestBackend.ffi;
     }

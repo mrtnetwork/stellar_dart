@@ -1,12 +1,15 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 /// Phase 1 / Step 1: CAP-84 muxed contract (`W`) addresses and the completed
 /// `ScAddress` union (6 arms per stellar-xdr v30.0).
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(scAddressP30Test, 'ScAddressP30');
+}
+
+void scAddressP30Test() {
 
   // Contract id from the SEP-23 examples; W vectors cross-checked with an
   // independent strkey implementation (version byte 22 << 3).

@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
+import 'utils.dart';
 
 /// Contract-spec parsing: WASM `contractspecv0` section walk + XDR entries.
 void main() {
+  StellarTestApi.runTest(contractSpecTest, 'ContractSpec');
+}
+
+void contractSpecTest() {
   List<int> leb(int v) {
     final out = <int>[];
     do {

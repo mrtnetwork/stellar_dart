@@ -1,11 +1,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
-import 'package:test/test.dart' show test, expect, equals, setUpAll;
+import 'package:test/test.dart' show test, expect, equals;
 
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(exceptionTest, 'Exception');
+}
+
+void exceptionTest() {
   test('Exception serialization', () {
     BuErrorCodec.registerTypes(StellarErrorType.values);
     {

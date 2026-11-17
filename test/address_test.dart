@@ -1,9 +1,12 @@
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(addressTest, 'Address');
+}
+
+void addressTest() {
   test("IAddress encoding", () {
     {
       final addr = StellarContractAddress(

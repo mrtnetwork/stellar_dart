@@ -1,7 +1,7 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/core/core.dart';
 
-import '../api/api.dart';
+import 'package:stellar_dart/src/provider/api/api/api.dart';
 
 /// Quick client: high-level Stellar calls with unified result types.
 ///

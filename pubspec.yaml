@@ -22,3 +22,7 @@ dev_dependencies:
   lints: ^6.0.0
   test: ^1.26.3
   flutter_lints: ^6.0.0
+  # Directly imported by test/utils.dart; hosted source matching
+  # blockchain_utils ^8.0.1 (single source; git+hosted for the same package
+  # fails version solving).
+  blockchain_utils_connector: ^0.1.1

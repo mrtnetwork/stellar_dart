@@ -1,10 +1,13 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(encodeRequestParamsTest, 'EncodeRequestParams');
+}
+
+void encodeRequestParamsTest() {
   test('encodable provider params', () {
     const param = HorizonRequestRetrieveAnAccount(accountId: "account!");
     final request = param.buildRequest(0);

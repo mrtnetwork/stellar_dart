@@ -2,10 +2,13 @@ import 'package:stellar_dart/src/address/address.dart';
 import 'package:stellar_dart/src/keypair/crypto/public_key.dart';
 import 'package:stellar_dart/src/models/ledger/base.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(assetsTest, 'Assets');
+}
+
+void assetsTest() {
   _asset();
 }
 

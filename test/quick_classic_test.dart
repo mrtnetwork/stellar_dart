@@ -1,7 +1,7 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/stellar_dart.dart';
 import 'package:test/test.dart';
-import 'suite_setup.dart';
+import 'utils.dart';
 
 /// Offline tests for the classic (non-Soroban) quick-client calls
 /// (fake providers, no network).
@@ -13,7 +13,10 @@ StellarAddress get _issuer => StellarAccountAddress(
 );
 
 void main() {
-  setUpAll(initSuiteBackend);
+  StellarTestApi.runTest(quickClassicTest, 'QuickClassic');
+}
+
+void quickClassicTest() {
 
   const accountG = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
   const issuerG = 'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ';
