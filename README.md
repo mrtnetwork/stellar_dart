@@ -94,6 +94,8 @@ live testnet (`tool/live_quick_test.dart`).
 
 ## Breaking changes
 
+- **All legacy exception classes removed — every error is `BuError`.** Failures throw `BuError` with a `StellarErrorType` taxonomy value (`domain: 'stellar'`: plugin, address). Update `catch` clauses and `on` filters to `BuError`.
+
 - Address types now inherit `IAddress` — `is` checks against the old concrete
   hierarchy and custom subclasses may need updating.
 - Horizon / Soroban RPC request and response models were regenerated from the

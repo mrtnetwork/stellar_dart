@@ -3,9 +3,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
-/// POST /getLatestLedger
-class StellarRpcRequestGetLatestLedger extends StellarRpcRequest<StellarRpcGetLatestLedgerResult, Map<String, dynamic>> {
 
+/// POST /getLatestLedger
+class StellarRpcRequestGetLatestLedger
+    extends
+        StellarRpcRequest<
+          StellarRpcGetLatestLedgerResult,
+          Map<String, dynamic>
+        > {
   const StellarRpcRequestGetLatestLedger();
 
   @override
@@ -19,8 +24,7 @@ class StellarRpcRequestGetLatestLedger extends StellarRpcRequest<StellarRpcGetLa
 
   @override
   dynamic body({JsonifyConfig config = DefaultJsonifyConfig.defaultConfig}) =>
-      config.encodeMap(<String, dynamic>{
-      });
+      config.encodeMap(<String, dynamic>{});
 
   @override
   StellarRpcGetLatestLedgerResult onResponse(Map<String, dynamic> result) {

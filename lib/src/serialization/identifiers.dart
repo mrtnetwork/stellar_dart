@@ -14,7 +14,10 @@ enum StellarSerializationIdentifiers implements SerializationIdentifier {
       (e) => e.id == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarSerializationIdentifiers found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarSerializationIdentifiers found for the given value. null",
+              ),
     );
   }
 

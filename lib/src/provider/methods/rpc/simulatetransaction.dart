@@ -3,8 +3,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
+
 /// POST /simulateTransaction
-class StellarRpcRequestSimulateTransaction extends StellarRpcRequest<StellarRpcSimulateTransactionResult, Map<String, dynamic>> {
+class StellarRpcRequestSimulateTransaction
+    extends
+        StellarRpcRequest<
+          StellarRpcSimulateTransactionResult,
+          Map<String, dynamic>
+        > {
   final String transaction;
   final StellarRpcSimulateTransactionParamsResourceConfig? resourceConfig;
   final String? xdrFormat;

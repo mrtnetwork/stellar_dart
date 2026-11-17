@@ -3,8 +3,10 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
+
 /// POST /getEvents
-class StellarRpcRequestGetEvents extends StellarRpcRequest<StellarRpcGetEventsResult, Map<String, dynamic>> {
+class StellarRpcRequestGetEvents
+    extends StellarRpcRequest<StellarRpcGetEventsResult, Map<String, dynamic>> {
   final num? startLedger;
   final num? endLedger;
   final List<StellarRpcGetEventsParamsFiltersItem>? filters;

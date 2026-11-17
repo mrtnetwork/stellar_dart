@@ -114,7 +114,10 @@ enum HorizonAssetBalanceChangeAssetCode {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonAssetBalanceChangeAssetCode found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonAssetBalanceChangeAssetCode found for the given value. null",
+              ),
     );
   }
 
@@ -137,7 +140,10 @@ enum HorizonAssetBalanceChangeType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonAssetBalanceChangeType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonAssetBalanceChangeType found for the given value. null",
+              ),
     );
   }
 
@@ -163,7 +169,10 @@ enum HorizonAsyncTransactionSubmissionResponseTxStatus {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonAsyncTransactionSubmissionResponseTxStatus found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonAsyncTransactionSubmissionResponseTxStatus found for the given value. null",
+              ),
     );
   }
 
@@ -185,7 +194,10 @@ enum HorizonBalanceLineAssetAssetType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonBalanceLineAssetAssetType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonBalanceLineAssetAssetType found for the given value. null",
+              ),
     );
   }
 
@@ -205,7 +217,10 @@ enum HorizonBalanceLineLiquidityPoolAssetType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonBalanceLineLiquidityPoolAssetType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonBalanceLineLiquidityPoolAssetType found for the given value. null",
+              ),
     );
   }
 
@@ -225,7 +240,10 @@ enum HorizonBalanceLineNativeAssetType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonBalanceLineNativeAssetType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonBalanceLineNativeAssetType found for the given value. null",
+              ),
     );
   }
 
@@ -292,7 +310,10 @@ enum HorizonEffectEmbeddedRecordsItemType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching HorizonEffectEmbeddedRecordsItemType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonEffectEmbeddedRecordsItemType found for the given value. null",
+              ),
     );
   }
 
@@ -311,7 +332,12 @@ enum HorizonIncludeFailed {
     final value = json;
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw const BuError(DefaultErrorType.notFound, "No matching HorizonIncludeFailed found for the given value. null"),
+      orElse:
+          () =>
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonIncludeFailed found for the given value. null",
+              ),
     );
   }
 
@@ -329,7 +355,12 @@ enum HorizonJoin {
     final value = json is String ? json : json?.toString();
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw const BuError(DefaultErrorType.notFound, "No matching HorizonJoin found for the given value. null"),
+      orElse:
+          () =>
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonJoin found for the given value. null",
+              ),
     );
   }
 
@@ -348,7 +379,12 @@ enum HorizonOrder {
     final value = json is String ? json : json?.toString();
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw const BuError(DefaultErrorType.notFound, "No matching HorizonOrder found for the given value. null"),
+      orElse:
+          () =>
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonOrder found for the given value. null",
+              ),
     );
   }
 
@@ -391,7 +427,12 @@ enum HorizonSignersType {
     final value = json is String ? json : json?.toString();
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw const BuError(DefaultErrorType.notFound, "No matching HorizonSignersType found for the given value. null"),
+      orElse:
+          () =>
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonSignersType found for the given value. null",
+              ),
     );
   }
 
@@ -411,7 +452,12 @@ enum HorizonTradeType {
     final value = json is String ? json : json?.toString();
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw const BuError(DefaultErrorType.notFound, "No matching HorizonTradeType found for the given value. null"),
+      orElse:
+          () =>
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching HorizonTradeType found for the given value. null",
+              ),
     );
   }
 
@@ -1150,9 +1196,8 @@ class HorizonClaimableBalanceFlags {
 
   Map<String, dynamic> toJson({
     JsonifyConfig config = DefaultJsonifyConfig.defaultConfig,
-  }) => config.encodeMap(<String, dynamic>{
-    'clawback_enabled': clawbackEnabled,
-  });
+  }) =>
+      config.encodeMap(<String, dynamic>{'clawback_enabled': clawbackEnabled});
 }
 
 /// GET /claimable_balances/{claimable_balance_id} (response)
@@ -1218,11 +1263,10 @@ class HorizonClaimableBalance {
                   .map((e) => HorizonClaimableBalanceClaimantsItem.fromJson(e))
                   .toList()
               : null,
-      flags: json
-          .valueTo<HorizonClaimableBalanceFlags?, Map<String, dynamic>>(
-            key: 'flags',
-            parse: (v) => HorizonClaimableBalanceFlags.fromJson(v),
-          ),
+      flags: json.valueTo<HorizonClaimableBalanceFlags?, Map<String, dynamic>>(
+        key: 'flags',
+        parse: (v) => HorizonClaimableBalanceFlags.fromJson(v),
+      ),
       pagingToken:
           (json['paging_token'] is num
               ? json['paging_token'].toString()
@@ -3919,11 +3963,10 @@ class HorizonClaimableBalancesEmbeddedRecordsItem {
                   .map((e) => HorizonClaimableBalanceClaimantsItem.fromJson(e))
                   .toList()
               : null,
-      flags: json
-          .valueTo<HorizonClaimableBalanceFlags?, Map<String, dynamic>>(
-            key: 'flags',
-            parse: (v) => HorizonClaimableBalanceFlags.fromJson(v),
-          ),
+      flags: json.valueTo<HorizonClaimableBalanceFlags?, Map<String, dynamic>>(
+        key: 'flags',
+        parse: (v) => HorizonClaimableBalanceFlags.fromJson(v),
+      ),
     );
   }
 

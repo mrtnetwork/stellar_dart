@@ -3,8 +3,11 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
+
 /// POST /getLedgers
-class StellarRpcRequestGetLedgers extends StellarRpcRequest<StellarRpcGetLedgersResult, Map<String, dynamic>> {
+class StellarRpcRequestGetLedgers
+    extends
+        StellarRpcRequest<StellarRpcGetLedgersResult, Map<String, dynamic>> {
   final num? startLedger;
   final StellarRpcGetEventsParamsPagination? pagination;
   final String? xdrFormat;

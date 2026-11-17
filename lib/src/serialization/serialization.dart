@@ -55,7 +55,8 @@ abstract class XDRVariantSerialization extends XDRSerialization {
     Map<String, dynamic> json,
   ) {
     if (json['key'] is! String || !json.containsKey('value')) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid variant layout. Only enum layouts can be deserialized with `XDRVariantSerialization.deserialize`.',
       );
     }
@@ -68,7 +69,8 @@ abstract class XDRVariantSerialization extends XDRSerialization {
   }) {
     final json = layout.deserialize(bytes).value;
     if (json['key'] is! String || !json.containsKey('value')) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid variant layout. Only enum layouts can be deserialized with `XDRVariantSerialization.deserialize`.',
       );
     }

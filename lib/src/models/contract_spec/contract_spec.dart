@@ -79,7 +79,8 @@ class ScSpecType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScSpecType not found.',
                 details: {
                   'name': name,
@@ -94,7 +95,8 @@ class ScSpecType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScSpecType not found.',
                 details: {
                   'value': value?.toString(),
@@ -407,7 +409,10 @@ class ScSpecTypeDef extends XDRVariantSerialization {
       case ScSpecType.udt:
         return ScSpecTypeDef.udt(ScSpecTypeUdt.fromStruct(decode.value));
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid ScSpecTypeDef.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid ScSpecTypeDef.',
+        );
     }
   }
 
@@ -883,7 +888,8 @@ class ScSpecUDTUnionCaseKind {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScSpecUDTUnionCaseKind not found.',
                 details: {'name': name},
               ),
@@ -918,7 +924,10 @@ class ScSpecUDTUnionCaseV0 extends XDRVariantSerialization {
           ScSpecUDTUnionCaseTupleV0.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid ScSpecUDTUnionCaseV0.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid ScSpecUDTUnionCaseV0.',
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1331,7 +1340,8 @@ class ScSpecEntryKind {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScSpecEntryKind not found.',
                 details: {'name': name},
               ),
@@ -1381,7 +1391,10 @@ class ScSpecEntry extends XDRVariantSerialization {
       case ScSpecEntryKind.eventV0:
         return ScSpecEntry.event(ScSpecEventV0.fromStruct(decode.value));
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid ScSpecEntry.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid ScSpecEntry.',
+        );
     }
   }
   static Layout<Map<String, dynamic>> layout({String? property}) {
@@ -1455,7 +1468,10 @@ class StellarContractSpec {
       final decoded = layout.deserialize(spec, offset: offset);
       entries.add(ScSpecEntry.fromStruct(decoded.value));
       if (decoded.consumed <= 0) {
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid contract spec entry.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid contract spec entry.',
+        );
       }
       offset += decoded.consumed;
     }
@@ -1485,7 +1501,10 @@ class StellarContractSpec {
         wasm[1] != 0x61 ||
         wasm[2] != 0x73 ||
         wasm[3] != 0x6d) {
-      throw const BuError(DefaultErrorType.invalidArgument, 'Invalid WASM bytes.');
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
+        'Invalid WASM bytes.',
+      );
     }
     final layout = LEB128U32OffsetLayout();
     var pos = 8;
@@ -1495,7 +1514,8 @@ class StellarContractSpec {
         pos += decode.consumed;
         return decode.value;
       } catch (_) {
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid WASM section: truncated LEB128 at offset $pos.',
         );
       }
@@ -1506,13 +1526,17 @@ class StellarContractSpec {
       final size = readLeb();
       final end = pos + size;
       if (end > wasm.length) {
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid WASM section.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid WASM section.',
+        );
       }
       if (sectionId == 0) {
         final nameLen = readLeb();
 
         if (pos + nameLen > end) {
-          throw BuError(DefaultErrorType.invalidArgument, 
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             'Invalid WASM section: name length $nameLen exceeds section end.',
           );
         }
@@ -1524,6 +1548,9 @@ class StellarContractSpec {
       }
       pos = end;
     }
-    throw const BuError(DefaultErrorType.notFound, 'Contract spec not found in WASM.');
+    throw const BuError(
+      DefaultErrorType.notFound,
+      'Contract spec not found in WASM.',
+    );
   }
 }

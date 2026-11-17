@@ -26,7 +26,8 @@ class StellarContractAddress extends StellarAddress {
         type: XlmAddrTypes.contract,
       );
     } catch (e, s) {
-      throw BuError(DefaultErrorType.invalidAddressBytes, 
+      throw BuError(
+        DefaultErrorType.invalidAddressBytes,
         'Invalid contract address bytes.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );
@@ -43,7 +44,8 @@ class StellarContractAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.contract) {
-        throw BuError(DefaultErrorType.invalidAddress, 
+        throw BuError(
+          DefaultErrorType.invalidAddress,
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.contract.name,
@@ -55,7 +57,8 @@ class StellarContractAddress extends StellarAddress {
     } on BuError {
       rethrow;
     } catch (e, s) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid Stellar contract address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );

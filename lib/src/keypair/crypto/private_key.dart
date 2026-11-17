@@ -37,11 +37,15 @@ class StellarPrivateKey with SecretState {
         addrType: XlmAddrTypes.privKey,
       );
       if (key.type != XlmAddrTypes.privKey) {
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid key type.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid key type.',
+        );
       }
       return StellarPrivateKey.fromBytes(key.pubKeyBytes);
     } catch (e) {
-      throw BuError(DefaultErrorType.badBase32, 
+      throw BuError(
+        DefaultErrorType.badBase32,
         'Invalid base32 secret key.',
         details: {'message': e.toString()},
       );

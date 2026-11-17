@@ -1,4 +1,7 @@
 ## 3.0.0
+- BREAKING: all legacy exception classes removed; every error is now `BuError` with a `StellarErrorType` taxonomy value.
+
+## 3.0.0
 - Stellar XDR v30.0: CAP-84 muxed-contract (`W…`) addresses with the completed 6-arm `ScAddress` union, `CreateContractArgsV2` + auth V2, `SorobanCredentials` addressV2 with delegates, `ContractExecutable` externalRef, `ContractCostType`, `StellarValue` ms arms (CAP-88), ML-DSA key classes (CAP-87, client side).
 - Contract addresses: added `StellarContractAddress` (`C…`) and `StellarMuxedContractAddress`.
 - Regenerated Horizon (OpenAPI) and Soroban RPC (OpenRPC) request/response models; validated against live testnet.

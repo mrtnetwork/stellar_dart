@@ -51,7 +51,8 @@ class StellarMuxedContractAddress extends StellarAddress {
         muxedAddress: muxedAddress,
       );
     } catch (e) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid contract id.',
         details: {'stack': e.toString()},
       );
@@ -69,7 +70,8 @@ class StellarMuxedContractAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.muxedContract) {
-        throw BuError(DefaultErrorType.invalidAddress, 
+        throw BuError(
+          DefaultErrorType.invalidAddress,
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.muxedContract.name,
@@ -85,7 +87,8 @@ class StellarMuxedContractAddress extends StellarAddress {
     } on BuError {
       rethrow;
     } catch (e, s) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid muxed contract address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );

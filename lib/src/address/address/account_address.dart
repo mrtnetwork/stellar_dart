@@ -28,7 +28,8 @@ class StellarAccountAddress extends StellarAddress {
         type: XlmAddrTypes.pubKey,
       );
     } catch (e, s) {
-      throw BuError(DefaultErrorType.badPublicKey, 
+      throw BuError(
+        DefaultErrorType.badPublicKey,
         'Invalid ED25519 public key bytes.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );
@@ -45,7 +46,8 @@ class StellarAccountAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.pubKey) {
-        throw BuError(DefaultErrorType.invalidAddress, 
+        throw BuError(
+          DefaultErrorType.invalidAddress,
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.pubKey.name,
@@ -57,7 +59,8 @@ class StellarAccountAddress extends StellarAddress {
     } on BuError {
       rethrow;
     } catch (e, s) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid Stellar ED25519 public key address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );

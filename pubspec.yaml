@@ -1,5 +1,5 @@
 name: stellar_dart
-description: A comprehensive library for interacting with the Stellar network, including support for operations, smart contracts, and wallet management.
+description: "Stellar SDK for Dart: transactions, multisig, Soroban contracts, and Horizon/RPC providers."
 version: 3.0.0
 homepage: "https://github.com/mrtnetwork/stellar_dart"
 repository: "https://github.com/mrtnetwork/stellar_dart"
@@ -17,9 +17,7 @@ environment:
 
 dependencies:
   # blockchain_utils: ^7.1.0
-  blockchain_utils:
-    git:
-      url: https://github.com/mrtnetwork/blockchain_utils
+  blockchain_utils: ^8.0.1
 dev_dependencies:
   lints: ^6.0.0
   test: ^1.26.3

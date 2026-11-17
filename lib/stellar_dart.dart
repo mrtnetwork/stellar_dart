@@ -3,4 +3,20 @@
 library;
 
 export 'src/stellar_dart.dart';
-export 'src/error/stellar_error.dart';
+export 'package:blockchain_utils/blockchain_utils.dart'
+    show
+        BuSerializableHash,
+        BuBytes,
+        BuAead,
+        SecretBytes,
+        SecretState,
+        BuHashApi,
+        BuError,
+        BuErrorType,
+        DefaultErrorType,
+        BuMoneroApi,
+        BuMoneroScanAccount,
+        BuMoneroScanOutput,
+        BuMoneroUnlockMatch,
+        BuConfig,
+        BuBuildFeature;

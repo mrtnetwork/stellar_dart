@@ -41,7 +41,8 @@ class ClaimAtomType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClaimAtom type not found.',
                 details: {
                   'name': name,
@@ -66,7 +67,8 @@ abstract class ClaimAtom extends XDRVariantSerialization {
       case ClaimAtomType.claimAtomTypeLiquidityPool:
         return ClaimLiquidityAtom.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ClaimAtom type.',
           details: {'type': type.name},
         );
@@ -115,12 +117,15 @@ class ClaimOfferAtomV0 extends ClaimAtom {
     required BigInt amountSold,
     required this.assetBought,
     required BigInt amountBought,
-  }) : sellerEd25519 = sellerEd25519.exc(
-         length: StellarConst.ed25519PubKeyLength,
-         name: 'sellerEd25519',
-         operation: "ClaimOfferAtomV0",
-         reason: "Invalid sellerEd25519 bytes length.",
-       ).asImmutableBytes,
+  }) : sellerEd25519 =
+           sellerEd25519
+               .exc(
+                 length: StellarConst.ed25519PubKeyLength,
+                 name: 'sellerEd25519',
+                 operation: "ClaimOfferAtomV0",
+                 reason: "Invalid sellerEd25519 bytes length.",
+               )
+               .asImmutableBytes,
        offerID = offerID.asI64,
        amountSold = amountSold.asI64,
        amountBought = amountBought.asI64,
@@ -248,12 +253,15 @@ class ClaimLiquidityAtom extends ClaimAtom {
     required BigInt amountSold,
     required this.assetBought,
     required BigInt amountBought,
-  }) : liquidityPoolID = liquidityPoolID.exc(
-         length: StellarConst.ed25519PubKeyLength,
-         name: 'liquidityPoolID',
-         operation: "ClaimLiquidityAtom",
-         reason: "Invalid liquidityPoolID bytes length.",
-       ).asImmutableBytes,
+  }) : liquidityPoolID =
+           liquidityPoolID
+               .exc(
+                 length: StellarConst.ed25519PubKeyLength,
+                 name: 'liquidityPoolID',
+                 operation: "ClaimLiquidityAtom",
+                 reason: "Invalid liquidityPoolID bytes length.",
+               )
+               .asImmutableBytes,
        amountSold = amountSold.asI64,
        amountBought = amountBought.asI64,
        super(ClaimAtomType.claimAtomTypeLiquidityPool);
@@ -339,7 +347,8 @@ class CreateAccountResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'CreateAccountResultCode not found.',
                 details: {
                   'name': name,
@@ -477,7 +486,8 @@ class PaymentResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'PaymentResultCode not found.',
                 details: {
                   'name': name,
@@ -647,7 +657,8 @@ class PathPaymentStrictReceiveResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -953,7 +964,8 @@ class ManageOfferEffectType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ManageOfferEffect type not found.',
                 details: {
                   'name': name,
@@ -978,7 +990,8 @@ abstract class ManageOfferEffect extends XDRVariantSerialization {
       case ManageOfferEffectType.manageOfferUpdated:
         return ManageOfferEffectUpdated.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ManageOfferEffect type.',
           details: {'type': type.name},
         );
@@ -1146,7 +1159,8 @@ class ManageSellOfferResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1443,7 +1457,8 @@ class SetOptionsResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1557,7 +1572,8 @@ class ChangeTrustResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1665,7 +1681,8 @@ class AllowTrustResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AllowTrustResultCode not found.',
                 details: {
                   'name': name,
@@ -1775,7 +1792,8 @@ class AccountMergeResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AccountMergeResultCode not found.',
                 details: {
                   'name': name,
@@ -1898,7 +1916,8 @@ class InflationResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'InflationResultCode not found.',
                 details: {
                   'name': name,
@@ -2067,7 +2086,8 @@ class ManageDataResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'BumpSequenceResultCode not found.',
                 details: {
                   'name': name,
@@ -2153,7 +2173,8 @@ class BumpSequenceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'BumpSequenceResultCode not found.',
                 details: {
                   'name': name,
@@ -2283,7 +2304,8 @@ class ManageBuyOfferResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ManageBuyOfferResultCode not found.',
                 details: {
                   'name': name,
@@ -2485,7 +2507,8 @@ class PathPaymentStrictSendResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'CreateClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2598,7 +2621,8 @@ class CreateClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'CreateClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2746,7 +2770,8 @@ class ClaimClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClaimClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -2839,7 +2864,8 @@ class EndSponsoringFutureReservesResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'EndSponsoringFutureReservesResultCode not found.',
                 details: {
                   'name': name,
@@ -2946,7 +2972,8 @@ class RevokeSponsorshipResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'RevokeSponsorshipResultCode not found.',
                 details: {
                   'name': name,
@@ -3049,7 +3076,8 @@ class ClawbackResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClawbackResultCode not found.',
                 details: {
                   'name': name,
@@ -3153,7 +3181,8 @@ class ClawbackClaimableBalanceResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClawbackClaimableBalanceResultCode not found.',
                 details: {
                   'name': name,
@@ -3254,7 +3283,8 @@ class SetTrustLineFlagsResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'SetTrustLineFlagsResultCode not found.',
                 details: {
                   'name': name,
@@ -3364,7 +3394,8 @@ class LiquidityPoolDepositResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'LiquidityPoolDepositResultCode not found.',
                 details: {
                   'name': name,
@@ -3474,7 +3505,8 @@ class LiquidityPoolWithdrawResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'LiquidityPoolWithdrawResultCode not found.',
                 details: {
                   'name': name,
@@ -3578,7 +3610,8 @@ class InvokeHostFunctionResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'InvokeHostFunctionResultCode not found.',
                 details: {
                   'name': name,
@@ -3655,12 +3688,15 @@ class InvokeHostFunctionResultVoid extends InvokeHostFunctionResult {
 class InvokeHostFunctionResultSuccess extends InvokeHostFunctionResult {
   final BuBytes success;
   InvokeHostFunctionResultSuccess(List<int> success)
-    : success = success.exc(
-        length: StellarConst.hash256Length,
-        name: 'success',
-        operation: "InvokeHostFunctionResultSuccess",
-        reason: "Invalid success bytes length.",
-      ).asImmutableBytes,
+    : success =
+          success
+              .exc(
+                length: StellarConst.hash256Length,
+                name: 'success',
+                operation: "InvokeHostFunctionResultSuccess",
+                reason: "Invalid success bytes length.",
+              )
+              .asImmutableBytes,
       super(InvokeHostFunctionResultCode.invokeHostFunctionSuccess);
   factory InvokeHostFunctionResultSuccess.fromStruct(
     Map<String, dynamic> json,
@@ -3716,7 +3752,8 @@ class ExtendFootprintTTLResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -3814,7 +3851,8 @@ class RestoreFootprintResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -3922,7 +3960,8 @@ class BeginSponsoringFutureReservesResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'BeginSponsoringFutureReservesResultCode not found.',
                 details: {
                   'name': name,
@@ -4090,7 +4129,8 @@ class TransactionResultType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'TransactionResultType not found.',
                 details: {
                   'name': name,
@@ -4155,7 +4195,8 @@ class OperationResultCode {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'OperationResultCode not found.',
                 details: {
                   'name': name,
@@ -4385,7 +4426,10 @@ class OperationResultOpInner extends OperationResult {
               property: type.name,
             );
           default:
-            throw const BuError(DefaultErrorType.invalidArgument, 'Invalid Operation type.');
+            throw const BuError(
+              DefaultErrorType.invalidArgument,
+              'Invalid Operation type.',
+            );
         }
       }),
       property: property,
@@ -4479,7 +4523,10 @@ class OperationResultOpInner extends OperationResult {
         inner = RestoreFootprintResult.fromStruct(decode.value);
         break;
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid Operation type.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid Operation type.',
+        );
     }
     return OperationResultOpInner(inner);
   }
@@ -4518,12 +4565,15 @@ class InnerTransactionResultPair extends TransactionResultCode {
   InnerTransactionResultPair({
     required this.result,
     required List<int> transactionHash,
-  }) : transactionHash = transactionHash.exc(
-         length: StellarConst.hash256Length,
-         name: 'transactionHash',
-         operation: "InnerTransactionResultPair",
-         reason: "Invalid transactionHash bytes length.",
-       ).asImmutableBytes,
+  }) : transactionHash =
+           transactionHash
+               .exc(
+                 length: StellarConst.hash256Length,
+                 name: 'transactionHash',
+                 operation: "InnerTransactionResultPair",
+                 reason: "Invalid transactionHash bytes length.",
+               )
+               .asImmutableBytes,
        super(code: TransactionResultType.txFeeBumpInnerFailed);
   factory InnerTransactionResultPair.fromStruct(Map<String, dynamic> json) {
     return InnerTransactionResultPair(

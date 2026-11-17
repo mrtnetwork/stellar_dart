@@ -65,7 +65,8 @@ class StellarHelper {
     final BigInt finalDenominator = denominators[1].toBigInt();
 
     if (finalNumerator == BigInt.zero || finalDenominator == BigInt.zero) {
-      throw BuError(DefaultErrorType.notFound, 
+      throw BuError(
+        DefaultErrorType.notFound,
         "Couldn't find approximation",
         details: {'price': price},
       );
@@ -83,7 +84,8 @@ class StellarHelper {
   }) {
     final codeBytes = StringUtils.encode(code);
     if (code.length > length) {
-      throw BuError(DefaultErrorType.invalidLength, 
+      throw BuError(
+        DefaultErrorType.invalidLength,
         'Invalid asset code length.',
         details: {
           'expected': length.toString(),
@@ -124,7 +126,8 @@ class StellarHelper {
     required AssetType type,
   }) {
     if (type == AssetType.native) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid asset type for issued asset: must not be native.",
       );
     }

@@ -38,9 +38,7 @@ dependencies:
   stellar_dart:
     path: ../
   # blockchain_utils: ^7.1.0
-  blockchain_utils:
-    git:
-      url: https://github.com/mrtnetwork/blockchain_utils
+  blockchain_utils: ^8.0.1
   http: ^1.2.2
 
 dev_dependencies:

@@ -29,7 +29,8 @@ class StellarAssetMetadata {
     try {
       return StellarProviderUtils.parseTomlCurrencies(toml);
     } catch (_) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         "Failed to parse Stellar TOML data: Invalid or unexpected format.",
       );
     }

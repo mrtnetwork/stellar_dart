@@ -28,7 +28,10 @@ enum StellarRpcGetEventsParamsFiltersItemType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcGetEventsParamsFiltersItemType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcGetEventsParamsFiltersItemType found for the given value. null",
+              ),
     );
   }
 
@@ -50,7 +53,10 @@ enum StellarRpcGetEventsResultEventsItemType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcGetEventsResultEventsItemType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcGetEventsResultEventsItemType found for the given value. null",
+              ),
     );
   }
 
@@ -73,7 +79,10 @@ enum StellarRpcGetTransactionResultStatus {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcGetTransactionResultStatus found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcGetTransactionResultStatus found for the given value. null",
+              ),
     );
   }
 
@@ -97,7 +106,10 @@ enum StellarRpcSendTransactionResultStatus {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcSendTransactionResultStatus found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcSendTransactionResultStatus found for the given value. null",
+              ),
     );
   }
 
@@ -120,7 +132,10 @@ enum StellarRpcSimulateTransactionParamsAuthMode {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcSimulateTransactionParamsAuthMode found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcSimulateTransactionParamsAuthMode found for the given value. null",
+              ),
     );
   }
 
@@ -145,7 +160,10 @@ enum StellarRpcSimulateTransactionResultStateChangesItemType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw const BuError(DefaultErrorType.notFound, "No matching StellarRpcSimulateTransactionResultStateChangesItemType found for the given value. null"),
+              throw const BuError(
+                DefaultErrorType.notFound,
+                "No matching StellarRpcSimulateTransactionResultStateChangesItemType found for the given value. null",
+              ),
     );
   }
 

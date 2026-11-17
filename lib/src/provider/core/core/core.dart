@@ -12,7 +12,8 @@ enum StellarAPIType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.invalidArgument, 
+              throw BuError(
+                DefaultErrorType.invalidArgument,
                 'Unknown StellarAPIType value "$value".',
               ),
     );

@@ -3,15 +3,18 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
+
 /// POST /getLedgerEntries
-class StellarRpcRequestGetLedgerEntries extends StellarRpcRequest<StellarRpcGetLedgerEntriesResult, Map<String, dynamic>> {
+class StellarRpcRequestGetLedgerEntries
+    extends
+        StellarRpcRequest<
+          StellarRpcGetLedgerEntriesResult,
+          Map<String, dynamic>
+        > {
   final List<String> keys;
   final String? xdrFormat;
 
-  const StellarRpcRequestGetLedgerEntries({
-    required this.keys,
-    this.xdrFormat,
-  });
+  const StellarRpcRequestGetLedgerEntries({required this.keys, this.xdrFormat});
 
   @override
   String? get path => null;
@@ -24,10 +27,7 @@ class StellarRpcRequestGetLedgerEntries extends StellarRpcRequest<StellarRpcGetL
 
   @override
   dynamic body({JsonifyConfig config = DefaultJsonifyConfig.defaultConfig}) =>
-      config.encodeMap(<String, dynamic>{
-        'keys': keys,
-        'xdrFormat': xdrFormat,
-      });
+      config.encodeMap(<String, dynamic>{'keys': keys, 'xdrFormat': xdrFormat});
 
   @override
   StellarRpcGetLedgerEntriesResult onResponse(Map<String, dynamic> result) {

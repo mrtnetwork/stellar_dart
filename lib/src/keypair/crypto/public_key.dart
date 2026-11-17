@@ -27,7 +27,8 @@ class StellarPublicKey extends XDRSerialization with Equality {
   factory StellarPublicKey.fromAddress(StellarAddress address) {
     if (address.type != XlmAddrTypes.pubKey &&
         address.type != XlmAddrTypes.muxed) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to `StellarPublicKey`.',
         details: {'type': address.type.name},
       );
@@ -52,7 +53,8 @@ class StellarPublicKey extends XDRSerialization with Equality {
   factory StellarPublicKey.fromStruct(Map<String, dynamic> json) {
     final int type = json.valueAs('type');
     if (type != 0) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid StellarPublicKey XDR bytes.',
       );
     }
@@ -95,7 +97,8 @@ class StellarPublicKey extends XDRSerialization with Equality {
   BuBytes hint() {
     final bytes = toBytes();
     if (bytes.length < StellarConst.pubkeyHintBytesLength) {
-      throw BuError(DefaultErrorType.invalidLength, 
+      throw BuError(
+        DefaultErrorType.invalidLength,
         'Invalid public key: expected at least ${StellarConst.pubkeyHintBytesLength} bytes, received ${bytes.length}.',
       );
     }

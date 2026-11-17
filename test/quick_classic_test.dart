@@ -15,10 +15,8 @@ StellarAddress get _issuer => StellarAccountAddress(
 void main() {
   setUpAll(initSuiteBackend);
 
-  const accountG =
-      'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
-  const issuerG =
-      'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ';
+  const accountG = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
+  const issuerG = 'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ';
 
   HorizonAccountEmbeddedRecordsItem fakeAccount({
     String sequence = '41',
@@ -79,30 +77,35 @@ void main() {
     return DefaultStellarQuickClient(
       horizonProvider: _FakeProvider(horizon),
       rpcProvider: _FakeProvider({
-        StellarRpcRequestGetNetwork: () => StellarRpcGetNetworkResult(
-          passphrase: StellarNetwork.testnet.passphrase,
-          protocolVersion: 29,
-        ),
+        StellarRpcRequestGetNetwork:
+            () => StellarRpcGetNetworkResult(
+              passphrase: StellarNetwork.testnet.passphrase,
+              protocolVersion: 29,
+            ),
         ...rpc,
       }),
     );
   }
 
   test('parseBalanceToStroops converts decimal XLM', () {
-    expect(StellarQuickClientApi.parseBalanceToStroops('1.5'), BigInt.from(15000000));
+    expect(
+      StellarQuickClientApi.parseBalanceToStroops('1.5'),
+      BigInt.from(15000000),
+    );
     expect(StellarQuickClientApi.parseBalanceToStroops('0'), BigInt.zero);
   });
 
   test('getNativeBalance sums native lines only', () async {
     final quick = quickWith(
       horizon: {
-        HorizonRequestRetrieveAnAccount: () => fakeAccount(
-          balances: [
-            nativeLine('1.5'),
-            assetLine(balance: '10', code: 'USDC', issuer: issuerG),
-            nativeLine('0.5'),
-          ],
-        ),
+        HorizonRequestRetrieveAnAccount:
+            () => fakeAccount(
+              balances: [
+                nativeLine('1.5'),
+                assetLine(balance: '10', code: 'USDC', issuer: issuerG),
+                nativeLine('0.5'),
+              ],
+            ),
       },
     );
     expect(await quick.getNativeBalance(_account), BigInt.from(20000000));
@@ -111,11 +114,13 @@ void main() {
   test('getNativeBalance is zero for missing accounts', () async {
     final quick = quickWith(
       horizon: {
-        HorizonRequestRetrieveAnAccount: () => throw const RPCError(
-          message: 'Not found',
-          statusCode: 404,
-          relatedNetwork: BlockchainNetwork.stellar,
-        ),
+        HorizonRequestRetrieveAnAccount:
+            () =>
+                throw const RPCError(
+                  message: 'Not found',
+                  statusCode: 404,
+                  relatedNetwork: BlockchainNetwork.stellar,
+                ),
       },
     );
     expect(await quick.getNativeBalance(_account), BigInt.zero);
@@ -124,12 +129,13 @@ void main() {
   test('getAssetBalance matches code and issuer', () async {
     final quick = quickWith(
       horizon: {
-        HorizonRequestRetrieveAnAccount: () => fakeAccount(
-          balances: [
-            nativeLine('1.5'),
-            assetLine(balance: '10.25', code: 'USDC', issuer: issuerG),
-          ],
-        ),
+        HorizonRequestRetrieveAnAccount:
+            () => fakeAccount(
+              balances: [
+                nativeLine('1.5'),
+                assetLine(balance: '10.25', code: 'USDC', issuer: issuerG),
+              ],
+            ),
       },
     );
     expect(
@@ -176,11 +182,13 @@ void main() {
   test('buildClassicTransaction throws for missing accounts', () async {
     final quick = quickWith(
       horizon: {
-        HorizonRequestRetrieveAnAccount: () => throw const RPCError(
-          message: 'Not found',
-          statusCode: 404,
-          relatedNetwork: BlockchainNetwork.stellar,
-        ),
+        HorizonRequestRetrieveAnAccount:
+            () =>
+                throw const RPCError(
+                  message: 'Not found',
+                  statusCode: 404,
+                  relatedNetwork: BlockchainNetwork.stellar,
+                ),
       },
     );
     await expectLater(
@@ -196,10 +204,8 @@ void main() {
   test('submitChecked returns the hash on success', () async {
     final quick = quickWith(
       horizon: {
-        HorizonRequestSubmitATransaction: () => HorizonTransaction2(
-          hash: 'ab' * 32,
-          successful: true,
-        ),
+        HorizonRequestSubmitATransaction:
+            () => HorizonTransaction2(hash: 'ab' * 32, successful: true),
       },
     );
     expect(await quick.submitChecked('e30='), 'ab' * 32);
@@ -208,25 +214,19 @@ void main() {
   test('submitChecked throws on failure responses', () async {
     final failed = quickWith(
       horizon: {
-        HorizonRequestSubmitATransaction: () =>
-            HorizonTransaction2(hash: 'ab' * 32, successful: false),
+        HorizonRequestSubmitATransaction:
+            () => HorizonTransaction2(hash: 'ab' * 32, successful: false),
       },
     );
-    await expectLater(
-      failed.submitChecked('e30='),
-      throwsA(isA<BuError>()),
-    );
+    await expectLater(failed.submitChecked('e30='), throwsA(isA<BuError>()));
 
     final hashless = quickWith(
       horizon: {
-        HorizonRequestSubmitATransaction: () =>
-            const HorizonTransaction2(successful: true),
+        HorizonRequestSubmitATransaction:
+            () => const HorizonTransaction2(successful: true),
       },
     );
-    await expectLater(
-      hashless.submitChecked('e30='),
-      throwsA(isA<BuError>()),
-    );
+    await expectLater(hashless.submitChecked('e30='), throwsA(isA<BuError>()));
   });
 
   test('trackHorizonTransaction completes and times out', () async {
@@ -250,10 +250,8 @@ void main() {
 
     final failed = quickWith(
       horizon: {
-        HorizonRequestRetrieveATransaction: () => HorizonTransaction2(
-          hash: 'ab' * 32,
-          successful: false,
-        ),
+        HorizonRequestRetrieveATransaction:
+            () => HorizonTransaction2(hash: 'ab' * 32, successful: false),
       },
     );
     await expectLater(
@@ -266,10 +264,8 @@ void main() {
 
     final never = quickWith(
       horizon: {
-        HorizonRequestRetrieveATransaction: () => HorizonTransaction2(
-          hash: 'ab' * 32,
-          successful: null,
-        ),
+        HorizonRequestRetrieveATransaction:
+            () => HorizonTransaction2(hash: 'ab' * 32, successful: null),
       },
     );
     await expectLater(
@@ -286,8 +282,8 @@ void main() {
     final quick = quickWith(
       horizon: const {},
       rpc: {
-        StellarRpcRequestGetLatestLedger: () =>
-            const StellarRpcGetLatestLedgerResult(sequence: 123),
+        StellarRpcRequestGetLatestLedger:
+            () => const StellarRpcGetLatestLedgerResult(sequence: 123),
       },
     );
     expect(await quick.latestLedgerSequence(), 123);

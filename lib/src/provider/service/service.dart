@@ -25,7 +25,8 @@ mixin StellarServiceProvider
     request,
     Duration? timeout,
   }) {
-    throw const BuError(DefaultErrorType.unsupported, 
+    throw const BuError(
+      DefaultErrorType.unsupported,
       "Subscription requests are not supported by this service.",
     );
   }
@@ -35,7 +36,8 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw const BuError(DefaultErrorType.unsupported, 
+    throw const BuError(
+      DefaultErrorType.unsupported,
       "gRPC requests are not supported by this service.",
     );
   }
@@ -45,7 +47,8 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw const BuError(DefaultErrorType.unsupported, 
+    throw const BuError(
+      DefaultErrorType.unsupported,
       "gRPC requests are not supported by this service.",
     );
   }
@@ -55,7 +58,8 @@ mixin StellarServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw const BuError(DefaultErrorType.unsupported, 
+    throw const BuError(
+      DefaultErrorType.unsupported,
       "gRPC requests are not supported by this service.",
     );
   }

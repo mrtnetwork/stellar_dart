@@ -16,7 +16,8 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 
 import 'test_backend.dart';
 import 'test_backend_stub.dart'
-    if (dart.library.io) 'test_backend_io.dart' as backend_io;
+    if (dart.library.io) 'test_backend_io.dart'
+    as backend_io;
 
 /// Selects the backend for the current suite. VM default is the pure-Dart
 /// backend (zero setup); pass `BU_BACKEND=ffi` for the Rust backend (the

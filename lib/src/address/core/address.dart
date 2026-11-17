@@ -22,7 +22,8 @@ abstract class StellarAddress
       case XlmAddrTypes.contract:
         return StellarContractAddress(address);
       case XlmAddrTypes.privKey:
-        throw const BuError(StellarErrorType.address, 
+        throw const BuError(
+          StellarErrorType.address,
           'Invalid address type. For secret key, please use `StellarPrivateKey.fromBase32`.',
         );
     }
@@ -54,7 +55,8 @@ abstract class StellarAddress
       case XlmAddrTypes.contract:
         return StellarContractAddress.fromBytes(values.rawValueAt(1));
       case XlmAddrTypes.privKey:
-        throw const BuError(StellarErrorType.address, 
+        throw const BuError(
+          StellarErrorType.address,
           'Invalid address type. For secret key, please use `StellarPrivateKey.fromBase32`.',
         );
     }
@@ -82,7 +84,8 @@ abstract class StellarAddress
 
   T cast<T extends StellarAddress>() {
     if (this is! T) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Address casting failed.',
         details: {'expected': '$T', 'address': runtimeType.toString()},
       );

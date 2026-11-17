@@ -8,8 +8,7 @@ import 'suite_setup.dart';
 void main() {
   setUpAll(initSuiteBackend);
 
-  const accountG =
-      'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
+  const accountG = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
   const contractIdHex =
       '3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a';
   const wOne =
@@ -105,10 +104,11 @@ void main() {
     return DefaultStellarQuickClient(
       horizonProvider: _FakeProvider(horizon),
       rpcProvider: _FakeProvider({
-        StellarRpcRequestGetNetwork: () => StellarRpcGetNetworkResult(
-          passphrase: StellarNetwork.testnet.passphrase,
-          protocolVersion: 29,
-        ),
+        StellarRpcRequestGetNetwork:
+            () => StellarRpcGetNetworkResult(
+              passphrase: StellarNetwork.testnet.passphrase,
+              protocolVersion: 29,
+            ),
         ...rpc,
       }),
     );
@@ -123,12 +123,13 @@ void main() {
     expect(assembled.needsRestore, isFalse);
     expect(assembled.minResourceFee, '1000');
 
-    final envelope = Envelope.fromXdr(
-      StringUtils.encode(
-        assembled.envelopeBase64,
-        encoding: StringEncoding.base64,
-      ),
-    ).cast<TransactionV1Envelope>();
+    final envelope =
+        Envelope.fromXdr(
+          StringUtils.encode(
+            assembled.envelopeBase64,
+            encoding: StringEncoding.base64,
+          ),
+        ).cast<TransactionV1Envelope>();
     // base fee 100 + resource fee 1000.
     expect(envelope.tx.fee, 1100);
     final body =
@@ -163,11 +164,10 @@ void main() {
       minResourceFee: sim.minResourceFee,
       results: sim.results,
       transactionData: sim.transactionData,
-      restorePreamble:
-          const StellarRpcSimulateTransactionResultRestorePreamble(
-            minResourceFee: '200',
-            transactionData: '',
-          ),
+      restorePreamble: const StellarRpcSimulateTransactionResultRestorePreamble(
+        minResourceFee: '200',
+        transactionData: '',
+      ),
     );
     final assembled = await quick.assembleTransaction(
       unsignedEnvelopeBase64: unsignedInvokeEnvelope(),
@@ -182,17 +182,17 @@ void main() {
     final txData = sampleTxData();
     final envelopeBase64 = await quick.buildRestoreTransaction(
       source: StellarAccountAddress(accountG),
-      preamble:
-          StellarRpcSimulateTransactionResultRestorePreamble(
-            minResourceFee: '200',
-            transactionData: txData,
-          ),
+      preamble: StellarRpcSimulateTransactionResultRestorePreamble(
+        minResourceFee: '200',
+        transactionData: txData,
+      ),
       seqNum: BigInt.from(42),
       fee: 300,
     );
-    final envelope = Envelope.fromXdr(
-      StringUtils.encode(envelopeBase64, encoding: StringEncoding.base64),
-    ).cast<TransactionV1Envelope>();
+    final envelope =
+        Envelope.fromXdr(
+          StringUtils.encode(envelopeBase64, encoding: StringEncoding.base64),
+        ).cast<TransactionV1Envelope>();
     expect(envelope.tx.seqNum, BigInt.from(42));
     expect(envelope.tx.fee, 500);
     expect(
@@ -242,10 +242,7 @@ void main() {
       DefaultStellarQuickClient(
         horizonProvider: _FakeProvider(const {}),
         rpcProvider: _FakeProvider(const {}),
-      ).ledgerKeyForTrustline(
-        account: account,
-        asset: StellarAssetNative(),
-      ),
+      ).ledgerKeyForTrustline(account: account, asset: StellarAssetNative()),
       DefaultStellarQuickClient(
         horizonProvider: _FakeProvider(const {}),
         rpcProvider: _FakeProvider(const {}),
@@ -257,9 +254,7 @@ void main() {
       DefaultStellarQuickClient(
         horizonProvider: _FakeProvider(const {}),
         rpcProvider: _FakeProvider(const {}),
-      ).ledgerKeyForClaimableBalance(
-        ClaimableBalanceIdV0(contractId),
-      ),
+      ).ledgerKeyForClaimableBalance(ClaimableBalanceIdV0(contractId)),
       DefaultStellarQuickClient(
         horizonProvider: _FakeProvider(const {}),
         rpcProvider: _FakeProvider(const {}),
@@ -268,8 +263,7 @@ void main() {
         horizonProvider: _FakeProvider(const {}),
         rpcProvider: _FakeProvider(const {}),
       ).ledgerKeyForContractData(
-        contract:
-            StellarContractAddress.fromBytes(contractId).toScAddress(),
+        contract: StellarContractAddress.fromBytes(contractId).toScAddress(),
         key: StellarScVal.symbol('k'),
       ),
       DefaultStellarQuickClient(
@@ -280,9 +274,9 @@ void main() {
     expect(keys, hasLength(8));
     for (final k in keys) {
       final decoded = LedgerKey.fromStruct(
-        LedgerKey.layout().deserialize(
-          StringUtils.encode(k, encoding: StringEncoding.base64),
-        ).value,
+        LedgerKey.layout()
+            .deserialize(StringUtils.encode(k, encoding: StringEncoding.base64))
+            .value,
       );
       expect(decoded.toVariantXDRBase64(), k);
     }

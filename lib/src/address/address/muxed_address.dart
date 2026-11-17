@@ -62,7 +62,8 @@ class StellarMuxedAddress extends StellarAddress {
         muxedAddress: muxedAddress,
       );
     } catch (e) {
-      throw BuError(DefaultErrorType.badPublicKey, 
+      throw BuError(
+        DefaultErrorType.badPublicKey,
         'Invalid public key.',
         details: {'stack': e.toString()},
       );
@@ -78,7 +79,8 @@ class StellarMuxedAddress extends StellarAddress {
     try {
       final decode = XlmAddrDecoder().decode(address);
       if (decode.type != XlmAddrTypes.muxed) {
-        throw BuError(DefaultErrorType.invalidAddress, 
+        throw BuError(
+          DefaultErrorType.invalidAddress,
           'Incorrect address type.',
           details: {
             'expected': XlmAddrTypes.muxed.name,
@@ -95,7 +97,8 @@ class StellarMuxedAddress extends StellarAddress {
     } on BuError {
       rethrow;
     } catch (e, s) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid Muxed address.',
         details: {'error': e.toString(), 'stack': s.toString()},
       );

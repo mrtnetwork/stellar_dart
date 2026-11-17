@@ -3,9 +3,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
-/// POST /getVersionInfo
-class StellarRpcRequestGetVersionInfo extends StellarRpcRequest<StellarRpcGetVersionInfoResult, Map<String, dynamic>> {
 
+/// POST /getVersionInfo
+class StellarRpcRequestGetVersionInfo
+    extends
+        StellarRpcRequest<
+          StellarRpcGetVersionInfoResult,
+          Map<String, dynamic>
+        > {
   const StellarRpcRequestGetVersionInfo();
 
   @override
@@ -19,8 +24,7 @@ class StellarRpcRequestGetVersionInfo extends StellarRpcRequest<StellarRpcGetVer
 
   @override
   dynamic body({JsonifyConfig config = DefaultJsonifyConfig.defaultConfig}) =>
-      config.encodeMap(<String, dynamic>{
-      });
+      config.encodeMap(<String, dynamic>{});
 
   @override
   StellarRpcGetVersionInfoResult onResponse(Map<String, dynamic> result) {

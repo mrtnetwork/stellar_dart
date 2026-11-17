@@ -3,8 +3,14 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:stellar_dart/src/provider/methods/rpc/core.dart';
 import 'types.dart';
+
 /// POST /getTransactions
-class StellarRpcRequestGetTransactions extends StellarRpcRequest<StellarRpcGetTransactionsResult, Map<String, dynamic>> {
+class StellarRpcRequestGetTransactions
+    extends
+        StellarRpcRequest<
+          StellarRpcGetTransactionsResult,
+          Map<String, dynamic>
+        > {
   final num? startLedger;
   final StellarRpcGetEventsParamsPagination? pagination;
   final String? xdrFormat;

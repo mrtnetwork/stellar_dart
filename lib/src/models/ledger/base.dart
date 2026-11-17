@@ -62,7 +62,8 @@ class LedgerEntryType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'LedgerEntry type not found.',
                 details: {
                   'name': name,
@@ -110,7 +111,8 @@ abstract class LedgerEntryData extends XDRVariantSerialization {
       case LedgerEntryType.ttl:
         return TTLEntry.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid LedgerEntry type.',
           details: {'type': type.name},
         );
@@ -182,7 +184,8 @@ abstract class LedgerEntryData extends XDRVariantSerialization {
               index: type.value,
             );
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid LedgerEntry type.',
               details: {'type': type.name},
             );
@@ -451,7 +454,8 @@ class AccountEntryExtensionV3Ext extends XDRVariantSerialization {
           v3: AccountEntryExtensionV3.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid AccountEntryExtensionV3Ext extension.',
         );
     }
@@ -525,7 +529,8 @@ class AccountEntryExtensionV2 extends XDRSerialization {
               final data = Map<String, dynamic>.from(e);
               return StellarPublicKey.fromStruct(data);
             } catch (e, s) {
-              throw BuError(DefaultErrorType.invalidArgument, 
+              throw BuError(
+                DefaultErrorType.invalidArgument,
                 'Incorrect value.',
                 details: {
                   'key': 'signerSponsoringIDs',
@@ -594,7 +599,8 @@ class AccountEntryExtensionV2Ext extends XDRVariantSerialization {
           v2: AccountEntryExtensionV2.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid AccountEntryExtensionV2 extension.',
         );
     }
@@ -695,7 +701,8 @@ class AccountEntryExt extends XDRVariantSerialization {
           v1: AccountEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid AccountEntry extension.',
         );
     }
@@ -790,7 +797,8 @@ class TrustLineEntryV2Ext extends XDRVariantSerialization {
           v2: TrustLineEntryExtensionV2.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid TrustLineEntryExtensionV2 extension.',
         );
     }
@@ -882,7 +890,8 @@ class TrustLineEntryExt extends XDRVariantSerialization {
       case ExtensionPointType.extArgs1:
         return TrustLineEntryExt(v1: TrustLineEntryV1.fromStruct(decode.value));
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid TrustLineEntryV1 extension.',
         );
     }
@@ -1245,7 +1254,8 @@ class ClaimableBalanceEntryExt extends XDRVariantSerialization {
           v1: ClaimableBalanceEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid TrustLineEntryV1 extension.',
         );
     }
@@ -1304,7 +1314,8 @@ class ClaimableBalanceIdType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClaimableBalanceId not found.',
                 details: {
                   'name': name,
@@ -1331,7 +1342,8 @@ abstract class ClaimableBalanceId extends XDRVariantSerialization {
       case ClaimableBalanceIdType.v0:
         return ClaimableBalanceIdV0.fromStruct(decode.value);
       default:
-        throw BuError(StellarErrorType.address, 
+        throw BuError(
+          StellarErrorType.address,
           'Invalid ClaimableBalanceId type.',
           details: {'type': type.name},
         );
@@ -1398,7 +1410,8 @@ class ClaimantType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Claimant type not found.',
                 details: {
                   'name': name,
@@ -1430,7 +1443,8 @@ abstract class Claimant extends XDRVariantSerialization {
       case ClaimantType.v0:
         return ClaimantV0.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid Claimant type.',
           details: {'type': type.name},
         );
@@ -1528,7 +1542,8 @@ class ClaimPredicateType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ClaimPredicate type not found.',
                 details: {
                   'name': name,
@@ -1564,7 +1579,8 @@ abstract class ClaimPredicate extends XDRVariantSerialization {
       case ClaimPredicateType.beforeRelativeTime:
         return ClaimPredicateBeforeRelativeTime.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ClaimPredicate type.',
           details: {'type': type.name},
         );
@@ -1613,7 +1629,8 @@ abstract class ClaimPredicate extends XDRVariantSerialization {
             );
 
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid ClaimPredicate type.',
               details: {'type': type.name},
             );
@@ -1893,7 +1910,8 @@ class LiquidityPoolType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'LiquidityPool type not found.',
                 details: {
                   'name': name,
@@ -1919,7 +1937,8 @@ abstract class LiquidityPoolEntryBody extends XDRVariantSerialization {
       case LiquidityPoolType.liquidityPoolConstantProduct:
         return LiquidityPoolEntryConstantProduct.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid LiquidityPool type.',
           details: {'type': type.name},
         );
@@ -2143,7 +2162,8 @@ class ScAddressType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScAddress type not found.',
                 details: {
                   'name': name,
@@ -2174,7 +2194,8 @@ abstract class ScAddress extends XDRVariantSerialization {
       case XlmAddrTypes.muxedContract:
         return ScAddressMuxedContract.fromAddress(address.cast());
       default:
-        throw BuError(StellarErrorType.address, 
+        throw BuError(
+          StellarErrorType.address,
           'Invalid address type.',
           details: {'type': address.type.name},
         );
@@ -2213,7 +2234,8 @@ abstract class ScAddress extends XDRVariantSerialization {
       case ScAddressType.muxedContract:
         return ScAddressMuxedContract.fromStruct(decode.value);
       default:
-        throw BuError(StellarErrorType.address, 
+        throw BuError(
+          StellarErrorType.address,
           'Invalid ScAddress type.',
           details: {'type': type.name},
         );
@@ -2411,7 +2433,8 @@ class ScAddressClaimableBalance extends ScAddress {
 
   @override
   StellarAddress get address {
-    throw const BuError(DefaultErrorType.notFound, 
+    throw const BuError(
+      DefaultErrorType.notFound,
       'Claimable balance ScAddress has no classic address mapping.',
     );
   }
@@ -2454,7 +2477,8 @@ class ScAddressLiquidityPool extends ScAddress {
 
   @override
   StellarAddress get address {
-    throw const BuError(DefaultErrorType.notFound, 
+    throw const BuError(
+      DefaultErrorType.notFound,
       'Liquidity pool ScAddress has no classic address mapping.',
     );
   }
@@ -2597,7 +2621,8 @@ class ScValueType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScValue type not found.',
                 details: {
                   'name': name,
@@ -2696,13 +2721,15 @@ abstract class ScVal<T> extends XDRVariantSerialization {
         val = ScValNonceKey.fromStruct(decode.value);
         break;
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ScVal type.',
           details: {'type': type.name},
         );
     }
     if (val is! ScVal<T>) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Incorrect ScVal type casting.',
         details: {'expected': '$T', 'ScVal': val.runtimeType.toString()},
       );
@@ -2848,7 +2875,8 @@ abstract class ScVal<T> extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid ScVal type.',
               details: {'type': type.name},
             );
@@ -2868,7 +2896,8 @@ abstract class ScVal<T> extends XDRVariantSerialization {
 
   E cast<E extends ScVal>() {
     if (this is! E) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'ScVal casting failed.',
         details: {'expected': '$E', 'type': '$runtimeType'},
       );
@@ -2910,7 +2939,8 @@ class ScErrorType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ScError type not found.',
                 details: {
                   'name': name,
@@ -2999,7 +3029,8 @@ class ScErrorCode extends ScError {
   ScErrorCode._(super.code);
   factory ScErrorCode(ScErrorType code) {
     if (code == ScErrorType.contract) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         'Use `ScErrorContract` instead `ScErrorCode` for user-defined error code.',
       );
     }
@@ -3195,12 +3226,14 @@ class UInt128Parts extends XDRSerialization {
   factory UInt128Parts.fromNumber(BigInt number) {
     if (number.isNegative || number.bitLength > 128) {
       if (number.isNegative) {
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid Unsigned int.',
           details: {'number': number.toString()},
         );
       }
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -3246,7 +3279,8 @@ class Int128Parts extends XDRSerialization {
       lo = lo.asU64;
   factory Int128Parts.fromNumber(BigInt number) {
     if (number.bitLength > 128) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -3312,12 +3346,14 @@ class UInt256Parts extends XDRSerialization {
   factory UInt256Parts.fromNumber(BigInt number) {
     if (number.isNegative || number.bitLength > 256) {
       if (number.isNegative) {
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid Unsigned int.',
           details: {'number': number.toString()},
         );
       }
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Number is to large for `Int256Parts`',
         details: {'number': number.toString()},
       );
@@ -3387,7 +3423,8 @@ class Int256Parts extends XDRSerialization {
   }
   factory Int256Parts.fromNumber(BigInt number) {
     if (number.bitLength > 256) {
-      throw const BuError(DefaultErrorType.invalidArgument, 
+      throw const BuError(
+        DefaultErrorType.invalidArgument,
         'Number is to large for `Int256Parts`',
       );
     }
@@ -3911,7 +3948,8 @@ class ContractExecutableType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ContractExecutable type not found.',
                 details: {
                   'name': name,
@@ -3941,7 +3979,8 @@ abstract class ContractExecutable extends XDRVariantSerialization {
       case ContractExecutableType.executableExternalRef:
         return ContractExecutableExternalRef.fromStruct(decode.value);
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ContractExecutable type.',
         );
     }
@@ -4138,7 +4177,8 @@ class ContractDataDurability {
       (e) => e.value == value,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ContractDataDurability not found.',
                 details: {
                   'value': value?.toString(),
@@ -4349,7 +4389,8 @@ class ContractCodeEntryExt extends XDRVariantSerialization {
           v1: ContractCodeEntryV1.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ContractCodeEntry extension.',
         );
     }
@@ -4524,7 +4565,8 @@ class ConfigSettingId {
       (e) => e.value == value,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ConfigSettingId not found.',
                 details: {
                   'value': value?.toString(),
@@ -4539,7 +4581,8 @@ class ConfigSettingId {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ConfigSettingId not found.',
                 details: {
                   'name': name,
@@ -4632,7 +4675,8 @@ abstract class ConfigSetting extends XDRVariantSerialization {
         return ConfigSettingEvictionIterator.fromStruct(decode.value);
 
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ConfigSettingId.',
           details: {'ConfigSettingId': type.name},
         );
@@ -4730,7 +4774,8 @@ abstract class ConfigSetting extends XDRVariantSerialization {
               index: type.value,
             );
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid ConfigSettingId.',
               details: {'ConfigSettingId': type.name},
             );
@@ -5552,7 +5597,8 @@ class ContractCostType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ContractCostType not found.',
                 details: {
                   'name': name,
@@ -5567,7 +5613,8 @@ class ContractCostType {
       (e) => e.value == value,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ContractCostType not found.',
                 details: {'value': value?.toString()},
               ),
@@ -5927,7 +5974,8 @@ class ConfigSettingBucketlistSizeWindow extends ConfigSetting {
     return ConfigSettingBucketlistSizeWindow(
       json.valueAs<List>('ledgerMaxTxCount').map((e) {
         if (e is! BigInt) {
-          throw BuError(DefaultErrorType.invalidArgument, 
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             'Incorrect value.',
             details: {
               'key': 'ledgerMaxTxCount',
@@ -6130,7 +6178,8 @@ class LedgerEntryExt extends XDRVariantSerialization {
           v1: LedgerEntryExtensionV1.fromStruct(decode.value),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid LedgerEntry extension.',
         );
     }
@@ -6258,7 +6307,8 @@ abstract class LedgerKey extends XDRVariantSerialization {
       case LedgerEntryType.ttl:
         return LedgerKeyTTL.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid LedgerEntry type.',
           details: {'type': type.name},
         );
@@ -6330,7 +6380,8 @@ abstract class LedgerKey extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid LedgerEntry type.',
               details: {'type': type.name},
             );
@@ -6933,7 +6984,8 @@ class StellarCryptoKeyType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -6961,7 +7013,8 @@ abstract class MuxedAccount extends XDRVariantSerialization {
         ed25519: address.keyBytes(),
       );
     } else if (address.type != XlmAddrTypes.pubKey) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         'Only Stellar ED25519 public key address (XlmAddrTypes.pubKey, XlmAddrTypes.muxed) can be converted to muxed account.',
         details: {'type': address.type.name},
       );
@@ -6984,7 +7037,8 @@ abstract class MuxedAccount extends XDRVariantSerialization {
       case StellarCryptoKeyType.muxedEd25519:
         return MuxedAccountMed25519.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid MuxedAccount type.',
           details: {'type': type.name},
         );
@@ -7092,7 +7146,8 @@ class PreconditionType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Precondition type not found.',
                 details: {
                   'name': name,
@@ -7263,7 +7318,8 @@ abstract class Preconditions extends XDRVariantSerialization {
       case PreconditionType.v2:
         return PrecondV2.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid Precondition type.',
           details: {'type': type.name},
         );
@@ -7393,7 +7449,8 @@ abstract class AssetCode extends XDRVariantSerialization {
       case AssetType.creditAlphanum4:
         return AssetCode4.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid AssetCode type',
           details: {'type': type.name},
         );
@@ -7528,7 +7585,8 @@ class RevokeSponsorshipType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'RevokeSponsorship type not found.',
                 details: {
                   'name': name,
@@ -7556,7 +7614,8 @@ abstract class RevokeSponsorship extends XDRVariantSerialization {
       case RevokeSponsorshipType.signer:
         return RevokeSponsorshipSigner.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid RevokeSponsorship type.',
           details: {'type': type.name},
         );
@@ -7696,7 +7755,8 @@ class HostFunctionType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'HostFunction type not found.',
                 details: {
                   'name': name,
@@ -7728,7 +7788,8 @@ abstract class HostFunction extends XDRVariantSerialization {
       case HostFunctionType.createContractV2:
         return HostFunctionTypeCreateContractV2.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid HostFunction type.',
           details: {'type': type.name},
         );
@@ -7823,7 +7884,8 @@ class ContractIdPreimageType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'ContractIdPreimage type not found.',
                 details: {
                   'name': name,
@@ -7851,7 +7913,8 @@ abstract class ContractIdPreimage extends XDRVariantSerialization {
       case ContractIdPreimageType.fromAsset:
         return ContractIdPreimageFromAsset.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid ContractIdPreimage type.',
           details: {'type': type.name},
         );
@@ -8183,7 +8246,8 @@ class SorobanCredentialsType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'SorobanCredentials type not found.',
                 details: {
                   'name': name,
@@ -8215,7 +8279,8 @@ abstract class SorobanCredentials extends XDRVariantSerialization {
       case SorobanCredentialsType.sourceAccount:
         return SorobanCredentialsSourceAccount.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid SorobanCredentials type.',
           details: {'type': type.name},
         );
@@ -8545,7 +8610,8 @@ class SorobanAuthorizedFunctionType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'SorobanAuthorizedFunction type not found.',
                 details: {
                   'name': name,
@@ -8582,7 +8648,8 @@ abstract class SorobanAuthorizedFunction extends XDRVariantSerialization {
           decode.value,
         );
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid SorobanAuthorizedFunction type.',
           details: {'type': type.name},
         );
@@ -8936,7 +9003,8 @@ class TrustLineFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'TrustLineFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -8980,7 +9048,8 @@ class TrustAuthFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'TrustAuthFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -9020,7 +9089,8 @@ class AuthFlag {
       (e) => e.value == flag,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'AuthFlag not found.',
                 details: {
                   'flag': flag?.toString(),
@@ -9057,7 +9127,8 @@ class SorobanTransactionDataExt extends XDRVariantSerialization {
           ),
         );
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid SorobanTransactionData extension.',
         );
     }
@@ -9138,7 +9209,8 @@ class ExtensionPointType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -9428,7 +9500,8 @@ class StellarValueType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'StellarValue type not found.',
                 details: {
                   'name': name,
@@ -9760,7 +9833,8 @@ class StellarValueExt extends XDRVariantSerialization {
           value: StellarValueEmptyTxSetMs.fromStruct(decode.value),
         );
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid StellarValue type.',
           details: {'type': type.name},
         );
@@ -9860,7 +9934,8 @@ class EnvelopeType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Envelope type not found.',
                 details: {
                   'name': name,
@@ -9912,7 +9987,8 @@ abstract class Envelope<T extends StellarTransaction>
               index: type.value,
               layout:
                   ({property}) =>
-                      throw BuError(DefaultErrorType.unsupported, 
+                      throw BuError(
+                        DefaultErrorType.unsupported,
                         'Envelope type is not supported.',
                         details: {'type': type.name, 'property': property},
                       ),
@@ -9939,13 +10015,15 @@ abstract class Envelope<T extends StellarTransaction>
         envlope = FeeBumpTransactionEnvelope.fromStruct(decode.value);
         break;
       default:
-        throw BuError(DefaultErrorType.unsupported, 
+        throw BuError(
+          DefaultErrorType.unsupported,
           'Envelope type is not supported.',
           details: {'type': type.name},
         );
     }
     if (envlope is! Envelope<T>) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Envelope casting failed.',
         details: {
           'expected': 'Envelope<$T>',
@@ -9972,7 +10050,8 @@ abstract class Envelope<T extends StellarTransaction>
 
   E cast<E extends Envelope<T>>() {
     if (this is! E) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Incorrect Envelope casting.',
         details: {'expected': '$E', 'type': '$runtimeType'},
       );
@@ -10276,7 +10355,8 @@ abstract class StellarTransaction extends XDRVariantSerialization {
               index: type.value,
               layout:
                   ({property}) =>
-                      throw BuError(DefaultErrorType.unsupported, 
+                      throw BuError(
+                        DefaultErrorType.unsupported,
                         'Transaction type is not supported.',
                         details: {'type': type.name, 'property': property},
                       ),
@@ -10299,7 +10379,8 @@ abstract class StellarTransaction extends XDRVariantSerialization {
       case EnvelopeType.txFeeBump:
         return StellarFeeBumpTransaction.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.unsupported, 
+        throw BuError(
+          DefaultErrorType.unsupported,
           'Transaction type is not supported.',
           details: {'type': type.name},
         );
@@ -10316,7 +10397,8 @@ abstract class StellarTransaction extends XDRVariantSerialization {
 
   T cast<T extends StellarTransaction>() {
     if (this is! T) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Incorrect StellarTransaction casting.',
         details: {'expected': '$T', 'type': '$runtimeType'},
       );
@@ -10404,7 +10486,8 @@ class MemoType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -10438,7 +10521,8 @@ abstract class StellarMemo extends XDRVariantSerialization {
       case MemoType.text:
         return StellarMemoText.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid Memo type.',
           details: {'type': type.name},
         );
@@ -10485,7 +10569,8 @@ abstract class StellarMemo extends XDRVariantSerialization {
 
   T cast<T extends StellarMemo>() {
     if (this is! T) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Stellar memo casting failed.',
         details: {'expected': '$T', 'type': runtimeType.toString()},
       );
@@ -10660,7 +10745,8 @@ class SignerKeyType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'SignerKey type not found.',
                 details: {
                   'name': name,
@@ -10692,7 +10778,8 @@ abstract class SignerKey extends XDRVariantSerialization {
       case SignerKeyType.ed25519SignedPayload:
         return SignerKeyEd25519SignedPayload.fromStruct(decode.value);
       default:
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid SignerKeyType "${type.name}".',
         );
     }
@@ -10727,7 +10814,8 @@ abstract class SignerKey extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw BuError(DefaultErrorType.invalidArgument, 
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               'Invalid SignerKeyType "${type.name}".',
             );
         }
@@ -10976,7 +11064,8 @@ class AssetType {
       (e) => e.name == name,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Asset type not found.',
                 details: {
                   'name': name,
@@ -11003,7 +11092,10 @@ abstract class StellarAsset extends XDRVariantSerialization {
       case AssetType.poolShare:
         return StellarAssetPoolShare.fromStruct(decode.value);
       default:
-        throw const BuError(DefaultErrorType.invalidArgument, 'Invalid AssetType.');
+        throw const BuError(
+          DefaultErrorType.invalidArgument,
+          'Invalid AssetType.',
+        );
     }
   }
   factory StellarAsset.fromXdr(List<int> bytes, {String? property}) {
@@ -11044,7 +11136,10 @@ abstract class StellarAsset extends XDRVariantSerialization {
               property: type.name,
             );
           default:
-            throw const BuError(DefaultErrorType.invalidArgument, 'Invalid AssetType.');
+            throw const BuError(
+              DefaultErrorType.invalidArgument,
+              'Invalid AssetType.',
+            );
         }
       }),
       property: property,
@@ -11061,7 +11156,8 @@ abstract class StellarAsset extends XDRVariantSerialization {
 
   T cast<T extends StellarAsset>() {
     if (this is! T) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         'Stellar asset casting failed.',
         details: {'expected': '$T', 'asset': runtimeType.toString()},
       );

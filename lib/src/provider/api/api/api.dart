@@ -90,7 +90,10 @@ mixin StellarQuickClientApi {
     final first = (records == null || records.isEmpty) ? null : records.first;
     final reserve = first?.baseReserveInStroops;
     if (reserve == null) {
-      throw const BuError(DefaultErrorType.invalidState, 'Missing base reserve.');
+      throw const BuError(
+        DefaultErrorType.invalidState,
+        'Missing base reserve.',
+      );
     }
     return reserve;
   }
@@ -188,7 +191,8 @@ mixin StellarQuickClientApi {
   }) async {
     final account = await getAccount(source);
     if (account == null) {
-      throw BuError(DefaultErrorType.notFound, 
+      throw BuError(
+        DefaultErrorType.notFound,
         'Account not found.',
         details: {'address': source.baseAddress},
       );
@@ -219,7 +223,8 @@ mixin StellarQuickClientApi {
     );
     final hash = response.hash;
     if (response.successful != true || hash == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Stellar transaction failed.',
         details: {'hash': hash},
       );
@@ -248,14 +253,18 @@ mixin StellarQuickClientApi {
             completer.complete();
           } else if (receipt.successful == false) {
             completer.completeError(
-              const BuError(DefaultErrorType.invalidArgument, 'Stellar transaction failed.'),
+              const BuError(
+                DefaultErrorType.invalidArgument,
+                'Stellar transaction failed.',
+              ),
             );
           }
         } catch (_) {}
       });
       await completer.future.timeout(timeout);
     } on TimeoutException {
-      throw const BuError(DefaultErrorType.invalidState, 
+      throw const BuError(
+        DefaultErrorType.invalidState,
         'Transaction confirmation failed within the allotted timeout.',
       );
     } finally {
@@ -269,7 +278,10 @@ mixin StellarQuickClientApi {
     final r = await getLatestLedger();
     final sequence = r.sequence?.toInt();
     if (sequence == null) {
-      throw const BuError(DefaultErrorType.invalidState, 'Missing latest ledger.');
+      throw const BuError(
+        DefaultErrorType.invalidState,
+        'Missing latest ledger.',
+      );
     }
     return sequence;
   }
@@ -360,7 +372,8 @@ mixin StellarQuickClientApi {
         simulation ??
         await simulateTransaction(envelopeXdr: unsignedEnvelopeBase64);
     if (sim.error != null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Transaction simulation failed.',
         details: {'error': sim.error},
       );
@@ -465,7 +478,8 @@ mixin StellarQuickClientApi {
         return r;
       }
       if (DateTime.now().isAfter(deadline)) {
-        throw BuError(DefaultErrorType.invalidState, 
+        throw BuError(
+          DefaultErrorType.invalidState,
           'Transaction $hash not confirmed within $timeout.',
         );
       }
@@ -497,7 +511,8 @@ mixin StellarQuickClientApi {
   Future<BigInt> nextSequence(StellarAddress address) async {
     final account = await getAccount(address);
     if (account == null) {
-      throw BuError(DefaultErrorType.notFound, 
+      throw BuError(
+        DefaultErrorType.notFound,
         'Account not found.',
         details: {'address': address.baseAddress},
       );

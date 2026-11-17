@@ -33,7 +33,8 @@ abstract class HorizonRequest<RESULT, RESPONSE>
     final template = path ?? '';
     final pathParams = StellarProviderUtils.extractParams(template);
     if (pathParams.length != pathParameters.length) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Path Parameters.',
         details: {
           'pathParams': pathParameters.join(","),

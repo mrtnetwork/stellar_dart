@@ -26,10 +26,7 @@ void main() {
     expect(w.id, BigInt.zero);
     expect(w.baseAddress, contractBase);
     expect(w.toString(), wZero);
-    expect(
-      w.toContractAddress(),
-      StellarContractAddress(contractBase),
-    );
+    expect(w.toContractAddress(), StellarContractAddress(contractBase));
 
     final fromId = StellarMuxedContractAddress.fromContractId(
       contractId: BytesUtils.fromHexString(contractIdHex),
@@ -42,18 +39,13 @@ void main() {
       isA<StellarMuxedContractAddress>(),
     );
     expect(
-      StellarAddress.deserializeIAddress(
-        bytes: fromId.encodeAsIAddress(),
-      ),
+      StellarAddress.deserializeIAddress(bytes: fromId.encodeAsIAddress()),
       fromId,
     );
   });
 
   test('W address requires contract type', () {
-    expect(
-      () => StellarMuxedContractAddress(contractBase),
-      throwsA(anything),
-    );
+    expect(() => StellarMuxedContractAddress(contractBase), throwsA(anything));
     expect(
       () => StellarMuxedContractAddress.fromContractId(
         contractId: List<int>.filled(31, 0),
@@ -80,10 +72,7 @@ void main() {
       contractIdHex,
     );
     final back = roundTrip(sc);
-    expect(
-      (back.address as StellarMuxedContractAddress).toString(),
-      wMax,
-    );
+    expect((back.address as StellarMuxedContractAddress).toString(), wMax);
     expect(
       ScAddress.fromAddress(StellarMuxedContractAddress(wOne)),
       isA<ScAddressMuxedContract>(),
@@ -96,10 +85,7 @@ void main() {
     final sc = ScAddress.fromAddress(StellarMuxedAddress(muxed));
     expect(sc, isA<ScAddressMuxedAccount>());
     final back = roundTrip(sc);
-    expect(
-      (back.address as StellarMuxedAddress).toString(),
-      muxed,
-    );
+    expect((back.address as StellarMuxedAddress).toString(), muxed);
     expect(
       StellarMuxedAddress(muxed).toScAddress(),
       isA<ScAddressMuxedAccount>(),
@@ -108,28 +94,19 @@ void main() {
 
   test('ScAddress claimableBalance and liquidityPool arms', () {
     final cb = ScAddressClaimableBalance(
-      ClaimableBalanceIdV0(
-        BytesUtils.fromHexString(contractIdHex),
-      ),
+      ClaimableBalanceIdV0(BytesUtils.fromHexString(contractIdHex)),
     );
     final cbBack = roundTrip(cb);
     expect(
-      BytesUtils.toHexString(
-        (cbBack.balanceId as ClaimableBalanceIdV0).hash,
-      ),
+      BytesUtils.toHexString((cbBack.balanceId as ClaimableBalanceIdV0).hash),
       contractIdHex,
     );
 
-    final lp = ScAddressLiquidityPool(
-      BytesUtils.fromHexString(contractIdHex),
-    );
+    final lp = ScAddressLiquidityPool(BytesUtils.fromHexString(contractIdHex));
     roundTrip(lp);
   });
 
   test('ScAddress union rejects unknown arms', () {
-    expect(
-      () => ScAddressType.fromName('nope'),
-      throwsA(anything),
-    );
+    expect(() => ScAddressType.fromName('nope'), throwsA(anything));
   });
 }

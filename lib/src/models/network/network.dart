@@ -31,7 +31,8 @@ class StellarNetwork {
       (e) => e.passphrase == passphrase,
       orElse:
           () =>
-              throw BuError(DefaultErrorType.notFound, 
+              throw BuError(
+                DefaultErrorType.notFound,
                 'Network not found with the provided passphrase.',
                 details: {'passphrase': passphrase},
               ),

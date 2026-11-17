@@ -10,8 +10,7 @@ void main() {
   const contractIdHex =
       '3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a';
   final contractId = BytesUtils.fromHexString(contractIdHex);
-  const accountG =
-      'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
+  const accountG = 'GCFIRY65OQE7DFP5KLNS2PF2LVZMUZYJX4OZIEQ36N2IQANUB5XVYOJR';
 
   T roundTrip<T extends XDRSerialization>(
     T value,
@@ -28,9 +27,7 @@ void main() {
     T Function(Map<String, dynamic>) fromStruct,
   ) {
     final layout = value.createVariantLayout();
-    final decoded = fromStruct(
-      layout.deserialize(value.toVariantXDR()).value,
-    );
+    final decoded = fromStruct(layout.deserialize(value.toVariantXDR()).value);
     expect(decoded.toVariantXDR(), value.toVariantXDR());
     return decoded;
   }
@@ -45,10 +42,7 @@ void main() {
       constructorArgs: [ScValU32(7), ScValSymbol('init')],
     );
     final fn = HostFunctionTypeCreateContractV2(args);
-    final back = roundTripVariant(
-      fn,
-      HostFunction.fromStruct,
-    );
+    final back = roundTripVariant(fn, HostFunction.fromStruct);
     expect(
       ((back as HostFunctionTypeCreateContractV2).args.constructorArgs[0]
               as ScValU32)
@@ -56,8 +50,9 @@ void main() {
       7,
     );
 
-    final authFn =
-        SorobanAuthorizedFunctionTypeCreateContractV2HostFunction(args);
+    final authFn = SorobanAuthorizedFunctionTypeCreateContractV2HostFunction(
+      args,
+    );
     final authBack = roundTripVariant(
       authFn,
       SorobanAuthorizedFunction.fromStruct,
@@ -111,19 +106,13 @@ void main() {
       tag: 'vault',
     );
     final back = roundTripVariant(ext, ContractExecutable.fromStruct);
-    expect(
-      (back as ContractExecutableExternalRef).tag,
-      'vault',
-    );
+    expect((back as ContractExecutableExternalRef).tag, 'vault');
 
     expect(ContractCostType.values, hasLength(95));
     expect(ContractCostType.fromValue(0).name, 'WasmInsnExec');
     expect(ContractCostType.fromValue(92).name, 'VerifyMlDsa44Sig');
     expect(ContractCostType.fromValue(94).name, 'VerifyMlDsa87Sig');
-    expect(
-      ContractCostType.fromName('MlDsa65DecodeSignature').value,
-      90,
-    );
+    expect(ContractCostType.fromName('MlDsa65DecodeSignature').value, 90);
   });
 
   test('Step 5: StellarValue incl. ms arms (CAP-88)', () {
@@ -134,7 +123,10 @@ void main() {
       ext: ext,
     );
 
-    final basicBack = roundTrip(base(StellarValueExt.basic()), StellarValue.fromStruct);
+    final basicBack = roundTrip(
+      base(StellarValueExt.basic()),
+      StellarValue.fromStruct,
+    );
     expect(basicBack.type, StellarValueType.basic);
 
     final nodeKey = StellarAccountAddress(accountG).toPublicKey();
@@ -156,10 +148,7 @@ void main() {
     final msBody = msBack.ext.value as StellarValueSignedMs;
     expect(msBody.closeTimeMs, BigInt.from(1234567890123));
     // Whole-second invariant: closeTime == closeTimeMs ~/ 1000.
-    expect(
-      msBack.closeTime,
-      (msBody.closeTimeMs ~/ BigInt.from(1000)),
-    );
+    expect(msBack.closeTime, (msBody.closeTimeMs ~/ BigInt.from(1000)));
 
     final txSetBack = roundTrip(
       base(
@@ -187,16 +176,10 @@ void main() {
       seed: seed,
     );
     final pk = sk.publicKey;
-    expect(
-      StellarMldsaHelper.publicKeyFromBytes(pk.toBytes().toList()),
-      pk,
-    );
+    expect(StellarMldsaHelper.publicKeyFromBytes(pk.toBytes().toList()), pk);
 
     const message = [1, 2, 3, 4, 5];
-    final signature = StellarMldsaHelper.sign(
-      privateKey: sk,
-      message: message,
-    );
+    final signature = StellarMldsaHelper.sign(privateKey: sk, message: message);
     expect(
       StellarMldsaHelper.verify(
         publicKey: pk,
